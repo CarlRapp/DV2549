@@ -2,17 +2,70 @@
 #include <GLEW/glew.h>
 #include "Input/InputWrapper.h"
 #include "Graphics/GraphicsWrapper.h"
+#include "Memory/MemoryWrapper.h"
 
 #ifdef WIN32
 #ifdef _DEBUG
 #include <VLD/vld.h>
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
 #endif
 #endif
+
+char*	dataBlock;
+int		dataBlockByteSize;
+int		dataCurrentByteOffset;
+
+void CreateBlock(int numberOfBytes)
+{
+	dataBlockByteSize = numberOfBytes;
+	dataCurrentByteOffset = 0;
+	dataBlock = (char*)malloc(numberOfBytes);
+}
+
+char* AllocateBlock(int elementSize)
+{
+	int tempOffset = dataCurrentByteOffset;
+	dataCurrentByteOffset += elementSize;
+	return dataBlock + tempOffset;
+}
+
+void ResetBlock()
+{
+	dataCurrentByteOffset = 0;
+}
 
 int main(int argc, char** argv)
 {
 	Input::InputWrapper inputWrapper = Input::InputWrapper::GetInstance();
 	Graphics::GraphicsWrapper graphicsWrapper = Graphics::GraphicsWrapper::GetInstance();
+	Memory::MemoryWrapper memoryWrapper = Memory::MemoryWrapper::GetInstance();
+
+	CreateBlock(10*sizeof(int));
+
+	std::printf("Before: \n");
+	for (int n = 0; n < 10; n++)
+	{
+		int tempValue = dataBlock[n*sizeof(int)];
+		std::printf("%i", tempValue);
+	}
+	std::printf("\n");
+
+
+	for (int n = 0; n < 10; n++)
+	{
+		int* tempValue = (int*)AllocateBlock(sizeof(int));
+		*tempValue = n;
+	}
+	std::printf("\n\nAfter: \n");
+	for (int n = 0; n < 10; n++)
+	{
+		int tempValue = dataBlock[n*sizeof(int)];
+		std::printf("%i", tempValue);
+	}
+	std::printf("\n");
+	ResetBlock();
 
 	while (true)
 	{
@@ -52,6 +105,11 @@ int main(int argc, char** argv)
 		graphicsWrapper.Render();
 	}
 
-
+	
+#ifdef WIN32
+#ifdef _DEBUG
+	_CrtDumpMemoryLeaks();
+#endif
+#endif
 	return 0;
 }
