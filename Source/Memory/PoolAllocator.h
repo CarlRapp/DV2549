@@ -14,7 +14,7 @@ private:
 	void* m_memory = nullptr;
 
 	std::vector<void*> m_memPoolList;
-	std::priority_queue<bool> m_memSlotsTaken;
+	std::vector<bool> m_memSlotsTaken;
 
 public:
 	PoolAllocator();
