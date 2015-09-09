@@ -1,87 +1,89 @@
 #include "PoolAllocator.h"
 #include <stdlib.h>
 
+#define MemoryAligned
+
 PoolAllocator::PoolAllocator()
 {
 
 }
 
-PoolAllocator::~PoolAllocator()
+PoolAllocator::PoolAllocator(unsigned int _items, size_t _size)
 {
-
+	SetSize(_items, _size);
 }
 
-void* PoolAllocator::Allocate(size_t size)
+PoolAllocator::~PoolAllocator()
+{
+	free(m_origpointer);
+}
+
+void* PoolAllocator::Allocate()
 {
 	char* mem = static_cast<char*>(m_memory);
 
-	bool outOfMemory = false;
 
-	while (m_memSlotsTaken[m_memPointer] == 1)
+	if (m_memFreeSlots.empty())
 	{
-		m_memPointer += 1;
-
-		if (m_memPointer >= m_maxMemory)
-		{
-			if (outOfMemory)
-			{
-				printf("out of memory\n");
-				return nullptr;
-			}
-
-			m_memPointer = 0;
-			outOfMemory = true;
-		}
+		printf("out of memory\n");
+		return nullptr;
 	}
-	
-	m_memSlotsTaken[m_memPointer] = true;
-	return &mem[m_memPointer*m_memSlotSize];
+
+	unsigned int memPointer = m_memFreeSlots.top() * m_memSlotSize;
+	m_memFreeSlots.pop();
+
+	return &mem[memPointer];
 }
 
 void PoolAllocator::Free(void* deleted)
 {
-	int* d = static_cast<int*>(deleted);
-	int* m = static_cast<int*>(m_memory);
+	char* d = static_cast<char*>(deleted);
+	char* m = static_cast<char*>(m_memory);
 
-	int diff = &d - &m;
+	int diff = static_cast<int>(d - m);
 
 	diff /= m_memSlotSize;
 
-	m_memSlotsTaken[diff] = false;
+	m_memFreeSlots.push(diff);
 }
 
 void PoolAllocator::SetSize(unsigned int _items, size_t _size)
 {
+
+#if defined(_WIN64)
+	int alignment = 8;
+	//#elseif defined(__x86__)
+#elif defined(_WIN32)
+	int alignment = 4;
+#endif
+
 	m_maxMemory = _items;
-	m_memory = malloc(_size*_items);
+	m_origpointer = malloc(_size * _items + alignment);
+	m_memory = m_origpointer;
 
 	size_t align = (size_t)(m_memory);
 		
-	if (align > 1)
-	{
-		--align;
-		align |= align >> 1;
-		align |= align >> 2;
-		align |= align >> 4;
-		align |= align >> 8;
-		align |= align >> 16;
-#ifdef __x64__
-		align |= align >> 32;
-#endif
+	int unaligned = align & (alignment * 2 - 1);
 
-		align++;
+	if (unaligned == 0)
+	{
+		printf("Memory aligned\n");
 	}
 
-	if (align != 16)
-		printf("unaligned");
-
+	else
+	{
+#ifdef MemoryAligned
+		m_memory = (char*)m_origpointer + alignment - unaligned;
+#endif
+		printf("Memory not aligned\n");
+	}
 
 	m_memSlotSize = _size;
 
-	m_memSlotsTaken.resize(_items);
-	for (int i = 0; i < m_memSlotsTaken.size(); i++)
+
+	for (unsigned int i = 0; i < _items; i++)
 	{
-		m_memSlotsTaken[i] = false;
+		m_memFreeSlots.push(i);
 	}
 }
 

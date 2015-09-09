@@ -16,7 +16,7 @@ private:
 
 public:
 
-	virtual void* Allocate(size_t) = 0;
+	virtual void* Allocate() = 0;
 	virtual void Free(void*) = 0;
 	virtual void SetSize(unsigned int _items, size_t _size) = 0;
 };
