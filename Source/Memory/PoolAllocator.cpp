@@ -65,7 +65,7 @@ void PoolAllocator::SetSize(unsigned int _items, size_t _size)
 		align |= align >> 4;
 		align |= align >> 8;
 		align |= align >> 16;
-#ifef __x64__
+#ifdef __x64__
 		align |= align >> 32;
 #endif
 
