@@ -1,7 +1,17 @@
-#include "MemoryManager.h"
+#include "PoolAllocator.h"
 #include <stdlib.h>
 
-void* MemoryManager::Allocate(size_t size)
+PoolAllocator::PoolAllocator()
+{
+
+}
+
+PoolAllocator::~PoolAllocator()
+{
+
+}
+
+void* PoolAllocator::Allocate(size_t size)
 {
 	char* mem = static_cast<char*>(m_memory);
 
@@ -28,7 +38,7 @@ void* MemoryManager::Allocate(size_t size)
 	return &mem[m_memPointer*m_memSlotSize];
 }
 
-void MemoryManager::Free(void* deleted)
+void PoolAllocator::Free(void* deleted)
 {
 	int* d = static_cast<int*>(deleted);
 	int* m = static_cast<int*>(m_memory);
@@ -38,16 +48,33 @@ void MemoryManager::Free(void* deleted)
 	diff /= m_memSlotSize;
 
 	m_memSlotsTaken[diff] = false;
-
-// 	FreeStore* head = static_cast <FreeStore*> (deleted);
-// 	head->next = freeStoreHead;
-// 	freeStoreHead = head;
 }
 
-void MemoryManager::SetSize(unsigned int _items, size_t _size)
+void PoolAllocator::SetSize(unsigned int _items, size_t _size)
 {
 	m_maxMemory = _items;
 	m_memory = malloc(_size*_items);
+
+	size_t align = (size_t)(m_memory);
+		
+	if (align > 1)
+	{
+		--align;
+		align |= align >> 1;
+		align |= align >> 2;
+		align |= align >> 4;
+		align |= align >> 8;
+		align |= align >> 16;
+#ifef __x64__
+		align |= align >> 32;
+#endif
+
+		align++;
+	}
+
+	if (align != 16)
+		printf("unaligned");
+
 
 	m_memSlotSize = _size;
 
@@ -58,12 +85,3 @@ void MemoryManager::SetSize(unsigned int _items, size_t _size)
 	}
 }
 
-MemoryManager::MemoryManager()
-{
-
-}
-
-MemoryManager::~MemoryManager()
-{
-
-}

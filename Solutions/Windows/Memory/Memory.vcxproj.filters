@@ -9,9 +9,21 @@
     <ClCompile Include="..\..\..\Source\Memory\MemoryWrapper.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\Source\Memory\PoolAllocator.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Memory\AllocatorInterface.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Source\Memory\MemoryWrapper.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Memory\PoolAllocator.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Memory\AllocatorInterface.h">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>

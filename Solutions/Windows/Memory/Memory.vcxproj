@@ -19,9 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\Source\Memory\AllocatorInterface.cpp" />
+    <ClCompile Include="..\..\..\Source\Memory\PoolAllocator.cpp" />
     <ClCompile Include="..\..\..\Source\Memory\MemoryWrapper.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\Source\Memory\AllocatorInterface.h" />
+    <ClInclude Include="..\..\..\Source\Memory\PoolAllocator.h" />
     <ClInclude Include="..\..\..\Source\Memory\MemoryWrapper.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
