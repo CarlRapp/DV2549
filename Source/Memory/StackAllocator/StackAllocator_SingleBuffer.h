@@ -27,6 +27,8 @@ namespace Memory
 
 		bool	m_growIfFull;
 		bool	m_allocateIfFull;
+
+		SDL_mutex* m_reserveMutex;
 	};
 }
 #endif

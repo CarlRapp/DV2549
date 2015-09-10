@@ -5,7 +5,7 @@
 using namespace Memory;
 
 StackAllocator_SingleBuffer::StackAllocator_SingleBuffer(size_t _stackSizeBytes, size_t _stackAlignment, bool _growIfFull, bool _allocateIfFull)
-	: m_stackStartPtr(0), m_currentStackIndex(0), m_alignBytes(_stackAlignment)
+	: m_stackStartPtr(0), m_alignBytes(_stackAlignment)
 {
 	//	Allocate the number of requested bytes plus requested alignment minus on
 	//	to make sure that the amount of requested bytes can be used. 
@@ -22,6 +22,7 @@ StackAllocator_SingleBuffer::StackAllocator_SingleBuffer(size_t _stackSizeBytes,
 	m_totalByteSize = _stackSizeBytes;
 	m_growIfFull = _growIfFull;
 	m_allocateIfFull = _allocateIfFull;
+	testMutex = SDL_CreateMutex();
 }
 
 StackAllocator_SingleBuffer::~StackAllocator_SingleBuffer()
@@ -33,23 +34,29 @@ void* StackAllocator_SingleBuffer::Reserve(size_t _nBytes)
 {
 	void* pReservedMemory = NULL;
 
-	if (m_currentStackIndex + _nBytes <= m_totalByteSize)
+	//	Lock the mutex
+	if (SDL_LockMutex(m_reserveMutex) == 0)
 	{
-		pReservedMemory = &m_stackStartPtr[m_currentStackIndex];
-		m_currentStackIndex += _nBytes;
-	}
-	//else if (m_growIfFull)
-	//{
-	//	// TODO Grow the stack, if possible.
-	//}
-	//else if (m_allocateIfFull)
-	//{
-	//	// TODO Allocate using regular new and have the stack allocator keep the pointers for future deleting?
-	//}
-	else
-		throw std::string("Out of memory!");
+		if ((m_currentStackIndex - m_startPtrOffset) + _nBytes <= m_totalByteSize)
+		{
+			pReservedMemory = &m_stackStartPtr[m_currentStackIndex];
+			m_currentStackIndex += _nBytes;
+		}
+		//else if (m_growIfFull)
+		//{
+		//	// TODO Grow the stack, if possible.
+		//}
+		//else if (m_allocateIfFull)
+		//{
+		//	// TODO Allocate using regular new and have the stack allocator keep the pointers for future deleting?
+		//}
+		else
+			throw std::string("Out of memory!");
 		// TODO Throw exception / set error flag (or simply return the NULL pointer?) because there was an attempt to use the stack beyond its capacity.
-
+		
+		//	Unlock
+		SDL_UnlockMutex(m_reserveMutex);
+	}
 	return pReservedMemory;
 }
 
