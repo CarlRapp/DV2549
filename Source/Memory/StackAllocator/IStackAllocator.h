@@ -10,6 +10,7 @@ namespace Memory
 	public:
 		virtual ~IStackAllocator() = 0;
 
+		// Reserves a portion of the stack's memory, starting at the stack top, for placing data in using "placement new".
 		virtual void* Reserve(size_t _nBytes) = 0;
 
 		//virtual size_t GetTop() = 0;
