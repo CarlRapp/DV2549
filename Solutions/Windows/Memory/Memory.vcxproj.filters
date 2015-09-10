@@ -4,27 +4,27 @@
     <Filter Include="Source">
       <UniqueIdentifier>{95820a5b-9b3b-4949-90c4-dc7fdfae87e3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Stack Allocator">
+      <UniqueIdentifier>{09b611ab-b9bc-45a4-a9ac-62cbbed082bd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Source\Memory\MemoryWrapper.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Source\Memory\PoolAllocator.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\Memory\AllocatorInterface.cpp">
-      <Filter>Source</Filter>
+    <ClCompile Include="..\..\..\Source\Memory\StackAllocator\StackAllocator_SingleBuffer.cpp">
+      <Filter>Source\Stack Allocator</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Source\Memory\MemoryWrapper.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Source\Memory\PoolAllocator.h">
-      <Filter>Source</Filter>
+    <ClInclude Include="..\..\..\Source\Memory\StackAllocator\IStackAllocator.h">
+      <Filter>Source\Stack Allocator</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Source\Memory\AllocatorInterface.h">
-      <Filter>Source</Filter>
+    <ClInclude Include="..\..\..\Source\Memory\StackAllocator\StackAllocator_SingleBuffer.h">
+      <Filter>Source\Stack Allocator</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

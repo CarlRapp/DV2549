@@ -7,7 +7,7 @@
 
 namespace Memory
 {
-	class DECLSPEC StackAllocator_SingleBuffer
+	class DECLSPEC StackAllocator_SingleBuffer : public IStackAllocator
 	{
 	public:
 		StackAllocator_SingleBuffer(size_t _stackSizeBytes, size_t _pointerAlignment = 4);
