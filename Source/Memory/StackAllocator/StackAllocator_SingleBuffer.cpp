@@ -1,8 +1,9 @@
 #include "StackAllocator_SingleBuffer.h"
+#include <iostream>
 
 using namespace Memory;
 
-StackAllocator_SingleBuffer::StackAllocator_SingleBuffer(size_t _stackSizeBytes, size_t _pointerAlignment = 4, bool _growIfFull = false, bool _allocateIfFull = false)
+StackAllocator_SingleBuffer::StackAllocator_SingleBuffer(size_t _stackSizeBytes, size_t _pointerAlignment, bool _growIfFull, bool _allocateIfFull)
 	: m_stackStartPtr(0), m_currentStackIndex(0)
 {
 	m_stackStartPtr = (char*)malloc(_stackSizeBytes);
@@ -21,7 +22,7 @@ void* StackAllocator_SingleBuffer::Reserve(size_t _nBytes)
 {
 	void* pReservedMemory = NULL;
 
-	if (m_currentStackIndex + _nBytes <= m_totalByteSize)
+	if (m_currentStackIndex + _nBytes < m_totalByteSize)
 	{
 		pReservedMemory = &m_stackStartPtr[m_currentStackIndex];
 		m_currentStackIndex += _nBytes;

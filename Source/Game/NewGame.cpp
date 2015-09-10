@@ -3,6 +3,7 @@
 #include "Input/InputWrapper.h"
 #include "Graphics/GraphicsWrapper.h"
 #include "Memory/MemoryWrapper.h"
+#include "Memory/StackAllocator/StackAllocator_SingleBuffer.h"
 
 #ifdef WIN32
 #ifdef _DEBUG
@@ -13,64 +14,66 @@
 #endif
 #endif
 
-char*	dataBlock;
-int		dataBlockByteSize;
-int		dataCurrentByteOffset;
-
-void CreateBlock(int numberOfBytes)
+#include <new>
+#include <iostream>
+using namespace std;
+class A
 {
-	dataBlockByteSize = numberOfBytes;
-	dataCurrentByteOffset = 0;
-	dataBlock = (char*)malloc(numberOfBytes);
-}
+public:
+	int x;
 
-char* AllocateBlock(int elementSize)
-{
-	int tempOffset = dataCurrentByteOffset;
-	dataCurrentByteOffset += elementSize;
-	return dataBlock + tempOffset;
-}
+	A(int px)
+	{
+		x = px;
+	}
 
-void ResetBlock()
+	~A()
+	{}
+};
+
+class B
 {
-	dataCurrentByteOffset = 0;
-}
+public:
+	int x; int y;
+
+	B(int px, int py)
+	{
+		x = px; y = py;
+	}
+
+	~B()
+	{}
+};
+
+class C
+{
+public:
+	int x; float y; int z;
+
+	C(int px, float py, int pz)
+	{
+		x = px; y = py; z = pz;
+	}
+
+	~C()
+	{}
+};
+
 
 int main(int argc, char** argv)
 {
 	Input::InputWrapper inputWrapper = Input::InputWrapper::GetInstance();
 	Graphics::GraphicsWrapper graphicsWrapper = Graphics::GraphicsWrapper::GetInstance();
 	Memory::MemoryWrapper memoryWrapper = Memory::MemoryWrapper::GetInstance();
-
-	CreateBlock(10*sizeof(int));
-
-	std::printf("Before: \n");
-	for (int n = 0; n < 10; n++)
-	{
-		int tempValue = dataBlock[n*sizeof(int)];
-		std::printf("%i", tempValue);
-	}
-	std::printf("\n");
+	Memory::StackAllocator_SingleBuffer* singleBuffer = new Memory::StackAllocator_SingleBuffer(1024);
 
 
-	for (int n = 0; n < 10; n++)
-	{
-		int* tempValue = (int*)AllocateBlock(sizeof(int));
-		*tempValue = n;
-	}
-	std::printf("\n\nAfter: \n");
-	for (int n = 0; n < 10; n++)
-	{
-		int tempValue = dataBlock[n*sizeof(int)];
-		std::printf("%i", tempValue);
-	}
-	std::printf("\n");
-	ResetBlock();
-
+	void* address = 0;
 	while (true)
 	{
 		inputWrapper.Update();
 		SDL_Event e;
+		#pragma region	PollEvent
 		while (SDL_PollEvent(&e))
 		{
 			switch (e.type)
@@ -97,6 +100,32 @@ int main(int argc, char** argv)
 				break;
 			}
 		}
+#pragma endregion
+
+
+
+
+
+		address = singleBuffer->Reserve(sizeof(A));
+		A *p_A = new (address) A(1);
+		cout << endl << endl;
+		cout << p_A->x << ".";
+
+		address = singleBuffer->Reserve(sizeof(B));
+		B *p_B = new (address) B(1, 2);
+		cout << endl << endl;
+		cout << p_B->x << ", ";
+		cout << p_B->y << ".";
+
+		address = singleBuffer->Reserve(sizeof(C));
+		C *p_C = new (address) C(1, 2.5, 3);
+		cout << endl << endl;
+		cout << p_C->x << ", ";
+		cout << p_C->y << ", ";
+		cout << p_C->z << ".";
+
+		singleBuffer->FreeTo(0);
+
 
 		if (inputWrapper.GetKeyboard()->GetKeyState(SDL_SCANCODE_ESCAPE) == Input::InputState::PRESSED)
 			break;
