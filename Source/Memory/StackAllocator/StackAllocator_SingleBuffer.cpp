@@ -4,7 +4,7 @@ using namespace Memory;
 
 
 
-StackAllocator_SingleBuffer::StackAllocator_SingleBuffer(size_t _stackSizeBytes, size_t _pointerAlignment = 4)
+StackAllocator_SingleBuffer::StackAllocator_SingleBuffer(size_t _stackSizeBytes, size_t _pointerAlignment)
 	: m_stackStartPtr(0), m_currentStackIndex(0)
 {
 	m_stackStartPtr = (char*)malloc(_stackSizeBytes);
