@@ -22,7 +22,7 @@ StackAllocator_SingleBuffer::StackAllocator_SingleBuffer(size_t _stackSizeBytes,
 	m_totalByteSize = _stackSizeBytes;
 	m_growIfFull = _growIfFull;
 	m_allocateIfFull = _allocateIfFull;
-	testMutex = SDL_CreateMutex();
+	m_reserveMutex = SDL_CreateMutex();
 }
 
 StackAllocator_SingleBuffer::~StackAllocator_SingleBuffer()
