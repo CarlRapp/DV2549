@@ -65,73 +65,90 @@ int main(int argc, char** argv)
 	Input::InputWrapper inputWrapper = Input::InputWrapper::GetInstance();
 	Graphics::GraphicsWrapper graphicsWrapper = Graphics::GraphicsWrapper::GetInstance();
 	Memory::MemoryWrapper memoryWrapper = Memory::MemoryWrapper::GetInstance();
-	Memory::StackAllocator_SingleBuffer* singleBuffer = new Memory::StackAllocator_SingleBuffer(1024);
 
-
-	void* address = 0;
-	while (true)
+	Memory::StackAllocator_SingleBuffer* singleBuffer = 0;
+	try
 	{
-		inputWrapper.Update();
-		SDL_Event e;
-		#pragma region	PollEvent
-		while (SDL_PollEvent(&e))
+		singleBuffer = new Memory::StackAllocator_SingleBuffer(1024);
+	}
+	catch (std::string e)
+	{
+		std::printf("Following error: %s\n", e.c_str());
+	}
+
+	try
+	{
+		void* address = 0;
+		while (true)
 		{
-			switch (e.type)
+			inputWrapper.Update();
+			SDL_Event e;
+			#pragma region	PollEvent
+			while (SDL_PollEvent(&e))
 			{
-			case SDL_WINDOWEVENT:
-				break;
-			case SDL_KEYDOWN:
-			case SDL_KEYUP:
-			case SDL_FINGERMOTION:
-			case SDL_FINGERDOWN:
-			case SDL_FINGERUP:
-			case SDL_TEXTINPUT:
-			case SDL_JOYAXISMOTION:
-			case SDL_JOYBALLMOTION:
-			case SDL_JOYHATMOTION:
-			case SDL_JOYBUTTONDOWN:
-			case SDL_JOYBUTTONUP:
-			case SDL_MOUSEMOTION:
-			case SDL_MOUSEBUTTONDOWN:
-			case SDL_MOUSEBUTTONUP:
-			case SDL_MOUSEWHEEL:
-			case SDL_MULTIGESTURE:
-				inputWrapper.PollEvent(e);
-				break;
+				switch (e.type)
+				{
+				case SDL_WINDOWEVENT:
+					break;
+				case SDL_KEYDOWN:
+				case SDL_KEYUP:
+				case SDL_FINGERMOTION:
+				case SDL_FINGERDOWN:
+				case SDL_FINGERUP:
+				case SDL_TEXTINPUT:
+				case SDL_JOYAXISMOTION:
+				case SDL_JOYBALLMOTION:
+				case SDL_JOYHATMOTION:
+				case SDL_JOYBUTTONDOWN:
+				case SDL_JOYBUTTONUP:
+				case SDL_MOUSEMOTION:
+				case SDL_MOUSEBUTTONDOWN:
+				case SDL_MOUSEBUTTONUP:
+				case SDL_MOUSEWHEEL:
+				case SDL_MULTIGESTURE:
+					inputWrapper.PollEvent(e);
+					break;
+				}
 			}
+	#pragma endregion
+
+
+			address = singleBuffer->Reserve(1024);
+
+
+			address = singleBuffer->Reserve(sizeof(A));
+
+			//A* p_A = singleBuffer->Reserve<A>(P1, P2, P3, P4..... P5)
+			A *p_A = new (address) A(1);
+			cout << endl << endl;
+			cout << p_A->x << ".";
+
+			address = singleBuffer->Reserve(sizeof(B));
+			B *p_B = new (address) B(1, 2);
+			cout << endl << endl;
+			cout << p_B->x << ", ";
+			cout << p_B->y << ".";
+
+			address = singleBuffer->Reserve(sizeof(C));
+			C *p_C = new (address) C(1, 2.5, 3);
+			cout << endl << endl;
+			cout << p_C->x << ", ";
+			cout << p_C->y << ", ";
+			cout << p_C->z << ".";
+
+			singleBuffer->FreeTo(0);
+
+
+			if (inputWrapper.GetKeyboard()->GetKeyState(SDL_SCANCODE_ESCAPE) == Input::InputState::PRESSED)
+				break;
+
+
+			graphicsWrapper.Render();
 		}
-#pragma endregion
-
-
-
-
-
-		address = singleBuffer->Reserve(sizeof(A));
-		A *p_A = new (address) A(1);
-		cout << endl << endl;
-		cout << p_A->x << ".";
-
-		address = singleBuffer->Reserve(sizeof(B));
-		B *p_B = new (address) B(1, 2);
-		cout << endl << endl;
-		cout << p_B->x << ", ";
-		cout << p_B->y << ".";
-
-		address = singleBuffer->Reserve(sizeof(C));
-		C *p_C = new (address) C(1, 2.5, 3);
-		cout << endl << endl;
-		cout << p_C->x << ", ";
-		cout << p_C->y << ", ";
-		cout << p_C->z << ".";
-
-		singleBuffer->FreeTo(0);
-
-
-		if (inputWrapper.GetKeyboard()->GetKeyState(SDL_SCANCODE_ESCAPE) == Input::InputState::PRESSED)
-			break;
-
-
-		graphicsWrapper.Render();
+	}
+	catch (std::string e)
+	{
+		std::printf("Following error: %s\n", e.c_str());
 	}
 
 	

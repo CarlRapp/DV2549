@@ -10,7 +10,7 @@ namespace Memory
 	class DECLSPEC StackAllocator_SingleBuffer : public IStackAllocator
 	{
 	public:
-		StackAllocator_SingleBuffer(size_t _stackSizeBytes, size_t _pointerAlignment = 4, bool _growIfFull = false, bool _allocateIfFull = false);
+		StackAllocator_SingleBuffer(size_t _stackSizeBytes, size_t _stackAlignment = 64, bool _growIfFull = false, bool _allocateIfFull = false) throw();
 		~StackAllocator_SingleBuffer();
 
 		void* Reserve(size_t _nBytes);
@@ -19,8 +19,12 @@ namespace Memory
 
 	private:
 		char*	m_stackStartPtr;
+		size_t	m_startPtrOffset;
+
 		size_t	m_totalByteSize;
 		size_t	m_currentStackIndex;
+		size_t	m_alignBytes;
+
 		bool	m_growIfFull;
 		bool	m_allocateIfFull;
 	};
