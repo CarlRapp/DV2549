@@ -60,6 +60,36 @@ public:
 };
 
 
+static int TestThread(void* dataPtr)
+{
+	int tCounter = 0;
+	SDL_threadID tId = SDL_ThreadID();
+	while (true)
+	{
+		SDL_Delay(std::rand() % 3);
+		Memory::StackAllocator_SingleBuffer* _stackBuffer = (Memory::StackAllocator_SingleBuffer*)dataPtr;
+		int* threadData = (int*)_stackBuffer->Reserve(sizeof(int));
+
+		if (*threadData != 0)
+		{
+			int value = *threadData;
+
+			int a = 2;
+		}
+			
+
+		*threadData = tId;
+		++tCounter;
+
+		if (tCounter == 20)
+			break;
+	}
+	std::printf("%i | ", tId);
+
+	return 0;
+}
+
+
 int main(int argc, char** argv)
 {
 	Input::InputWrapper inputWrapper = Input::InputWrapper::GetInstance();
@@ -76,6 +106,12 @@ int main(int argc, char** argv)
 		std::printf("Following error: %s\n", e.c_str());
 	}
 
+	int* startAddress = (int*)singleBuffer->Reserve(0);
+
+	for (int n = 0; n < 256; ++n)
+		startAddress[n] = 0;
+
+	singleBuffer->FreeTo(0);
 	try
 	{
 		void* address = 0;
@@ -112,14 +148,32 @@ int main(int argc, char** argv)
 			}
 	#pragma endregion
 
+			
+			
+			std::vector<SDL_Thread*> threads;
+			std::printf("\n\nBefore:\n");
+			for (int n = 0; n < 10; ++n)
+				std::printf("%i | ", startAddress[n]);
+			
+			for (int n = 0; n < 10; ++n)
+			{
+				SDL_Thread* tThread = SDL_CreateThread(TestThread, "Thread", singleBuffer);
+				threads.push_back(tThread);
+			}
 
-			address = singleBuffer->Reserve(1024);
+			std::printf("\n\nAfter:\n");
+			for (int n = 0; n < 10; ++n)
+			{
+				int tempResult;
+				SDL_WaitThread(threads[n], &tempResult);
+				std::printf("%i | ", startAddress[n]);
+			}
 
 
-			address = singleBuffer->Reserve(sizeof(A));
+			//address = singleBuffer->Reserve(sizeof(A));
 
 			//A* p_A = singleBuffer->Reserve<A>(P1, P2, P3, P4..... P5)
-			A *p_A = new (address) A(1);
+			/* *p_A = new (address) A(1);
 			cout << endl << endl;
 			cout << p_A->x << ".";
 
@@ -135,9 +189,10 @@ int main(int argc, char** argv)
 			cout << p_C->x << ", ";
 			cout << p_C->y << ", ";
 			cout << p_C->z << ".";
-
+			*/
 			singleBuffer->FreeTo(0);
-
+			for (int n = 0; n < 256; ++n)
+				startAddress[n] = 0;
 
 			if (inputWrapper.GetKeyboard()->GetKeyState(SDL_SCANCODE_ESCAPE) == Input::InputState::PRESSED)
 				break;
