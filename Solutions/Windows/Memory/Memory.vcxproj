@@ -20,12 +20,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Source\Memory\MemoryWrapper.cpp" />
-    <ClCompile Include="..\..\..\Source\Memory\PoolAllocator.cpp" />
+    <ClCompile Include="..\..\..\Source\Memory\PoolAllocator\PoolAllocator.cpp" />
     <ClCompile Include="..\..\..\Source\Memory\StackAllocator\StackAllocator_SingleBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\Source\Memory\MemorySettings.h" />
     <ClInclude Include="..\..\..\Source\Memory\MemoryWrapper.h" />
-    <ClInclude Include="..\..\..\Source\Memory\PoolAllocator.h" />
+    <ClInclude Include="..\..\..\Source\Memory\PoolAllocator\PoolAllocator.h" />
     <ClInclude Include="..\..\..\Source\Memory\StackAllocator\IStackAllocator.h" />
     <ClInclude Include="..\..\..\Source\Memory\StackAllocator\StackAllocator_SingleBuffer.h" />
   </ItemGroup>

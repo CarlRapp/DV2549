@@ -1,0 +1,14 @@
+#ifndef MEMORYSETTINGS_H
+#define MEMORYSETTINGS_H
+
+#if _WIN64
+#define MEMORY_ALIGNMENT 8
+#elif _WIN32
+#define MEMORY_ALIGNMENT 4
+#endif
+
+#define MEMORY_ALIGNED 1
+#define MEMORY_PADDING 1
+#define MEMORY_DEBUG 1
+
+#endif
