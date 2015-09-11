@@ -7,6 +7,9 @@
     <Filter Include="Source\Stack Allocator">
       <UniqueIdentifier>{09b611ab-b9bc-45a4-a9ac-62cbbed082bd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Pool Allocator">
+      <UniqueIdentifier>{425e7922-fa07-47f5-ab25-b384e6a0cb7b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Source\Memory\MemoryWrapper.cpp">
@@ -14,6 +17,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\Source\Memory\StackAllocator\StackAllocator_SingleBuffer.cpp">
       <Filter>Source\Stack Allocator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Memory\PoolAllocator.cpp">
+      <Filter>Source\Pool Allocator</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -25,6 +31,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\Source\Memory\StackAllocator\StackAllocator_SingleBuffer.h">
       <Filter>Source\Stack Allocator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Memory\PoolAllocator.h">
+      <Filter>Source\Pool Allocator</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
