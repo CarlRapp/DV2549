@@ -28,7 +28,7 @@ namespace Memory
 		MemoryWrapper();
 
 		void* PNew(size_t _size);
-		void PDelete(void*);
+		void PDelete(void*, size_t _size);
 
 
 		std::map<size_t, std::vector<PoolAllocator*>>* m_PoolMap;
@@ -47,7 +47,7 @@ namespace Memory
 		template <typename T>
 		void PDelete(T*)
 		{
-			pdelete(static_cast<void*>(T));
+			pdelete(static_cast<void*>(T), sizeof(T));
 		}
 
 		void CreatePool(unsigned int _items, size_t _size);

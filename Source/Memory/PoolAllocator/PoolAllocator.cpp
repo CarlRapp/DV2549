@@ -86,7 +86,13 @@ bool PoolAllocator::HasFreeSlot()
 	bool result = !m_memFreeSlots->empty();
 	SDL_UnlockMutex(m_Mutex);
 	return result;
+}
 
+bool PoolAllocator::IsInRange(void* _pointer)
+{
+	static const void* maxpointer = (static_cast<char*>(m_origpointer) + m_maxMemory);
+
+	return (_pointer < maxpointer) && (_pointer >= m_memory);
 }
 
 void PoolAllocator::SetSize(unsigned int _items, size_t _size)

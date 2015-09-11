@@ -67,14 +67,49 @@ void* MemoryWrapper::PNew(size_t _size)
 	return nullptr;
 }
 
-void MemoryWrapper::PDelete(void*)
+void MemoryWrapper::PDelete(void* _delete, size_t _size)
 {
-	//FIXA!
+#ifdef MEMORY_PADDING
+	size_t size = GetPaddedBlockSize(_size);
+#else
+	size_t size = _size;
+#endif
+
+#if MEMORY_DEBUG && !_DEBUG
+	if (m_PoolMap.find(size) == m_PoolMap.end())
+	{
+		printf("No pool created for size %d\n", _size);
+		return nullptr;
+	}
+#elif _DEBUG
+	assert(m_PoolMap->find(size) != m_PoolMap->end());
+#endif
+
+	auto list = &m_PoolMap->at(size);
+	for (unsigned int i = 0; i < list->size(); ++i)
+	{
+		if (list->at(i)->IsInRange(_delete))
+		{
+			list->at(i)->Free(_delete);
+			return;
+		}
+	}
+
+#if MEMORY_DEBUG && !_DEBUG
+	printf("No pool found to delete from\n");
+#elif _DEBUG
+	assert(0);
+#endif
+
 }
 
 void MemoryWrapper::CreatePool(unsigned int _items, size_t _size)
 {
+#ifdef MEMORY_PADDING
 	size_t size = GetPaddedBlockSize(_size);
+#else
+	size_t size = _size;
+#endif
 	m_PoolMap->at(size).push_back(new PoolAllocator(_items, _size));
 }
 

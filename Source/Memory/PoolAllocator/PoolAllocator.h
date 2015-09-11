@@ -47,6 +47,7 @@ public:
 
 	bool HasFreeSlot();
 
+	bool IsInRange(void*);
 	
 
 };
