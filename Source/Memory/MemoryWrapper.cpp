@@ -30,7 +30,7 @@ void MemoryWrapper::DestoryInstance()
 
 #pragma endregion
 
-void* MemoryWrapper::PNew(size_t _size)
+void* MemoryWrapper::pnew(size_t _size)
 {
 
 #ifdef MEMORY_PADDING
@@ -67,7 +67,7 @@ void* MemoryWrapper::PNew(size_t _size)
 	return nullptr;
 }
 
-void MemoryWrapper::PDelete(void* _delete, size_t _size)
+void MemoryWrapper::pdelete(void* _delete, size_t _size)
 {
 #ifdef MEMORY_PADDING
 	size_t size = GetPaddedBlockSize(_size);
@@ -100,7 +100,6 @@ void MemoryWrapper::PDelete(void* _delete, size_t _size)
 #elif _DEBUG
 	assert(0);
 #endif
-
 }
 
 void MemoryWrapper::CreatePool(unsigned int _items, size_t _size)
@@ -110,7 +109,7 @@ void MemoryWrapper::CreatePool(unsigned int _items, size_t _size)
 #else
 	size_t size = _size;
 #endif
-	m_PoolMap->at(size).push_back(new PoolAllocator(_items, _size));
+	(*m_PoolMap)[size].push_back(new PoolAllocator(_items, _size));
 }
 
 void MemoryWrapper::ClearAllPools()
@@ -125,4 +124,36 @@ void MemoryWrapper::ClearAllPools()
 	m_PoolMap->clear();
 }
 
+void MemoryWrapper::PrintPools()
+{
+	
+
+	for (auto it = m_PoolMap->begin(); it != m_PoolMap->end(); ++it)
+	{
+		printf("\nSIZE %d", it->first);
+
+		for (unsigned int i = 0; i < it->second.size(); ++i)
+		{
+			printf("\nPOOL %d\n", i);
+
+			char* str = it->second[i]->GetPrint();
+			unsigned int maxMem = it->second[i]->GetMaxMemory();
+			unsigned int counter = 0;
+			for (int k = 0; k < maxMem; k++)
+			{
+				counter++;
+				if (str[k] != 0)
+					printf("X");
+				else
+					printf("|");
+
+				if (counter >= it->first)
+				{
+					printf(" ");
+					counter = 0;
+				}
+			}
+		}
+	}
+}
 

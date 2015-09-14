@@ -27,8 +27,8 @@ namespace Memory
 	private:
 		MemoryWrapper();
 
-		void* PNew(size_t _size);
-		void PDelete(void*, size_t _size);
+		void* pnew(size_t _size);
+		void pdelete(void*, size_t _size);
 
 
 		std::map<size_t, std::vector<PoolAllocator*>>* m_PoolMap;
@@ -39,20 +39,36 @@ namespace Memory
 		void DestoryInstance();
 
 		template <typename T>
-		T* PNew(T)
+		T* PNew()
 		{
 			return static_cast<T*>(pnew(sizeof(T)));
 		}
 
 		template <typename T>
-		void PDelete(T*)
+		void PDelete(T* _pointer)
 		{
-			pdelete(static_cast<void*>(T), sizeof(T));
+			pdelete(static_cast<void*>(_pointer), sizeof(T));
+		}
+
+		//for array
+		template <typename T>
+		T* PNew(size_t _size)
+		{
+			return static_cast<T*>(pnew(sizeof(T)*_size));
+		}
+
+		//for array
+		template <typename T>
+		void PDelete(T*,size_t _size)
+		{
+			pdelete(static_cast<void*>(T), sizeof(T)*_size);
 		}
 
 		void CreatePool(unsigned int _items, size_t _size);
 
 		void ClearAllPools();
+
+		void PrintPools();
 
 	};
 }

@@ -13,6 +13,7 @@ PoolAllocator::PoolAllocator(unsigned int _items, size_t _size)
 PoolAllocator::~PoolAllocator()
 {
 	free(m_origpointer);
+
 	delete m_memFreeSlots;
 }
 
@@ -118,6 +119,7 @@ void PoolAllocator::SetSize(unsigned int _items, size_t _size)
 
 	m_maxMemory = m_memSlotSize * _items + MEMORY_ALIGNMENT;
 	m_origpointer = malloc(m_maxMemory);
+	memset(m_origpointer, 0, m_maxMemory);
 	m_memory = m_origpointer;
 
 	size_t align = (size_t)(m_memory);
@@ -129,20 +131,17 @@ void PoolAllocator::SetSize(unsigned int _items, size_t _size)
 #ifdef MEMORY_ALIGNED
 		m_memory = (char*)m_origpointer + MEMORY_ALIGNMENT - unaligned;
 #endif
-
 #if MEMORY_DEBUG
 		printf("Memory not aligned\n");
 #endif
-
 	}
-
 #if MEMORY_DEBUG
 	else
 	{
 		printf("Memory aligned\n");
 	}
-#endif
 
+#endif
 
 	for (unsigned int i = 0; i < _items; i++)
 	{
@@ -150,3 +149,7 @@ void PoolAllocator::SetSize(unsigned int _items, size_t _size)
 	}
 }
 
+char* PoolAllocator::GetPrint()
+{
+	return static_cast<char*>(m_memory);
+}

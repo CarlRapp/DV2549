@@ -4,11 +4,7 @@
 #include <functional>
 
 #include <SDL/SDL.h>
-
 #include "Memory/MemorySettings.h"
-
-
-
 
 static size_t GetPaddedBlockSize(size_t _size) 
 {
@@ -49,5 +45,9 @@ public:
 
 	bool IsInRange(void*);
 	
-
+#ifdef MEMORY_DEBUG
+	char* GetPrint();
+	unsigned int GetMaxMemory() { return m_maxMemory - MEMORY_ALIGNMENT; };
+#endif
+	
 };
