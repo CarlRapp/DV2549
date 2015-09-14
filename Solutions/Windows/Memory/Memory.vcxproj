@@ -29,6 +29,7 @@
     <ClInclude Include="..\..\..\Source\Memory\PoolAllocator\PoolAllocator.h" />
     <ClInclude Include="..\..\..\Source\Memory\StackAllocator\IStackAllocator.h" />
     <ClInclude Include="..\..\..\Source\Memory\StackAllocator\StackAllocator_SingleBuffer.h" />
+    <ClInclude Include="..\..\..\Source\Memory\TestScenarios.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{65AC8BCF-B67B-43E5-B01D-A1D462E629CA}</ProjectGuid>

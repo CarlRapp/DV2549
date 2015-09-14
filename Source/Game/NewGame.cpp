@@ -4,6 +4,7 @@
 #include "Graphics/GraphicsWrapper.h"
 #include "Memory/MemoryWrapper.h"
 #include "Memory/StackAllocator/StackAllocator_SingleBuffer.h"
+#include "Memory/TestScenarios.h"
 
 #ifdef WIN32
 #ifdef _DEBUG
@@ -95,6 +96,9 @@ int main(int argc, char** argv)
 	Input::InputWrapper inputWrapper = Input::InputWrapper::GetInstance();
 	Graphics::GraphicsWrapper graphicsWrapper = Graphics::GraphicsWrapper::GetInstance();
 	Memory::MemoryWrapper memoryWrapper = Memory::MemoryWrapper::GetInstance();
+
+	VerifyMTStack(4096, 4, 4);
+	MeasureSQStack(1048576, 4);
 
 	Memory::StackAllocator_SingleBuffer* singleBuffer = 0;
 	try
