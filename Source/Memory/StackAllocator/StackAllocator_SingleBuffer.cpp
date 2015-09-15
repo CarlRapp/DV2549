@@ -30,6 +30,17 @@ StackAllocator_SingleBuffer::~StackAllocator_SingleBuffer()
 	free(m_stackStartPtr);
 }
 
+bool Memory::StackAllocator_SingleBuffer::HasPointer(void * _inPtr)
+{
+	size_t ptrValue = (size_t)_inPtr;
+	size_t stackBlockPtr = (size_t)m_stackStartPtr + m_startPtrOffset;
+
+	if (stackBlockPtr <= ptrValue && ptrValue < stackBlockPtr + m_totalByteSize)
+		return true;
+
+	return false;
+}
+
 void* StackAllocator_SingleBuffer::Reserve(size_t _nBytes)
 {
 	void* pReservedMemory = NULL;
@@ -37,10 +48,28 @@ void* StackAllocator_SingleBuffer::Reserve(size_t _nBytes)
 	//	Lock the mutex
 	if (SDL_LockMutex(m_reserveMutex) == 0)
 	{
-		if ((m_currentStackIndex - m_startPtrOffset) + _nBytes <= m_totalByteSize)
+		size_t bytesToReserve = 0;
+		size_t extraBytes = 0;
+		if (_nBytes < m_alignBytes)
+			bytesToReserve = m_alignBytes;
+		else
+		{
+			extraBytes = (_nBytes % m_alignBytes);
+
+			if (extraBytes == 0)
+				bytesToReserve = _nBytes;
+			else
+			{
+				size_t byteMultiple = (_nBytes / m_alignBytes) + 1;
+				bytesToReserve = byteMultiple * m_alignBytes;
+			}
+		}
+			
+
+		if ((m_currentStackIndex - m_startPtrOffset) + bytesToReserve <= m_totalByteSize)
 		{
 			pReservedMemory = &m_stackStartPtr[m_currentStackIndex];
-			m_currentStackIndex += _nBytes;
+			m_currentStackIndex += bytesToReserve;
 		}
 		//else if (m_growIfFull)
 		//{

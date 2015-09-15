@@ -13,6 +13,7 @@ namespace Memory
 		StackAllocator_SingleBuffer(size_t _stackSizeBytes, size_t _stackAlignment = 64, bool _growIfFull = false, bool _allocateIfFull = false) throw();
 		~StackAllocator_SingleBuffer();
 
+		bool HasPointer(void* _inPtr);
 		void* Reserve(size_t _nBytes);
 		size_t GetTop();
 		void FreeTo(size_t _index);
