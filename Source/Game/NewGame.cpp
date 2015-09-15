@@ -97,25 +97,19 @@ int main(int argc, char** argv)
 	Graphics::GraphicsWrapper graphicsWrapper = Graphics::GraphicsWrapper::GetInstance();
 	Memory::MemoryWrapper memoryWrapper = Memory::MemoryWrapper::GetInstance();
 
-	VerifyMTStack(4096, 4, 4);
-	MeasureSQStack(1048576, 4);
+	//VerifyMTStack(4096, 4, 4);
+	//MeasureSQStack(1048576, 4);
 
 	Memory::StackAllocator_SingleBuffer* singleBuffer = 0;
 	try
 	{
-		singleBuffer = new Memory::StackAllocator_SingleBuffer(1024);
+		singleBuffer = new Memory::StackAllocator_SingleBuffer(1024, 4);
 	}
 	catch (std::string e)
 	{
 		std::printf("Following error: %s\n", e.c_str());
 	}
 
-	int* startAddress = (int*)singleBuffer->Reserve(0);
-
-	for (int n = 0; n < 256; ++n)
-		startAddress[n] = 0;
-
-	singleBuffer->FreeTo(0);
 	try
 	{
 		void* address = 0;
@@ -152,56 +146,25 @@ int main(int argc, char** argv)
 			}
 	#pragma endregion
 
-			
-			
-			std::vector<SDL_Thread*> threads;
-			std::printf("\n\nBefore:\n");
-			for (int n = 0; n < 10; ++n)
-				std::printf("%i | ", startAddress[n]);
-			
-			for (int n = 0; n < 10; ++n)
+			for (int n = 0; n < 100; ++n)
 			{
-				SDL_Thread* tThread = SDL_CreateThread(TestThread, "Thread", singleBuffer);
-				threads.push_back(tThread);
+				int testNumber = 100;
+
+				A* testA = singleBuffer->Push<A>(testNumber);
+				C* testC = singleBuffer->Push<C>(testNumber, 2 * testNumber, 3 * testNumber);
+				B* testB = singleBuffer->Push<B>(testNumber, 2 * testNumber);
+
+				printf("A(%i) ", testA->x);
+				printf("B(%i, %i) ", testB->x, testB->y);
+				printf("C(%i, %f, %i)", testC->x, testC->y, testC->z);
+				printf("\n");
+				SDL_Delay(1000);
 			}
-
-			std::printf("\n\nAfter:\n");
-			for (int n = 0; n < 10; ++n)
-			{
-				int tempResult;
-				SDL_WaitThread(threads[n], &tempResult);
-				std::printf("%i | ", startAddress[n]);
-			}
-
-
-			//address = singleBuffer->Reserve(sizeof(A));
-
-			//A* p_A = singleBuffer->Reserve<A>(P1, P2, P3, P4..... P5)
-			/* *p_A = new (address) A(1);
-			cout << endl << endl;
-			cout << p_A->x << ".";
-
-			address = singleBuffer->Reserve(sizeof(B));
-			B *p_B = new (address) B(1, 2);
-			cout << endl << endl;
-			cout << p_B->x << ", ";
-			cout << p_B->y << ".";
-
-			address = singleBuffer->Reserve(sizeof(C));
-			C *p_C = new (address) C(1, 2.5, 3);
-			cout << endl << endl;
-			cout << p_C->x << ", ";
-			cout << p_C->y << ", ";
-			cout << p_C->z << ".";
-			*/
-			singleBuffer->FreeTo(0);
-			for (int n = 0; n < 256; ++n)
-				startAddress[n] = 0;
 
 			if (inputWrapper.GetKeyboard()->GetKeyState(SDL_SCANCODE_ESCAPE) == Input::InputState::PRESSED)
 				break;
 
-
+			singleBuffer->FreeTo(0);
 			graphicsWrapper.Render();
 		}
 	}
