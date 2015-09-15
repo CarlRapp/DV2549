@@ -99,6 +99,9 @@ int main(int argc, char** argv)
 
 	//VerifyMTStack(4096, 4, 4);
 	//MeasureSQStack(1048576, 4);
+	VerifyMTStack(4096, 4, 4);
+	MeasureSQStack(1048576, 4);
+	MeasureMTStack(1048576, 4, 4);
 
 	Memory::StackAllocator_SingleBuffer* singleBuffer = 0;
 	try
