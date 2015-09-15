@@ -48,7 +48,7 @@ void VerifyMTStack(unsigned int _numAllocations, unsigned int _dataTypeSize, uns
 	verifyMTStack_Buffer = 0;
 	try
 	{
-		verifyMTStack_Buffer = new Memory::StackAllocator_SingleBuffer(verifyMTStack_BufferSize);
+		verifyMTStack_Buffer = new Memory::StackAllocator_SingleBuffer(verifyMTStack_BufferSize, 4);
 	}
 	catch (std::string e)
 	{
@@ -161,7 +161,7 @@ void MeasureSQStack(unsigned int _numAllocations, unsigned int _dataTypeSize)
 	measureSQStack_Buffer = 0;
 	try
 	{
-		measureSQStack_Buffer = new Memory::StackAllocator_SingleBuffer(measureSQStack_BufferSize);
+		measureSQStack_Buffer = new Memory::StackAllocator_SingleBuffer(measureSQStack_BufferSize, 4);
 	}
 	catch (std::string e)
 	{
@@ -327,7 +327,7 @@ void MeasureMTStack(unsigned int _numAllocations, unsigned int _dataTypeSize, un
 	measureMTStack_Buffer = 0;
 	try
 	{
-		measureMTStack_Buffer = new Memory::StackAllocator_SingleBuffer(measureMTStack_BufferSize);
+		measureMTStack_Buffer = new Memory::StackAllocator_SingleBuffer(measureMTStack_BufferSize, 4);
 	}
 	catch (std::string e)
 	{
