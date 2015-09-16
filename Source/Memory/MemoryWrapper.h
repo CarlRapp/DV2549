@@ -27,8 +27,7 @@ namespace Memory
 	private:
 		MemoryWrapper();
 
-		void* pnew(size_t _size);
-		void pdelete(void*, size_t _size);
+		
 
 
 		std::map<size_t, std::vector<PoolAllocator*>>* m_PoolMap;
@@ -38,37 +37,68 @@ namespace Memory
 		static MemoryWrapper& GetInstance();
 		void DestoryInstance();
 
-		template <typename T>
+		/*
+			C* a =	PNEW(C, 1, memoryWrapper);
+					PNEW(Class , >1 if array , memorywrapper instance )
+		*/
+
+		//New and delete macros for arrays
+#define NEW_ARRAY( _type, _size, _wrapper )		static_cast<_type*>(_wrapper.pnew(sizeof(_type)*_size));
+#define DELETE_ARRAY( _type, _pointer, _size, _wrapper ) _wrapper.pdelete(static_cast<void*>(_pointer), sizeof(_type)*_size);
+
+		//New and delete macros for single target
+#define NEW( _type, _wrapper )		static_cast<_type*>(_wrapper.pnew(sizeof(_type)));
+#define DELETE( _type, _pointer, _wrapper ) _wrapper.pdelete(static_cast<void*>(_pointer), sizeof(_type));
+
+		/*
+		pnew Usage:
+
+			Class A*			= static_cast<Class*>(pnew(sizeof(Class)))
+			Class A[arraySize]	= static_cast<Class*>(pnew(sizeof(Class)*arraySize)) 
+		*/
+		void*	pnew(size_t _size);
+		/*
+		pdelete Usage :
+
+			pdelete(static_cast<void*>(p), sizeof(Class))
+			pdelete(static_cast<void*>(p), sizeof(Class)*arraySize)
+
+		*/
+		void	pdelete(void*, size_t _size);
+
+		/*template <typename T>
 		T* PNew()
 		{
 			return static_cast<T*>(pnew(sizeof(T)));
-		}
+		}*/
 
-		template <typename T>
+		/*template <typename T>
 		void PDelete(T* _pointer)
 		{
 			pdelete(static_cast<void*>(_pointer), sizeof(T));
-		}
+		}*/
 
 		//for array
-		template <typename T>
+		/*template <typename T>
 		T* PNew(size_t _size)
 		{
 			return static_cast<T*>(pnew(sizeof(T)*_size));
-		}
+		}*/
 
 		//for array
-		template <typename T>
-		void PDelete(T*,size_t _size)
-		{
-			pdelete(static_cast<void*>(T), sizeof(T)*_size);
-		}
+		//template <typename T>
+		//void PDelete(T*,size_t _size)
+		//{
+		//	pdelete(static_cast<void*>(T), sizeof(T)*_size);
+		//}
 
 		void CreatePool(unsigned int _items, size_t _size);
 
 		void ClearAllPools();
 
-		void PrintPools();
+		void PrintPoolsByteLevel();
+
+		void PrintPoolsPoolLevel();
 
 	};
 }

@@ -22,6 +22,7 @@ private:
 
 	void* m_origpointer = nullptr;
 	void* m_memory = nullptr;
+	void* m_maxPointer = nullptr;
 
 	std::priority_queue<unsigned int, std::vector<unsigned int>, std::greater<unsigned int>>* m_memFreeSlots;
 
@@ -43,11 +44,13 @@ public:
 
 	bool HasFreeSlot();
 
-	bool IsInRange(void*);
+	inline bool IsInRange(void*);
 	
 #ifdef MEMORY_DEBUG
 	char* GetPrint();
 	unsigned int GetMaxMemory() { return m_maxMemory - MEMORY_ALIGNMENT; };
+	size_t GetFreeSlots() { return m_memFreeSlots->size(); }
+	unsigned int GetMaxSlots() { return ((m_maxMemory - MEMORY_ALIGNMENT) / m_memSlotSize); }
 #endif
 	
 };

@@ -5,7 +5,7 @@
 #include "Memory/MemoryWrapper.h"
 #include "Memory/StackAllocator/StackAllocator_SingleBuffer.h"
 #include "Memory/TestScenarios.h"
-
+#include "Memory/PoolTest.h"
 #ifdef WIN32
 #ifdef _DEBUG
 #include <VLD/vld.h>
@@ -93,15 +93,24 @@ static int TestThread(void* dataPtr)
 
 int main(int argc, char** argv)
 {
+	//Memory::MemoryWrapper memoryWrapper = Memory::MemoryWrapper::GetInstance();
+
+	RunTest();
+	system("pause");
+
+	/*
 	Input::InputWrapper inputWrapper = Input::InputWrapper::GetInstance();
 	Graphics::GraphicsWrapper graphicsWrapper = Graphics::GraphicsWrapper::GetInstance();
-	Memory::MemoryWrapper memoryWrapper = Memory::MemoryWrapper::GetInstance();
+	
 
 	//VerifyMTStack(4096, 4, 4);
 	//MeasureSQStack(1048576, 4);
 	VerifyMTStack(4096, 4, 4);
 	MeasureSQStack(1048576, 4);
 	MeasureMTStack(1048576, 4, 4);
+
+	
+
 
 	Memory::StackAllocator_SingleBuffer* singleBuffer = 0;
 	try
@@ -176,7 +185,7 @@ int main(int argc, char** argv)
 		std::printf("Following error: %s\n", e.c_str());
 	}
 
-	
+	*/
 #ifdef WIN32
 #ifdef _DEBUG
 	_CrtDumpMemoryLeaks();

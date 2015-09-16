@@ -27,6 +27,7 @@
     <ClInclude Include="..\..\..\Source\Memory\MemorySettings.h" />
     <ClInclude Include="..\..\..\Source\Memory\MemoryWrapper.h" />
     <ClInclude Include="..\..\..\Source\Memory\PoolAllocator\PoolAllocator.h" />
+    <ClInclude Include="..\..\..\Source\Memory\PoolTest.h" />
     <ClInclude Include="..\..\..\Source\Memory\StackAllocator\IStackAllocator.h" />
     <ClInclude Include="..\..\..\Source\Memory\StackAllocator\StackAllocator_SingleBuffer.h" />
     <ClInclude Include="..\..\..\Source\Memory\TestScenarios.h" />
