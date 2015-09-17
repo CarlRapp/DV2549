@@ -7,12 +7,20 @@ using namespace Memory;
 StackAllocator_SingleBuffer::StackAllocator_SingleBuffer(size_t _stackSizeBytes, size_t _stackAlignment, bool _growIfFull, bool _allocateIfFull)
 	: m_stackStartPtr(0), m_alignBytes(_stackAlignment)
 {
+	//	Check so alignment is greater than one
+	assert(m_alignBytes > 1);
+
 	//	Allocate the number of requested bytes plus requested alignment minus on
 	//	to make sure that the amount of requested bytes can be used. 
 	//	(Worst case scenario, m_alignBytes-1 needs to be used to 'move' the pointer)
-	m_stackStartPtr = (char*)malloc(_stackSizeBytes + (m_alignBytes-1));
-	if (m_stackStartPtr == 0)
-		throw std::string("Function malloc() failed to allocate valid memory!");
+	m_stackStartPtr = (char*)malloc(_stackSizeBytes + (m_alignBytes - 1));
+
+	//	Check so we got a valid pointer
+	assert(m_stackStartPtr != 0);
+
+	//	Alignment must be a power of two
+	assert(!(m_alignBytes & (m_alignBytes-1)));
+	
 
 	//	Calculate how much to align the start of the pointer
 	size_t bytesToAlign = ((size_t)m_stackStartPtr) % m_alignBytes;
@@ -23,6 +31,9 @@ StackAllocator_SingleBuffer::StackAllocator_SingleBuffer(size_t _stackSizeBytes,
 	m_growIfFull = _growIfFull;
 	m_allocateIfFull = _allocateIfFull;
 	m_reserveMutex = SDL_CreateMutex();
+
+	//	Create bitmask
+	m_alignBitmask = ~(m_alignBytes);
 }
 
 StackAllocator_SingleBuffer::~StackAllocator_SingleBuffer()
@@ -41,52 +52,23 @@ bool Memory::StackAllocator_SingleBuffer::HasPointer(void * _inPtr)
 	return false;
 }
 
+//This method will return a NULL pointer if the stack can' allocated the requested amount of bytes.
 void* StackAllocator_SingleBuffer::Reserve(size_t _nBytes)
 {
-	void* pReservedMemory = NULL;
+	void* returnPtr = 0;
 
-	//	Lock the mutex
-	if (SDL_LockMutex(m_reserveMutex) == 0)
-	{
-		size_t bytesToReserve = 0;
-		size_t extraBytes = 0;
-		if (_nBytes < m_alignBytes)
-			bytesToReserve = m_alignBytes;
-		else
-		{
-			extraBytes = (_nBytes % m_alignBytes);
+	//	Calculate padding
+	size_t bytesToReserve = (_nBytes + m_alignBytes-1) & ~(m_alignBytes-1);
 
-			if (extraBytes == 0)
-				bytesToReserve = _nBytes;
-			else
-			{
-				size_t byteMultiple = (_nBytes / m_alignBytes) + 1;
-				bytesToReserve = byteMultiple * m_alignBytes;
-			}
-		}
-			
+	//	Fetch the current stack index and then increment it
+	//	with the requested bytes together with additional padding
+	size_t preIncrementIndex = m_currentStackIndex.fetch_add(bytesToReserve, std::memory_order_relaxed);
 
-		if ((m_currentStackIndex - m_startPtrOffset) + bytesToReserve <= m_totalByteSize)
-		{
-			pReservedMemory = &m_stackStartPtr[m_currentStackIndex];
-			m_currentStackIndex += bytesToReserve;
-		}
-		//else if (m_growIfFull)
-		//{
-		//	// TODO Grow the stack, if possible.
-		//}
-		//else if (m_allocateIfFull)
-		//{
-		//	// TODO Allocate using regular new and have the stack allocator keep the pointers for future deleting?
-		//}
-		else
-			throw std::string("Out of memory!");
-		// TODO Throw exception / set error flag (or simply return the NULL pointer?) because there was an attempt to use the stack beyond its capacity.
-		
-		//	Unlock
-		SDL_UnlockMutex(m_reserveMutex);
-	}
-	return pReservedMemory;
+	//	Check so the index is within memory bounds
+	if (preIncrementIndex + bytesToReserve <= m_totalByteSize)
+		returnPtr = &m_stackStartPtr[preIncrementIndex];
+
+	return returnPtr;
 }
 
 size_t StackAllocator_SingleBuffer::GetTop()

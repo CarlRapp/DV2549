@@ -4,6 +4,7 @@
 #include "IStackAllocator.h"
 
 #include <SDL/SDL.h>
+#include <atomic>
 
 namespace Memory
 {
@@ -19,17 +20,17 @@ namespace Memory
 		void FreeTo(size_t _index);
 
 	private:
-		char*	m_stackStartPtr;
+		std::atomic<size_t>	m_currentStackIndex;
 		size_t	m_startPtrOffset;
-
 		size_t	m_totalByteSize;
-		size_t	m_currentStackIndex;
 		size_t	m_alignBytes;
+		size_t	m_alignBitmask;
 
 		bool	m_growIfFull;
 		bool	m_allocateIfFull;
-
+		
 		SDL_mutex* m_reserveMutex;
+		char*	m_stackStartPtr;
 	};
 }
 #endif
