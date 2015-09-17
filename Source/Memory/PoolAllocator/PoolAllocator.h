@@ -6,7 +6,7 @@
 #include <SDL/SDL.h>
 #include "Memory/MemorySettings.h"
 
-static size_t GetPaddedBlockSize(size_t _size) 
+inline static size_t GetPaddedBlockSize(size_t _size) 
 {
 	int temp = MEMORY_ALIGNMENT - 1;
 
@@ -24,7 +24,7 @@ private:
 	void* m_memory = nullptr;
 	void* m_maxPointer = nullptr;
 
-	std::priority_queue<unsigned int, std::vector<unsigned int>, std::greater<unsigned int>>* m_memFreeSlots;
+	std::queue<unsigned int>* m_memFreeSlots;
 
 	SDL_mutex* m_Mutex;
 
