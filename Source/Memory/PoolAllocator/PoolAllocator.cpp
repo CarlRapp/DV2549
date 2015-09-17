@@ -4,7 +4,7 @@
 
 PoolAllocator::PoolAllocator(unsigned int _items, size_t _size)
 {
-	m_memFreeSlots = new std::priority_queue<unsigned int, std::vector<unsigned int>, std::greater<unsigned int>>();
+	m_memFreeSlots = new std::queue<unsigned int>();
 
 	SetSize(_items, _size);
 	m_Mutex = SDL_CreateMutex();
@@ -33,7 +33,7 @@ void* PoolAllocator::Allocate()
 	assert(!m_memFreeSlots->empty());
 #endif	
 
-	unsigned int memPointer = m_memFreeSlots->top() * m_memSlotSize;
+	unsigned int memPointer = m_memFreeSlots->front() * m_memSlotSize;
 	m_memFreeSlots->pop();
 	SDL_UnlockMutex(m_Mutex);
 
