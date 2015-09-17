@@ -6,7 +6,7 @@
 #include <SDL/SDL.h>
 #include "Memory/MemorySettings.h"
 
-static size_t GetPaddedBlockSize(size_t _size) 
+inline static size_t GetPaddedBlockSize(size_t _size) 
 {
 	int temp = MEMORY_ALIGNMENT - 1;
 
