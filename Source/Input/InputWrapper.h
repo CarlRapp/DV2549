@@ -10,7 +10,7 @@
 
 #include "Devices/Keyboard.h"
 #include "Devices/Mouse.h"
-#include "Devices/Touch.h"
+//#include "Devices/Touch.h"
 
 #include <SDL/SDL.h>
 #include <vector>
@@ -29,14 +29,14 @@ namespace Input
 
 		Keyboard* GetKeyboard();
 		Mouse* GetMouse();
-		Touch* GetTouch();
+		//Touch* GetTouch();
 
 	private:
 		InputWrapper();
 		static InputWrapper* m_instance;
 		Keyboard* m_keyboard;
 		Mouse* m_mouse;
-		Touch* m_touch;
+		//Touch* m_touch;
 	};
 }
 
