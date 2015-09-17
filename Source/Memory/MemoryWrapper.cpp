@@ -46,7 +46,7 @@ void* MemoryWrapper::pnew(size_t _size)
 		printf("No pool created for size %d\n", _size);
 		return nullptr;
 	}
-#elif //_DEBUG
+//#elif //_DEBUG
 	assert(m_PoolMap->find(size) != m_PoolMap->end());
 #endif
 
