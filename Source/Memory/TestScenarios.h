@@ -40,7 +40,10 @@ int VerifyMTStack_Thread(void* _ptr)
 
 void VerifyMTStack(unsigned int _numAllocations, unsigned int _dataTypeSize, unsigned int _numThreads, unsigned int _alignment)
 {
-	verifyMTStack_BufferSize = _numAllocations * _dataTypeSize;
+	if (_alignment > _dataTypeSize)
+		verifyMTStack_BufferSize = _numAllocations * _alignment;
+	else
+		verifyMTStack_BufferSize = _numAllocations * _dataTypeSize;
 	verifyMTStack_DataTypeSize = _dataTypeSize;
 	verifyMTStack_NumThreads = _numThreads;
 
@@ -154,7 +157,10 @@ Memory::StackAllocator_SingleBuffer* measureSQStack_Buffer;
 
 void MeasureSQStack(unsigned int _numAllocations, unsigned int _dataTypeSize, unsigned int _alignment)
 {
-	measureSQStack_BufferSize = _numAllocations * _dataTypeSize;
+	if (_alignment > _dataTypeSize)
+		verifyMTStack_BufferSize = _numAllocations * _alignment;
+	else
+		verifyMTStack_BufferSize = _numAllocations * _dataTypeSize;
 	measureSQStack_DataTypeSize = _dataTypeSize;
 
 	/* Create a memory buffer */
@@ -319,7 +325,10 @@ int MeasureMTStack_ThreadDefaultFree(void* _ptr)
 
 void MeasureMTStack(unsigned int _numAllocations, unsigned int _dataTypeSize, unsigned int _numThreads, unsigned int _alignment)
 {
-	measureMTStack_BufferSize = _numAllocations * _dataTypeSize;
+	if (_alignment > _dataTypeSize)
+		verifyMTStack_BufferSize = _numAllocations * _alignment;
+	else
+		verifyMTStack_BufferSize = _numAllocations * _dataTypeSize;
 	measureMTStack_DataTypeSize = _dataTypeSize;
 	measureMTStack_NumThreads = _numThreads;
 
