@@ -28,8 +28,8 @@ namespace Memory
 	private:
 		MemoryWrapper();
 
-		std::map<size_t, std::vector<PoolAllocator*>>* m_PoolMap;
-		std::shared_timed_mutex mutex;
+		std::map<size_t, std::vector<PoolAllocator*>>* m_poolMap;
+		std::shared_timed_mutex* m_mutex;
 
 	public:
 		~MemoryWrapper();
@@ -69,10 +69,10 @@ namespace Memory
 
 		void ClearAllPools();
 
+#ifdef MEMORY_DEBUG
 		void PrintPoolsByteLevel();
-
 		void PrintPoolsPoolLevel();
-
+#endif
 	};
 }
 

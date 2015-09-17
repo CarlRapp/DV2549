@@ -98,7 +98,7 @@ void PoolAllocator::SetSize(unsigned int _items, size_t _size)
 {
 
 #ifdef MEMORY_PADDING
-	m_memSlotSize = GetPaddedBlockSize(_size);
+	m_memSlotSize = (unsigned int)GetPaddedBlockSize(_size);
 #else
 	m_memSlotSize = _size;
 #endif

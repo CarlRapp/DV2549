@@ -116,7 +116,7 @@ void VerifyMTPool(unsigned int _numAllocations, unsigned int _dataTypeSize, unsi
 					if (memoryAddress == verifyMTPool_MemoryPointers[i][j])
 					{
 						printf("Memory has been found in more than one place (%iz). Locations: (Thread: %i, Memory Index: %i) and (Thread: %i, Memory Index: %i)\n",
-							memoryAddress,
+							(int)memoryAddress,
 							threadIndex,
 							memoryIndex,
 							i,
