@@ -45,11 +45,11 @@ void RunTest()
 {
 	Uint32 measure1 = SDL_GetTicks();
 
-	Memory::MemoryWrapper mem = Memory::MemoryWrapper::GetInstance();
+	Memory::MemoryWrapper* mem = Memory::MemoryWrapper::GetInstance();
 	//game supports 50 simultaneous particle systems of 50 particles each
-	mem.CreatePool(50, 50 * sizeof(ExampleClassA));
+	mem->CreatePool(50, 50 * sizeof(ExampleClassA));
 	//game supports up to 25 different models at a time
-	mem.CreatePool(25, sizeof(ExampleClassB));
+	mem->CreatePool(25, sizeof(ExampleClassB));
 
 	Uint32 measure2 = SDL_GetTicks();
 
@@ -147,7 +147,7 @@ msrAllDel,
 total
 );
 
-	mem.PrintPoolsPoolLevel();
+	mem->PrintPoolsPoolLevel();
 
 
 }

@@ -17,10 +17,10 @@ MemoryWrapper::~MemoryWrapper()
 	delete m_PoolMap;
 }
 
-MemoryWrapper& MemoryWrapper::GetInstance()
+MemoryWrapper* MemoryWrapper::GetInstance()
 {
 	m_instance = new MemoryWrapper();
-	return *m_instance;
+	return m_instance;
 }
 
 void MemoryWrapper::DestoryInstance()

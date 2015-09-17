@@ -33,7 +33,7 @@ namespace Memory
 
 	public:
 		~MemoryWrapper();
-		static MemoryWrapper& GetInstance();
+		static MemoryWrapper* GetInstance();
 		void DestoryInstance();
 
 		/*
@@ -42,12 +42,12 @@ namespace Memory
 		*/
 
 		//New and delete macros for arrays
-#define NEW_ARRAY( _type, _size, _wrapper )		static_cast<_type*>(_wrapper.pnew(sizeof(_type)*_size));
-#define DELETE_ARRAY( _type, _pointer, _size, _wrapper ) _wrapper.pdelete(static_cast<void*>(_pointer), sizeof(_type)*_size);
+#define NEW_ARRAY( _type, _size, _wrapper )		static_cast<_type*>(_wrapper->pnew(sizeof(_type)*_size));
+#define DELETE_ARRAY( _type, _pointer, _size, _wrapper ) _wrapper->pdelete(static_cast<void*>(_pointer), sizeof(_type)*_size);
 
 		//New and delete macros for single target
-#define NEW( _type, _wrapper )		static_cast<_type*>(_wrapper.pnew(sizeof(_type)));
-#define DELETE( _type, _pointer, _wrapper ) _wrapper.pdelete(static_cast<void*>(_pointer), sizeof(_type));
+#define NEW( _type, _wrapper )		static_cast<_type*>(_wrapper->pnew(sizeof(_type)));
+#define DELETE( _type, _pointer, _wrapper ) _wrapper->pdelete(static_cast<void*>(_pointer), sizeof(_type));
 
 		/*
 		pnew Usage:
