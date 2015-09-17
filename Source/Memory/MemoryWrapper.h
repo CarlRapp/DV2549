@@ -65,32 +65,6 @@ namespace Memory
 		*/
 		void	pdelete(void*, size_t _size);
 
-		/*template <typename T>
-		T* PNew()
-		{
-			return static_cast<T*>(pnew(sizeof(T)));
-		}*/
-
-		/*template <typename T>
-		void PDelete(T* _pointer)
-		{
-			pdelete(static_cast<void*>(_pointer), sizeof(T));
-		}*/
-
-		//for array
-		/*template <typename T>
-		T* PNew(size_t _size)
-		{
-			return static_cast<T*>(pnew(sizeof(T)*_size));
-		}*/
-
-		//for array
-		//template <typename T>
-		//void PDelete(T*,size_t _size)
-		//{
-		//	pdelete(static_cast<void*>(T), sizeof(T)*_size);
-		//}
-
 		void CreatePool(unsigned int _items, size_t _size);
 
 		void ClearAllPools();
