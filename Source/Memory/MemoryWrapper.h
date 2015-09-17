@@ -12,6 +12,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <shared_mutex>
 
 
 #include "PoolAllocator/PoolAllocator.h"
@@ -27,10 +28,8 @@ namespace Memory
 	private:
 		MemoryWrapper();
 
-		
-
-
 		std::map<size_t, std::vector<PoolAllocator*>>* m_PoolMap;
+		std::shared_timed_mutex mutex;
 
 	public:
 		~MemoryWrapper();
