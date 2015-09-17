@@ -39,8 +39,7 @@ void* MemoryWrapper::pnew(size_t _size)
 	size_t size = _size;
 #endif
 
-	std::shared_lock<std::shared_timed_mutex> lock(mutex);
-	lock.lock();
+	mutex.lock_shared();
 #if MEMORY_DEBUG //&& !_DEBUG
 	if (m_PoolMap->find(size) == m_PoolMap->end())
 	{
@@ -52,7 +51,7 @@ void* MemoryWrapper::pnew(size_t _size)
 #endif
 
 	auto list = &m_PoolMap->at(size);
-	lock.unlock();
+	mutex.unlock_shared();
 
 	for (unsigned int i = 0; i < list->size(); ++i)
 	{
@@ -78,8 +77,7 @@ void MemoryWrapper::pdelete(void* _delete, size_t _size)
 	size_t size = _size;
 #endif
 
-	std::shared_lock<std::shared_timed_mutex> lock(mutex);
-	lock.lock();
+	mutex.lock_shared();
 #if MEMORY_DEBUG// && !_DEBUG
 	if (m_PoolMap->find(size) == m_PoolMap->end())
 	{
@@ -91,7 +89,7 @@ void MemoryWrapper::pdelete(void* _delete, size_t _size)
 #endif
 
 	auto list = &m_PoolMap->at(size);
-	lock.unlock();
+	mutex.unlock_shared();
 
 	for (unsigned int i = 0; i < list->size(); ++i)
 	{
@@ -116,16 +114,14 @@ void MemoryWrapper::CreatePool(unsigned int _items, size_t _size)
 #else
 	size_t size = _size;
 #endif
-	std::unique_lock<std::shared_timed_mutex> lock(mutex);
-	lock.lock();
+	mutex.lock();
 	(*m_PoolMap)[size].push_back(new PoolAllocator(_items, _size)); 
-	lock.unlock();
+	mutex.unlock();
 }
 
 void MemoryWrapper::ClearAllPools()
 {
-	std::unique_lock<std::shared_timed_mutex> lock(mutex);
-	lock.lock();
+	mutex.lock();
 	for (auto it = m_PoolMap->begin(); it != m_PoolMap->end(); ++it)
 	{
 		for (unsigned int i = 0; i < it->second.size(); ++i)
@@ -134,7 +130,7 @@ void MemoryWrapper::ClearAllPools()
 		}
 	}
 	m_PoolMap->clear();
-	lock.unlock();
+	mutex.unlock();
 }
 
 void MemoryWrapper::PrintPoolsByteLevel()
