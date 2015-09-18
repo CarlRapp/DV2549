@@ -136,6 +136,7 @@ void VerifyMTStack(unsigned int _numAllocations, unsigned int _dataTypeSize, uns
 	printf("Number of Threads: %i\n", _numThreads);
 	printf("Buffer Size: %i\n", verifyMTStack_BufferSize);
 	printf("Data Type Size: %i\n", verifyMTStack_DataTypeSize);
+	printf("Alignment: %i\n", _alignment);
 	printf("Number of Allocated Data Types per Thread: %i\n", ((verifyMTStack_BufferSize / verifyMTStack_DataTypeSize) / verifyMTStack_NumThreads));
 	if (errors)
 		printf("Conclusion: Memory IS NOT being allocated perfectly in a multi-threaded environment\n");
@@ -212,6 +213,7 @@ void MeasureSQStack(unsigned int _numAllocations, unsigned int _dataTypeSize, un
 	printf("Results from MeasureSQStack():\n");
 	printf("Buffer Size: %i\n", measureSQStack_BufferSize);
 	printf("Data Type Size: %i\n", measureSQStack_DataTypeSize);
+	printf("Alignment: %i\n", _alignment);
 	printf("Number of Allocated Data Types: %i\n\n", _numAllocations);
 	printf("Statistics:\n");
 	printf("Sequential Stack Allocation Time: %ims\n", stackAllocTime);
@@ -481,6 +483,7 @@ void MeasureMTStack(unsigned int _numAllocations, unsigned int _dataTypeSize, un
 	printf("Number of Threads: %i\n", _numThreads);
 	printf("Buffer Size: %i\n", measureMTStack_BufferSize);
 	printf("Data Type Size: %i\n", measureMTStack_DataTypeSize);
+	printf("Alignment: %i\n", _alignment);
 	printf("Number of Allocated Data Types per Thread: %i\n\n", (_numAllocations / _numThreads));
 	printf("Statistics:\n");
 	printf("Multi-Threaded Stack Allocation Time: %ims\n", measureMTStack_StackAllocationTime);
@@ -497,23 +500,6 @@ void MeasureMTStack(unsigned int _numAllocations, unsigned int _dataTypeSize, un
 }
 #pragma endregion
 
-#pragma endregion
-
-#pragma region Pool
-void VerifyMTPool()
-{
-
-}
-
-void TestSQPool()
-{
-
-}
-
-void TestMTPool()
-{
-
-}
 #pragma endregion
 
 #endif
