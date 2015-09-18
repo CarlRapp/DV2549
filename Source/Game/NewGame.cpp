@@ -96,10 +96,10 @@ int main(int argc, char** argv)
 	//Memory::MemoryWrapper memoryWrapper = Memory::MemoryWrapper::GetInstance();
 
 	
-
+	//MeasureSQPool(48, 4);
 	MeasureSQPool(1048576, 4);
 	MeasureMTPool(1048576, 4, 4);
-	//VerifyMTPool(4096, 4, 4);
+	VerifyMTPool(4096, 4, 4);
 
 	//RunTest();
 	system("pause");
