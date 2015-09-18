@@ -15,6 +15,21 @@ inline static size_t GetPaddedBlockSize(size_t _size)
 
 struct myQueue
 {
+	/*
+	
+	Increase free slots --->
+
+	Memory:
+	[L][x][x][x][x][x][x][x][R][][][][][][][Size]
+	
+	x = free slot
+	R++ on push
+	L++ on top
+	L > Size : L = 0
+	R > Size : R = 0
+
+	*/
+
 	unsigned int* Slots;
 	unsigned int Right = 0;
 	unsigned int Left = 0;

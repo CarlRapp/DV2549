@@ -22,7 +22,7 @@ void* PoolAllocator::Allocate()
 {
 	char* mem = static_cast<char*>(m_memory);
 
-	SDL_LockMutex(m_Mutex);
+	//SDL_LockMutex(m_Mutex);
 #if MEMORY_DEBUG //&& !_DEBUG
 	if (m_memFreeSlots->empty())
 	{
@@ -36,7 +36,7 @@ void* PoolAllocator::Allocate()
 
 	unsigned int memPointer = m_memFreeSlots.top() * m_memSlotSize;
 	//m_memFreeSlots->pop();
-	SDL_UnlockMutex(m_Mutex);
+	//SDL_UnlockMutex(m_Mutex);
 
 	return &mem[memPointer];
 }
@@ -70,25 +70,25 @@ void PoolAllocator::Free(void* deleted)
 
 	diff /= m_memSlotSize;
 
-	SDL_LockMutex(m_Mutex);
+	//SDL_LockMutex(m_Mutex);
 	m_memFreeSlots.push(diff);
-	SDL_UnlockMutex(m_Mutex);
+	//SDL_UnlockMutex(m_Mutex);
 }
 
 bool PoolAllocator::IsEmpty()
 {
-	SDL_LockMutex(m_Mutex);
+	//SDL_LockMutex(m_Mutex);
 	//bool result = m_memFreeSlots.size() == ((m_maxMemory  - MEMORY_ALIGNMENT) / m_memSlotSize);
 	bool result = (m_memFreeSlots.freeSlots() == 0);
-	SDL_UnlockMutex(m_Mutex);
+	//SDL_UnlockMutex(m_Mutex);
 	return result;
 }
 
 bool PoolAllocator::HasFreeSlot()
-{	SDL_LockMutex(m_Mutex);
+{	//SDL_LockMutex(m_Mutex);
 	//bool result = !m_memFreeSlots->empty();
 	bool result = (m_memFreeSlots.freeSlots() > 0);
-	SDL_UnlockMutex(m_Mutex);
+	//SDL_UnlockMutex(m_Mutex);
 	return result;
 }
 
