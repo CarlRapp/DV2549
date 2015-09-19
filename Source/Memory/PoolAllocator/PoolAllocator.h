@@ -76,6 +76,9 @@ private:
 	void* m_memory = nullptr;
 	void* m_maxPointer = nullptr;
 
+	void** m_first = nullptr;
+	void** m_last = nullptr;
+
 	//std::queue<unsigned int>* m_memFreeSlots;
 
 	SDL_mutex* m_Mutex;

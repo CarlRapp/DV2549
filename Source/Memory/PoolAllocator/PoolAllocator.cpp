@@ -20,6 +20,14 @@ PoolAllocator::~PoolAllocator()
 
 void* PoolAllocator::Allocate()
 {
+	//SDL_LockMutex(m_Mutex);
+	void* result = m_first;
+	m_first = static_cast<void**>(*m_first);
+	//SDL_UnlockMutex(m_Mutex);
+	return result;
+
+
+
 	char* mem = static_cast<char*>(m_memory);
 
 	//SDL_LockMutex(m_Mutex);
@@ -35,6 +43,7 @@ void* PoolAllocator::Allocate()
 #endif	
 
 	unsigned int memPointer = m_memFreeSlots.top() * m_memSlotSize;
+
 	//m_memFreeSlots->pop();
 	//SDL_UnlockMutex(m_Mutex);
 
@@ -43,6 +52,14 @@ void* PoolAllocator::Allocate()
 
 void PoolAllocator::Free(void* deleted)
 {
+	//SDL_LockMutex(m_Mutex);
+	*m_last = deleted;
+	m_last = static_cast<void**>(deleted);
+	*m_last = nullptr;
+	//SDL_UnlockMutex(m_Mutex);
+	return;
+
+
 	char* d = static_cast<char*>(deleted);
 	char* m = static_cast<char*>(m_memory);
 
@@ -142,11 +159,20 @@ void PoolAllocator::SetSize(unsigned int _items, size_t _size)
 		printf("OS Pointer OK %p\n", m_origpointer);
 	}
 #endif
-	m_memFreeSlots.alloc(_items);
-	for (unsigned int i = 0; i < _items; i++)
+	//m_memFreeSlots.alloc(_items);
+
+	void** start = static_cast<void**>(m_memory);
+	for (unsigned int i = 0; i < _items - 1; i++)
 	{
-		m_memFreeSlots.push(i);
+		//m_memFreeSlots.push(i);
+		start[i] = &start[i + 1];
+
+		//std::printf("1: %d, 2: %d\n", start[i], &start[i + 1]);
 	}
+	start[_items - 1] = nullptr;
+
+	m_first = start;
+	m_last = &start[_items - 1];
 
 	m_maxPointer = static_cast<char*>(m_origpointer) + m_maxMemory;
 }
