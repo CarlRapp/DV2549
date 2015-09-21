@@ -16,6 +16,7 @@
 
 
 #include "PoolAllocator/PoolAllocator.h"
+#include "StackAllocator/IStackAllocator.h"
 
 
 
@@ -73,6 +74,40 @@ namespace Memory
 		void PrintPoolsByteLevel();
 		void PrintPoolsPoolLevel();
 #endif
+
+
+
+		/*	Stack implementations	*/
+	public:
+		/*
+			Creates the global stack with the selected settings
+		*/
+		void	CreateGlobalStack(size_t _size, size_t _alignment);
+
+		/*
+		Usage:
+			Allocate objects with a lifespan of one frame or less.
+		Note:
+			Stack will get reset after each frame. Data should not be put on the stack if it lives longer than this.
+		*/
+		IStackAllocator*	GetGlobalStack();
+
+		/*
+		Usage:
+			Call this to create a new stack for a custom task. Otherwise use the global
+		Note:
+			This stack will be removed by the memory wrapper!
+		*/
+		IStackAllocator*	CreateStack(size_t _size, size_t _alignment);
+
+		/*
+		Usage:
+			Resets all stacks
+		*/
+		void	ResetStacks();
+
+	private:
+		std::vector<IStackAllocator*>	m_oneFrameStacks;
 	};
 }
 

@@ -1,4 +1,5 @@
 #include "MemoryWrapper.h"
+#include "Memory/StackAllocator/StackAllocator_SingleBuffer.h"
 #include <assert.h>
 
 using namespace Memory;
@@ -183,5 +184,28 @@ void MemoryWrapper::PrintPoolsPoolLevel()
 	}
 
 	printf("\n\n");
+}
+
+void MemoryWrapper::CreateGlobalStack(size_t _size, size_t _alignment)
+{
+	m_oneFrameStacks.push_back(new Memory::StackAllocator_SingleBuffer(_size, _alignment));
+}
+
+IStackAllocator * Memory::MemoryWrapper::GetGlobalStack()
+{
+	return m_oneFrameStacks[0];
+}
+
+IStackAllocator * Memory::MemoryWrapper::CreateStack(size_t _size, size_t _alignment)
+{
+	IStackAllocator* newStack = new Memory::StackAllocator_SingleBuffer(_size, _alignment);
+	m_oneFrameStacks.push_back(newStack);
+	return newStack;
+}
+
+void MemoryWrapper::ResetStacks()
+{
+	for (int n = 0; n < m_oneFrameStacks.size(); ++n)
+		m_oneFrameStacks[n]->FreeTo(0);
 }
 
