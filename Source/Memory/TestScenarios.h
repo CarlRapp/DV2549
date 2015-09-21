@@ -328,9 +328,9 @@ int MeasureMTStack_ThreadDefaultFree(void* _ptr)
 void MeasureMTStack(unsigned int _numAllocations, unsigned int _dataTypeSize, unsigned int _numThreads, unsigned int _alignment)
 {
 	if (_alignment > _dataTypeSize)
-		verifyMTStack_BufferSize = _numAllocations * _alignment;
+		measureMTStack_BufferSize = _numAllocations * _alignment;
 	else
-		verifyMTStack_BufferSize = _numAllocations * _dataTypeSize;
+		measureMTStack_BufferSize = _numAllocations * _dataTypeSize;
 	measureMTStack_DataTypeSize = _dataTypeSize;
 	measureMTStack_NumThreads = _numThreads;
 
