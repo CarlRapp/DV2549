@@ -35,7 +35,6 @@ namespace Memory
 	public:
 		~MemoryWrapper();
 		static MemoryWrapper* GetInstance();
-		void DestoryInstance();
 
 		/*
 			C* a =	PNEW(C, 1, memoryWrapper);

@@ -5,7 +5,7 @@
 using namespace Memory;
 
 
-static MemoryWrapper* m_instance;
+//static MemoryWrapper* m_instance;
 
 #pragma region Constructor/Destructor and GetInstance
 MemoryWrapper::MemoryWrapper()
@@ -22,13 +22,8 @@ MemoryWrapper::~MemoryWrapper()
 
 MemoryWrapper* MemoryWrapper::GetInstance()
 {
-	m_instance = new MemoryWrapper();
+	static MemoryWrapper* m_instance = new MemoryWrapper();
 	return m_instance;
-}
-
-void MemoryWrapper::DestoryInstance()
-{
-	delete m_instance;
 }
 
 #pragma endregion
