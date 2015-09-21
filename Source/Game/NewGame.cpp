@@ -115,7 +115,7 @@ int main(int argc, char** argv)
 
 	//RunTest();
 
-	VerifyMTStack(4096, 4, 4, 4);
+	VerifyMTStack(4096, 4, 4, 128);
 	MeasureSQStack(1048576, 4, 128);
 	MeasureMTStack(1048576, 4, 4, 128);
 

@@ -13,6 +13,7 @@
 #pragma region VerifyMTStack()
 unsigned int verifyMTStack_BufferSize;
 unsigned int verifyMTStack_DataTypeSize;
+unsigned int verifyMTStack_Alignment;
 unsigned int verifyMTStack_NumThreads;
 Memory::StackAllocator_SingleBuffer* verifyMTStack_Buffer;
 std::atomic_bool verifyMTStack_Ready;
@@ -21,7 +22,11 @@ std::vector<size_t>* verifyMTStack_MemoryPointers;
 int VerifyMTStack_Thread(void* _ptr)
 {
 	/* Calculate all settings variables */
-	unsigned int numDataTypesPerThread = (verifyMTStack_BufferSize / verifyMTStack_DataTypeSize) / verifyMTStack_NumThreads;
+	unsigned int numDataTypesPerThread = 0;
+	if (verifyMTStack_Alignment > verifyMTStack_DataTypeSize)
+		numDataTypesPerThread = (verifyMTStack_BufferSize / verifyMTStack_Alignment) / verifyMTStack_NumThreads;
+	else
+		numDataTypesPerThread = (verifyMTStack_BufferSize / verifyMTStack_DataTypeSize) / verifyMTStack_NumThreads;
 	unsigned int id = *static_cast<unsigned int*>(_ptr);
 	verifyMTStack_MemoryPointers[id].resize(numDataTypesPerThread);
 
@@ -45,6 +50,7 @@ void VerifyMTStack(unsigned int _numAllocations, unsigned int _dataTypeSize, uns
 	else
 		verifyMTStack_BufferSize = _numAllocations * _dataTypeSize;
 	verifyMTStack_DataTypeSize = _dataTypeSize;
+	verifyMTStack_Alignment = _alignment;
 	verifyMTStack_NumThreads = _numThreads;
 
 	/* Create a memory buffer */
@@ -232,6 +238,7 @@ void MeasureSQStack(unsigned int _numAllocations, unsigned int _dataTypeSize, un
 #pragma region MeasureMTStack()
 unsigned int measureMTStack_BufferSize;
 unsigned int measureMTStack_DataTypeSize;
+unsigned int measureMTStack_Alignment;
 unsigned int measureMTStack_NumThreads;
 Memory::StackAllocator_SingleBuffer* measureMTStack_Buffer;
 std::atomic_bool measureMTStack_Ready;
@@ -248,7 +255,11 @@ Uint32 measureMTStack_DefaultFreeTime;
 int MeasureMTStack_ThreadStackAlloc(void* _ptr)
 {
 	const unsigned int id = *static_cast<unsigned int*>(_ptr);
-	const unsigned int numAllocations = (measureMTStack_BufferSize / measureMTStack_DataTypeSize) / measureMTStack_NumThreads;
+	unsigned int numAllocations = 0;
+	if (measureMTStack_Alignment > measureMTStack_DataTypeSize)
+		numAllocations = (measureMTStack_BufferSize / measureMTStack_Alignment) / measureMTStack_NumThreads;
+	else
+		numAllocations = (measureMTStack_BufferSize / measureMTStack_DataTypeSize) / measureMTStack_NumThreads;
 	const unsigned int startIndex = (id * numAllocations);
 
 	while (!measureMTStack_Ready) { }
@@ -274,7 +285,11 @@ int MeasureMTStack_ThreadStackAlloc(void* _ptr)
 int MeasureMTStack_ThreadDefaultAlloc(void* _ptr)
 {
 	const unsigned int id = *static_cast<unsigned int*>(_ptr);
-	const unsigned int numAllocations = (measureMTStack_BufferSize / measureMTStack_DataTypeSize) / measureMTStack_NumThreads;
+	unsigned int numAllocations = 0;
+	if (measureMTStack_Alignment > measureMTStack_DataTypeSize)
+		numAllocations = (measureMTStack_BufferSize / measureMTStack_Alignment) / measureMTStack_NumThreads;
+	else
+		numAllocations = (measureMTStack_BufferSize / measureMTStack_DataTypeSize) / measureMTStack_NumThreads;
 	const unsigned int startIndex = (id * numAllocations);
 
 	while (!measureMTStack_Ready) {}
@@ -301,7 +316,11 @@ int MeasureMTStack_ThreadDefaultAlloc(void* _ptr)
 int MeasureMTStack_ThreadDefaultFree(void* _ptr)
 {
 	const unsigned int id = *static_cast<unsigned int*>(_ptr);
-	const unsigned int numFrees = (measureMTStack_BufferSize / measureMTStack_DataTypeSize) / measureMTStack_NumThreads;
+	unsigned int numFrees = 0;
+	if (measureMTStack_Alignment > measureMTStack_DataTypeSize)
+		numFrees = (measureMTStack_BufferSize / measureMTStack_Alignment) / measureMTStack_NumThreads;
+	else
+		numFrees = (measureMTStack_BufferSize / measureMTStack_DataTypeSize) / measureMTStack_NumThreads;
 	const unsigned int startIndex = (id * numFrees);
 
 	while (!measureMTStack_Ready) {}
@@ -332,6 +351,7 @@ void MeasureMTStack(unsigned int _numAllocations, unsigned int _dataTypeSize, un
 	else
 		measureMTStack_BufferSize = _numAllocations * _dataTypeSize;
 	measureMTStack_DataTypeSize = _dataTypeSize;
+	measureMTStack_Alignment = _alignment;
 	measureMTStack_NumThreads = _numThreads;
 
 	/* Create a memory buffer */
