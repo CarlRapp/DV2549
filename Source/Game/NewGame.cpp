@@ -4,6 +4,7 @@
 #include "Graphics/GraphicsWrapper.h"
 #include "Memory/MemoryWrapper.h"
 #include "Memory/StackAllocator/StackAllocator_SingleBuffer.h"
+#include "Memory/StackAllocator/StackAllocator_DoubleEnded.h"
 #include "Memory/TestScenarios.h"
 #include "Memory/PoolTest.h"
 #ifdef WIN32
@@ -90,6 +91,16 @@ static int TestThread(void* dataPtr)
 	return 0;
 }
 
+static int TestDoubleEnded(void* ptr)
+{
+	SDL_threadID tId = SDL_ThreadID();
+	Memory::StackAllocator_SingleBuffer* _stackBuffer = (Memory::StackAllocator_SingleBuffer*)ptr;
+	SDL_Delay(std::rand() % 3);
+	_stackBuffer->Push<int>(tId);
+
+
+	return 0;
+}
 
 int main(int argc, char** argv)
 {
@@ -97,10 +108,56 @@ int main(int argc, char** argv)
 
 	//VerifyMTPool(4096, 4, 4);
 
-	MeasureSQPool(1048576, 4);
-	MeasureMTPool(1048576, 4, 4);
+	//MeasureSQPool(1048576, 4);
+	//MeasureMTPool(1048576, 4, 4);
 	
 	//RunTest();
+
+	VerifyMTStack(4096, 4, 4, 4);
+	MeasureSQStack(1048576, 4, 128);
+	MeasureMTStack(1048576, 4, 4, 128);
+
+	/*int stackSize = 1024;
+	int alignment = 4;
+	Memory::StackAllocator_DoubleEnded* stack = new Memory::StackAllocator_DoubleEnded(stackSize, alignment);
+	int* start = (int*)stack->Reserve(0);
+	for (int n = 0; n < (int)stackSize / alignment; ++n)
+		start[n] = 0;
+
+
+	printf("Before:\n");
+	for (int n = 0; n < (int)stackSize / alignment; ++n)
+	{
+		printf("%i ", start[n]);
+
+		if ((n+1) % 10 == 0)
+			printf("\n");
+	}
+	printf("\n");
+
+	int nThreads = 100;
+	std::vector<SDL_Thread*> threads;
+	for (int n = 0; n < nThreads; ++n)
+	{
+		threads.push_back(SDL_CreateThread(TestDoubleEnded, "THREAD", stack));
+	}
+
+	for (int n = 0; n < nThreads; ++n)
+	{
+		int a;
+		SDL_WaitThread(threads[n], &a);
+	}
+
+	printf("After:\n");
+	for (int n = 0; n < (int)stackSize / alignment; ++n)
+	{
+		printf("%i ", start[n]);
+
+		if ((n + 1) % 10 == 0)
+			printf("\n");
+	}
+	printf("\n");*/
+
 	system("pause");
 
 	/*
@@ -110,9 +167,7 @@ int main(int argc, char** argv)
 
 	//VerifyMTStack(4096, 4, 4);
 	//MeasureSQStack(1048576, 4);
-	VerifyMTStack(4096, 4, 4);
-	MeasureSQStack(1048576, 4);
-	MeasureMTStack(1048576, 4, 4);
+
 
 	
 

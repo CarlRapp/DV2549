@@ -11,7 +11,7 @@ namespace Memory
 	class DECLSPEC StackAllocator_SingleBuffer : public IStackAllocator
 	{
 	public:
-		StackAllocator_SingleBuffer(size_t _stackSizeBytes, size_t _stackAlignment = 64, bool _growIfFull = false, bool _allocateIfFull = false) throw();
+		StackAllocator_SingleBuffer(size_t _stackSizeBytes, size_t _stackAlignment = 64, bool _growIfFull = false, bool _allocateIfFull = false);
 		~StackAllocator_SingleBuffer();
 
 		bool HasPointer(void* _inPtr);
