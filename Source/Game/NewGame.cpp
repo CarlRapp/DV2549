@@ -59,12 +59,58 @@ static int TestDoubleEnded(void* ptr)
 	return 0;
 }
 
+void TempTests()
+{
+	int stackSize = 1024;
+	int alignment = 4;
+	//Memory::StackAllocator_DoubleEnded* stack = new Memory::StackAllocator_DoubleEnded(stackSize, alignment);
+	Memory::MemoryWrapper::GetInstance()->CreateGlobalStack(stackSize, alignment);
+	Memory::MemoryWrapper::GetInstance()->CreateStack(stackSize, alignment);
+	Memory::IStackAllocator* stack = Memory::MemoryWrapper::GetInstance()->GetGlobalStack();// (stackSize, alignment);
+	int* start = (int*)stack->Reserve(0);
+	for (int n = 0; n < (int)stackSize / alignment; ++n)
+		start[n] = 0;
+
+
+	printf("Before:\n");
+	for (int n = 0; n < (int)stackSize / alignment; ++n)
+		if ((n + 1) % 10 == 0)
+			printf("\n");
+	printf("\n");
+
+	int nThreads = 100;
+	std::vector<SDL_Thread*> threads;
+	for (int n = 0; n < nThreads; ++n)
+	{
+		threads.push_back(SDL_CreateThread(TestDoubleEnded, "THREAD", stack));
+	}
+
+	for (int n = 0; n < nThreads; ++n)
+	{
+		int a;
+		SDL_WaitThread(threads[n], &a);
+	}
+
+	printf("After:\n");
+	for (int n = 0; n < (int)stackSize / alignment; ++n)
+	{
+		printf("%i ", start[n]);
+
+		if ((n + 1) % 10 == 0)
+			printf("\n");
+	}
+	printf("\n");
+
+	system("pause");
+}
+
 int main(int argc, char** argv)
 {
-	//MeasureSQPool(48, 4);
-	//MeasureMTPool(1048576, 4, 4);
-	//MeasureMTPool(1048576, 4, 4);
-	//VerifyMTPool(4096, 4, 4);
+	//TEST STUFF
+	{
+		TempTests();
+	}
+
 	Graphics::GraphicsWrapper graphics = Graphics::GraphicsWrapper::GetInstance();
 
 	//SETTINGS
@@ -168,12 +214,5 @@ int main(int argc, char** argv)
 		graphics.Render();
 	}
 	
-//	delete (&Graphics::GraphicsWrapper::GetInstance());
-
-// #ifdef WIN32
-// #ifdef _DEBUG
-// 	_CrtDumpMemoryLeaks();
-// #endif
-// #endif
 	return 0;
 }
