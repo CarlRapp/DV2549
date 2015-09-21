@@ -4,7 +4,7 @@
 
 PoolAllocator::PoolAllocator(unsigned int _items, size_t _size)
 {
-	m_memFreeSlots = new std::queue<unsigned int>();
+	//m_memFreeSlots = new std::queue<unsigned int>();
 
 	SetSize(_items, _size);
 	m_Mutex = SDL_CreateMutex();
@@ -14,14 +14,15 @@ PoolAllocator::~PoolAllocator()
 {
 	free(m_origpointer);
 
-	delete m_memFreeSlots;
+	//delete m_memFreeSlots;
+	free(m_memFreeSlots.Slots);
 }
 
 void* PoolAllocator::Allocate()
 {
 	char* mem = static_cast<char*>(m_memory);
 
-	SDL_LockMutex(m_Mutex);
+	//SDL_LockMutex(m_Mutex);
 #if MEMORY_DEBUG //&& !_DEBUG
 	if (m_memFreeSlots->empty())
 	{
@@ -33,9 +34,9 @@ void* PoolAllocator::Allocate()
 	assert(!m_memFreeSlots->empty());
 #endif	
 
-	unsigned int memPointer = m_memFreeSlots->front() * m_memSlotSize;
-	m_memFreeSlots->pop();
-	SDL_UnlockMutex(m_Mutex);
+	unsigned int memPointer = m_memFreeSlots.top() * m_memSlotSize;
+	//m_memFreeSlots->pop();
+	//SDL_UnlockMutex(m_Mutex);
 
 	return &mem[memPointer];
 }
@@ -69,23 +70,25 @@ void PoolAllocator::Free(void* deleted)
 
 	diff /= m_memSlotSize;
 
-	SDL_LockMutex(m_Mutex);
-	m_memFreeSlots->push(diff);
-	SDL_UnlockMutex(m_Mutex);
+	//SDL_LockMutex(m_Mutex);
+	m_memFreeSlots.push(diff);
+	//SDL_UnlockMutex(m_Mutex);
 }
 
 bool PoolAllocator::IsEmpty()
 {
-	SDL_LockMutex(m_Mutex);
-	bool result = m_memFreeSlots->size() == ((m_maxMemory  - MEMORY_ALIGNMENT) / m_memSlotSize);
-	SDL_UnlockMutex(m_Mutex);
+	//SDL_LockMutex(m_Mutex);
+	//bool result = m_memFreeSlots.size() == ((m_maxMemory  - MEMORY_ALIGNMENT) / m_memSlotSize);
+	bool result = (m_memFreeSlots.freeSlots() == 0);
+	//SDL_UnlockMutex(m_Mutex);
 	return result;
 }
 
 bool PoolAllocator::HasFreeSlot()
-{	SDL_LockMutex(m_Mutex);
-	bool result = !m_memFreeSlots->empty();
-	SDL_UnlockMutex(m_Mutex);
+{	//SDL_LockMutex(m_Mutex);
+	//bool result = !m_memFreeSlots->empty();
+	bool result = (m_memFreeSlots.freeSlots() > 0);
+	//SDL_UnlockMutex(m_Mutex);
 	return result;
 }
 
@@ -98,7 +101,7 @@ void PoolAllocator::SetSize(unsigned int _items, size_t _size)
 {
 
 #ifdef MEMORY_PADDING
-	m_memSlotSize = GetPaddedBlockSize(_size);
+	m_memSlotSize = (unsigned int)GetPaddedBlockSize(_size);
 #else
 	m_memSlotSize = _size;
 #endif
@@ -139,10 +142,10 @@ void PoolAllocator::SetSize(unsigned int _items, size_t _size)
 		printf("OS Pointer OK %p\n", m_origpointer);
 	}
 #endif
-
+	m_memFreeSlots.alloc(_items);
 	for (unsigned int i = 0; i < _items; i++)
 	{
-		m_memFreeSlots->push(i);
+		m_memFreeSlots.push(i);
 	}
 
 	m_maxPointer = static_cast<char*>(m_origpointer) + m_maxMemory;

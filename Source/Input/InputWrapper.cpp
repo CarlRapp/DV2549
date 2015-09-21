@@ -13,7 +13,7 @@ InputWrapper::InputWrapper()
 
 	m_keyboard = new Keyboard();
 	m_mouse = new Mouse();
-	m_touch = new Touch();
+	//m_touch = new Touch();
 }
 InputWrapper::~InputWrapper()
 {
@@ -27,11 +27,11 @@ InputWrapper::~InputWrapper()
 		delete m_mouse;
 		m_mouse = 0;
 	}
-	if (m_touch)
+	/*if (m_touch)
 	{
 		delete m_touch;
 		m_touch = 0;
-	}
+	}*/
 	m_instance = 0;
 }
 
@@ -48,7 +48,7 @@ void InputWrapper::Update()
 {
 	m_keyboard->Update();
 	m_mouse->Update();
-	m_touch->Update();
+	//m_touch->Update();
 }
 #pragma endregion
 
@@ -61,10 +61,10 @@ Mouse* InputWrapper::GetMouse()
 {
 	return m_mouse;
 }
-Touch* InputWrapper::GetTouch()
-{
-	return m_touch;
-}
+//Touch* InputWrapper::GetTouch()
+//{
+//	return m_touch;
+//}
 #pragma endregion
 
 #pragma region Poll SDL Event
@@ -91,7 +91,7 @@ void InputWrapper::PollEvent(SDL_Event& _e)
 	case SDL_FINGERDOWN:
 	case SDL_FINGERUP:
 	case SDL_FINGERMOTION:
-		m_touch->PollEvent(_e);
+		//m_touch->PollEvent(_e);
 		break;
 
 		/*	CONTROLLER	*/

@@ -9,6 +9,6 @@
 
 #define MEMORY_ALIGNED 1
 #define MEMORY_PADDING 1
-#define MEMORY_DEBUG 1
+#define MEMORY_DEBUG 0
 
 #endif

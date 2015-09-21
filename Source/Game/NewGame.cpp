@@ -108,9 +108,11 @@ int main(int argc, char** argv)
 
 	//VerifyMTPool(4096, 4, 4);
 
-	//MeasureSQPool(1048576, 4);
+	//MeasureSQPool(48, 4);
 	//MeasureMTPool(1048576, 4, 4);
-	
+	//MeasureMTPool(1048576, 4, 4);
+	//VerifyMTPool(4096, 4, 4);
+
 	//RunTest();
 
 	VerifyMTStack(4096, 4, 4, 4);

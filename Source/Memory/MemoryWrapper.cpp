@@ -9,12 +9,14 @@ static MemoryWrapper* m_instance;
 #pragma region Constructor/Destructor and GetInstance
 MemoryWrapper::MemoryWrapper()
 {
-	m_PoolMap = new std::map<size_t, std::vector<PoolAllocator*>>();
+	m_poolMap = new std::map<size_t, std::vector<PoolAllocator*>>();
+	m_mutex = new std::shared_timed_mutex;
 }
 MemoryWrapper::~MemoryWrapper()
 {
 	ClearAllPools();
-	delete m_PoolMap;
+	delete m_poolMap;
+	delete m_mutex;
 }
 
 MemoryWrapper* MemoryWrapper::GetInstance()
@@ -39,19 +41,19 @@ void* MemoryWrapper::pnew(size_t _size)
 	size_t size = _size;
 #endif
 
-	mutex.lock_shared();
+	m_mutex->lock_shared();
 #if MEMORY_DEBUG //&& !_DEBUG
-	if (m_PoolMap->find(size) == m_PoolMap->end())
+	if (m_poolMap->find(size) == m_poolMap->end())
 	{
-		printf("No pool created for size %d\n", _size);
+		printf("No pool created for size %d\n", (int)_size);
 		return nullptr;
 	}
 //#elif //_DEBUG
-	assert(m_PoolMap->find(size) != m_PoolMap->end());
+	assert(m_poolMap->find(size) != m_poolMap->end());
 #endif
 
-	auto list = &m_PoolMap->at(size);
-	mutex.unlock_shared();
+	auto list = &m_poolMap->at(size);
+	m_mutex->unlock_shared();
 
 	for (unsigned int i = 0; i < list->size(); ++i)
 	{
@@ -62,7 +64,7 @@ void* MemoryWrapper::pnew(size_t _size)
 	}
 
 #if MEMORY_DEBUG //&& !_DEBUG
-	printf("All pools are full for size %d\n", _size);
+	printf("All pools are full for size %d\n", (int)_size);
 //#elif _DEBUG
 	assert(0);
 #endif
@@ -77,19 +79,19 @@ void MemoryWrapper::pdelete(void* _delete, size_t _size)
 	size_t size = _size;
 #endif
 
-	mutex.lock_shared();
+	m_mutex->lock_shared();
 #if MEMORY_DEBUG// && !_DEBUG
-	if (m_PoolMap->find(size) == m_PoolMap->end())
+	if (m_poolMap->find(size) == m_poolMap->end())
 	{
-		printf("No pool created for size %d\n", _size);
+		printf("No pool created for size %d\n", (int)_size);
 		return;
 	}
 //#elif _DEBUG
-	assert(m_PoolMap->find(size) != m_PoolMap->end());
+	assert(m_poolMap->find(size) != m_poolMap->end());
 #endif
 
-	auto list = &m_PoolMap->at(size);
-	mutex.unlock_shared();
+	auto list = &m_poolMap->at(size);
+	m_mutex->unlock_shared();
 
 	for (unsigned int i = 0; i < list->size(); ++i)
 	{
@@ -114,30 +116,30 @@ void MemoryWrapper::CreatePool(unsigned int _items, size_t _size)
 #else
 	size_t size = _size;
 #endif
-	mutex.lock();
-	(*m_PoolMap)[size].push_back(new PoolAllocator(_items, _size)); 
-	mutex.unlock();
+	m_mutex->lock();
+	(*m_poolMap)[size].push_back(new PoolAllocator(_items, _size)); 
+	m_mutex->unlock();
 }
 
 void MemoryWrapper::ClearAllPools()
 {
-	mutex.lock();
-	for (auto it = m_PoolMap->begin(); it != m_PoolMap->end(); ++it)
+	m_mutex->lock();
+	for (auto it = m_poolMap->begin(); it != m_poolMap->end(); ++it)
 	{
 		for (unsigned int i = 0; i < it->second.size(); ++i)
 		{
 			delete it->second[i];
 		}
 	}
-	m_PoolMap->clear();
-	mutex.unlock();
+	m_poolMap->clear();
+	m_mutex->unlock();
 }
 
 void MemoryWrapper::PrintPoolsByteLevel()
 {
-	for (auto it = m_PoolMap->begin(); it != m_PoolMap->end(); ++it)
+	for (auto it = m_poolMap->begin(); it != m_poolMap->end(); ++it)
 	{
-		printf("\nSIZE %d", it->first);
+		printf("\nSIZE %d", (int)it->first);
 
 		for (unsigned int i = 0; i < it->second.size(); ++i)
 		{
@@ -168,15 +170,15 @@ void MemoryWrapper::PrintPoolsPoolLevel()
 {
 	printf("\n_Pool Memory Print_\n");
 
-	for (auto it = m_PoolMap->begin(); it != m_PoolMap->end(); ++it)
+	for (auto it = m_poolMap->begin(); it != m_poolMap->end(); ++it)
 	{
-		printf("\nSIZE %d", it->first);
+		printf("\nSIZE %d", (int)it->first);
 
 		for (unsigned int i = 0; i < it->second.size(); ++i)
 		{
 			printf("\n	POOL %d\n", i);
 
-			printf("	Free slots: %d/%d", it->second[i]->GetFreeSlots(), it->second[i]->GetMaxSlots());
+			printf("	Free slots: %d/%d", (int)it->second[i]->GetFreeSlots(), (int)it->second[i]->GetMaxSlots());
 		}
 	}
 
