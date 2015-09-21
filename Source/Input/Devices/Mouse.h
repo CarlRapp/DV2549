@@ -35,6 +35,9 @@ namespace Input
 			else
 				SDL_ShowCursor(SDL_ENABLE);
 		}
+
+		void SetCenter(int _x, int _y) { m_cX = _x; m_cY = _y; }
+
 	private:
 		static const int m_numberOfButtons = 6;
 		bool m_thisState[m_numberOfButtons];
@@ -45,6 +48,7 @@ namespace Input
 		int m_x, m_y;
 		int m_dx, m_dy;
 		int m_xScroll, m_yScroll;
+		int m_cX, m_cY;
 	};
 }
 

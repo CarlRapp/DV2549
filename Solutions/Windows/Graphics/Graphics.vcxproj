@@ -19,9 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\Source\Graphics\GLCamera.h" />
+    <ClInclude Include="..\..\..\Source\Graphics\GLShaderHandler.h" />
     <ClInclude Include="..\..\..\Source\Graphics\GraphicsWrapper.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\Source\Graphics\GLCamera.cpp" />
+    <ClCompile Include="..\..\..\Source\Graphics\GLShaderHandler.cpp" />
     <ClCompile Include="..\..\..\Source\Graphics\GraphicsWrapper.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
