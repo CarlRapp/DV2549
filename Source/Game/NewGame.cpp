@@ -115,13 +115,18 @@ int main(int argc, char** argv)
 
 	//RunTest();
 
-	VerifyMTStack(4096, 4, 4, 128);
-	MeasureSQStack(1048576, 4, 128);
-	MeasureMTStack(1048576, 4, 4, 128);
+	//VerifyMTStack(4096, 4, 4, 128);
+	//MeasureSQStack(1048576, 4, 128);
+	//MeasureMTStack(1048576, 4, 4, 128);
 
-	/*int stackSize = 1024;
+	
+
+	int stackSize = 1024;
 	int alignment = 4;
-	Memory::StackAllocator_DoubleEnded* stack = new Memory::StackAllocator_DoubleEnded(stackSize, alignment);
+	//Memory::StackAllocator_DoubleEnded* stack = new Memory::StackAllocator_DoubleEnded(stackSize, alignment);
+	Memory::MemoryWrapper::GetInstance()->CreateGlobalStack(stackSize, alignment);
+	Memory::MemoryWrapper::GetInstance()->CreateStack(stackSize, alignment);
+	Memory::IStackAllocator* stack = Memory::MemoryWrapper::GetInstance()->GetGlobalStack();// (stackSize, alignment);
 	int* start = (int*)stack->Reserve(0);
 	for (int n = 0; n < (int)stackSize / alignment; ++n)
 		start[n] = 0;
@@ -158,7 +163,7 @@ int main(int argc, char** argv)
 		if ((n + 1) % 10 == 0)
 			printf("\n");
 	}
-	printf("\n");*/
+	printf("\n");
 
 	system("pause");
 
