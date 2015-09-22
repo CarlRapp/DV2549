@@ -24,6 +24,9 @@
     <ClCompile Include="..\..\..\Source\Memory\StackAllocator\StackAllocator_DoubleEnded.cpp">
       <Filter>Source\Stack Allocator</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\Source\Memory\PoolAllocator\PoolManager.cpp">
+      <Filter>Source\Pool Allocator</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Source\Memory\MemoryWrapper.h">
@@ -49,6 +52,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\Source\Memory\StackAllocator\StackAllocator_DoubleEnded.h">
       <Filter>Source\Stack Allocator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Memory\PoolAllocator\PoolManager.h">
+      <Filter>Source\Pool Allocator</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

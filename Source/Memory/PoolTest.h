@@ -225,7 +225,7 @@ void MeasureSQPool(unsigned int _numAllocations, unsigned int _dataTypeSize)
 unsigned int measureMTPool_BufferSize;
 unsigned int measureMTPool_DataTypeSize;
 unsigned int measureMTPool_NumThreads;
-PoolAllocator* measureMTPool_Buffer;
+std::vector<PoolAllocator*> measureMTPool_Buffers;
 std::atomic_bool measureMTPool_Ready;
 std::atomic_uint measureMTPool_FinishedPoolThreads;
 std::atomic_uint measureMTPool_FinishedDefaultThreads;
@@ -240,6 +240,7 @@ Uint32 measureMTPool_DefaultFreeTime;
 int measureMTPool_ThreadPoolAlloc(void* _ptr)
 {
 	const unsigned int id = *static_cast<unsigned int*>(_ptr);
+	PoolAllocator* measureMTPool_Buffer = measureMTPool_Buffers[id];
 	const unsigned int numAllocations = (measureMTPool_BufferSize / measureMTPool_DataTypeSize) / measureMTPool_NumThreads;
 	const unsigned int startIndex = (id * numAllocations);
 
@@ -266,6 +267,7 @@ int measureMTPool_ThreadPoolAlloc(void* _ptr)
 int measureMTPool_ThreadPoolFree(void* _ptr)
 {
 	const unsigned int id = *static_cast<unsigned int*>(_ptr);
+	PoolAllocator* measureMTPool_Buffer = measureMTPool_Buffers[id];
 	const unsigned int numFrees = (measureMTPool_BufferSize / measureMTPool_DataTypeSize) / measureMTPool_NumThreads;
 	const unsigned int startIndex = (id * numFrees);
 
@@ -349,15 +351,17 @@ void MeasureMTPool(unsigned int _numAllocations, unsigned int _dataTypeSize, uns
 	measureMTPool_DataTypeSize = _dataTypeSize;
 	measureMTPool_NumThreads = _numThreads;
 
-	/* Create a memory buffer */
-	measureMTPool_Buffer = 0;
-	try
+	/* Create memory buffers */
+	for (unsigned int i = 0; i < _numThreads; ++i)
 	{
-		measureMTPool_Buffer = new PoolAllocator(_numAllocations, _dataTypeSize);
-	}
-	catch (std::string e)
-	{
-		std::printf("Following error: %s\n", e.c_str());
+		try
+		{
+			measureMTPool_Buffers.push_back(new PoolAllocator(_numAllocations / _numThreads, _dataTypeSize));
+		}
+		catch (std::string e)
+		{
+			std::printf("Following error: %s\n", e.c_str());
+		}
 	}
 
 	/* Initialize two arrays of pointers, used for storing allocations */
@@ -543,7 +547,8 @@ void MeasureMTPool(unsigned int _numAllocations, unsigned int _dataTypeSize, uns
 	delete[] threads;
 	delete[] measureMTPool_PoolPointers;
 	delete[] measureMTPool_DefaultAllocatorPointers;
-	delete measureMTPool_Buffer;
+	for (int i = 0; i < measureMTPool_Buffers.size(); ++i)
+		delete measureMTPool_Buffers[i];
 }
 #pragma endregion
 

@@ -91,7 +91,7 @@ public:
 	void* Allocate();
 	void Free(void*);
 
-	bool HasFreeSlot();
+	inline bool HasFreeSlot();
 
 	inline bool IsInRange(void*);
 	
