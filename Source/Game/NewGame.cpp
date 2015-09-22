@@ -130,7 +130,7 @@ int main(int argc, char** argv)
 		//MeasureMTStack(4194304, 4, 4, 512);
 		//MeasureMTStack(4194304, 4, 4, 1024);
 
-		/* Stack Multi-Threaded Test */
+		/* Stack Multi-Threading Test */
 		//MeasureMTStack(4194304, 4, 1, 4);
 		//MeasureMTStack(4194304, 4, 2, 4);
 		//MeasureMTStack(4194304, 4, 3, 4);
@@ -138,9 +138,15 @@ int main(int argc, char** argv)
 		//MeasureMTStack(4194304, 4, 8, 4);
 
 		/* Pool Alignment Test (Change alignment in MemorySettings.h) */
-		MeasureSQPool(4194304, 4);
-		MeasureMTPool(4194304, 4, 4);
+		//MeasureSQPool(4194304, 4);
+		//MeasureMTPool(4194304, 4, 4);
 
+		/* Pool Multi-Threading Test */
+		//MeasureMTPool(4194304, 4, 1);
+		//MeasureMTPool(4194304, 4, 2);
+		//MeasureMTPool(4194304, 4, 3);
+		//MeasureMTPool(4194304, 4, 4);
+		//MeasureMTPool(4194304, 4, 8);
 	}
 
 	Graphics::GraphicsWrapper graphics = Graphics::GraphicsWrapper::GetInstance();
