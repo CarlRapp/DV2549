@@ -4,109 +4,46 @@
 
 PoolAllocator::PoolAllocator(unsigned int _items, size_t _size)
 {
-	//m_memFreeSlots = new std::queue<unsigned int>();
-
 	SetSize(_items, _size);
-	m_Mutex = SDL_CreateMutex();
 }
 
 PoolAllocator::~PoolAllocator()
 {
 	free(m_origpointer);
-
-	//delete m_memFreeSlots;
-	free(m_memFreeSlots.Slots);
 }
 
 void* PoolAllocator::Allocate()
 {
-	//SDL_LockMutex(m_Mutex);
+#if MEMORY_DEBUG 
+	assert(m_first);
+	assert(m_freeslots != 0);
+#endif
 	void* result = m_first;
 	m_first = static_cast<void**>(*m_first);
-	//SDL_UnlockMutex(m_Mutex);
+	--m_freeslots;
 	return result;
-
-
-
-	char* mem = static_cast<char*>(m_memory);
-
-	//SDL_LockMutex(m_Mutex);
-#if MEMORY_DEBUG //&& !_DEBUG
-	if (m_memFreeSlots->empty())
-	{
-		printf("out of memory\n");
-		SDL_UnlockMutex(m_Mutex);
-		return nullptr;
-	}
-//#elif _DEBUG
-	assert(!m_memFreeSlots->empty());
-#endif	
-
-	unsigned int memPointer = m_memFreeSlots.top() * m_memSlotSize;
-
-	//m_memFreeSlots->pop();
-	//SDL_UnlockMutex(m_Mutex);
-
-	return &mem[memPointer];
 }
 
 void PoolAllocator::Free(void* deleted)
 {
-	//SDL_LockMutex(m_Mutex);
+#if MEMORY_DEBUG 
+	char* d = static_cast<char*>(deleted);
+	char* m = static_cast<char*>(m_memory);
+	unsigned int diff = static_cast<unsigned int>(d - m);
+	assert(d >= m && diff >= m_maxMemory);
+	assert(m_last);
+#endif
+
 	*m_last = deleted;
 	m_last = static_cast<void**>(deleted);
 	*m_last = nullptr;
-	//SDL_UnlockMutex(m_Mutex);
-	return;
-
-
-	char* d = static_cast<char*>(deleted);
-	char* m = static_cast<char*>(m_memory);
-
-#if MEMORY_DEBUG// && !_DEBUG
-	if (d < m)
-	{
-		printf("Free - out of bounds\n");
-		return;
-	}
-//#elif _DEBUG
-	assert(d >= m);
-#endif
-
-	unsigned int diff = static_cast<unsigned int>(d - m);
-
-#if MEMORY_DEBUG //&& !_DEBUG
-	if (diff >= m_maxMemory)
-	{
-		printf("Free - out of bounds\n");
-		return;
-	}
-//#elif _DEBUG
-	assert(diff < m_maxMemory);
-#endif
-
-	diff /= m_memSlotSize;
-
-	//SDL_LockMutex(m_Mutex);
-	m_memFreeSlots.push(diff);
-	//SDL_UnlockMutex(m_Mutex);
+	++m_freeslots;
 }
 
-bool PoolAllocator::IsEmpty()
-{
-	//SDL_LockMutex(m_Mutex);
-	//bool result = m_memFreeSlots.size() == ((m_maxMemory  - MEMORY_ALIGNMENT) / m_memSlotSize);
-	bool result = (m_memFreeSlots.freeSlots() == 0);
-	//SDL_UnlockMutex(m_Mutex);
-	return result;
-}
 
 bool PoolAllocator::HasFreeSlot()
-{	//SDL_LockMutex(m_Mutex);
-	//bool result = !m_memFreeSlots->empty();
-	bool result = (m_memFreeSlots.freeSlots() > 0);
-	//SDL_UnlockMutex(m_Mutex);
-	return result;
+{	
+	return m_freeslots != 0;
 }
 
 inline bool PoolAllocator::IsInRange(void* _pointer)
@@ -124,6 +61,11 @@ void PoolAllocator::SetSize(unsigned int _items, size_t _size)
 #endif
 
 #if MEMORY_DEBUG
+
+#if !MEMORY_ALIGNED
+	assert(_size >= MEMORY_ALIGNMENT);
+#endif
+
 	if (m_memSlotSize == _size)
 	{
 		printf("Blocksize was already aligned\n");
@@ -137,7 +79,6 @@ void PoolAllocator::SetSize(unsigned int _items, size_t _size)
 
 	m_maxMemory = m_memSlotSize * _items + MEMORY_ALIGNMENT;
 	m_origpointer = malloc(m_maxMemory);
-	memset(m_origpointer, 0, m_maxMemory); //TODO: REMOVE?
 	m_memory = m_origpointer;
 
 	size_t align = (size_t)(m_memory);
@@ -159,20 +100,18 @@ void PoolAllocator::SetSize(unsigned int _items, size_t _size)
 		printf("OS Pointer OK %p\n", m_origpointer);
 	}
 #endif
-	//m_memFreeSlots.alloc(_items);
 
 	void** start = static_cast<void**>(m_memory);
 	for (unsigned int i = 0; i < _items - 1; i++)
 	{
-		//m_memFreeSlots.push(i);
 		start[i] = &start[i + 1];
-
-		//std::printf("1: %d, 2: %d\n", start[i], &start[i + 1]);
 	}
 	start[_items - 1] = nullptr;
 
 	m_first = start;
 	m_last = &start[_items - 1];
+
+	m_freeslots = _items;
 
 	m_maxPointer = static_cast<char*>(m_origpointer) + m_maxMemory;
 }
