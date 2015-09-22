@@ -109,6 +109,38 @@ int main(int argc, char** argv)
 	//TEST STUFF
 	{
 		TempTests();
+
+		/* Stack Alignment Test */
+		//MeasureSQStack(4194304, 4, 4);
+		//MeasureSQStack(4194304, 4, 8);
+		//MeasureSQStack(4194304, 4, 16);
+		//MeasureSQStack(4194304, 4, 32);
+		//MeasureSQStack(4194304, 4, 64);
+		//MeasureSQStack(4194304, 4, 128);
+		//MeasureSQStack(4194304, 4, 256);
+		//MeasureSQStack(4194304, 4, 512);
+		//MeasureSQStack(4194304, 4, 1024);
+		//MeasureMTStack(4194304, 4, 4, 4);
+		//MeasureMTStack(4194304, 4, 4, 8);
+		//MeasureMTStack(4194304, 4, 4, 16);
+		//MeasureMTStack(4194304, 4, 4, 32);
+		//MeasureMTStack(4194304, 4, 4, 64);
+		//MeasureMTStack(4194304, 4, 4, 128);
+		//MeasureMTStack(4194304, 4, 4, 256);
+		//MeasureMTStack(4194304, 4, 4, 512);
+		//MeasureMTStack(4194304, 4, 4, 1024);
+
+		/* Stack Multi-Threaded Test */
+		//MeasureMTStack(4194304, 4, 1, 4);
+		//MeasureMTStack(4194304, 4, 2, 4);
+		//MeasureMTStack(4194304, 4, 3, 4);
+		//MeasureMTStack(4194304, 4, 4, 4);
+		//MeasureMTStack(4194304, 4, 8, 4);
+
+		/* Pool Alignment Test (Change alignment in MemorySettings.h) */
+		MeasureSQPool(4194304, 4);
+		MeasureMTPool(4194304, 4, 4);
+
 	}
 
 	Graphics::GraphicsWrapper graphics = Graphics::GraphicsWrapper::GetInstance();
