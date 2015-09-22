@@ -108,7 +108,11 @@ int main(int argc, char** argv)
 {
 	//TEST STUFF
 	{
-		TempTests();
+		//TempTests();
+
+		MeasureMTPool(40000000, 8, 4);
+		//MeasureSQPool(40000000, 8);
+		system("pause");
 	}
 
 	Graphics::GraphicsWrapper graphics = Graphics::GraphicsWrapper::GetInstance();
