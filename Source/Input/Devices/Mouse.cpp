@@ -70,8 +70,10 @@ void Mouse::PollEvent(SDL_Event e)
 		m_x = e.motion.x;
 		m_y = e.motion.y;
 
-		m_dx = e.motion.xrel;
-		m_dy = e.motion.yrel;
+// 		m_dx = e.motion.xrel;
+// 		m_dy = e.motion.yrel;
+		m_dx = m_x - m_cX;
+		m_dy = m_y - m_cY;
 		break;
 
 	case SDL_MOUSEWHEEL:
