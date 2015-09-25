@@ -5,10 +5,21 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Game\Timer">
+      <UniqueIdentifier>{9e1af095-11d9-4dbb-b375-c569f5a58ebe}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Source\Game\NewGame.cpp">
       <Filter>Game</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\Source\Game\Timer\Timer.cpp">
+      <Filter>Game\Timer</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\Source\Game\Timer\Timer.h">
+      <Filter>Game\Timer</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

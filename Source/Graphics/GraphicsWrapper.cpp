@@ -388,6 +388,7 @@ void Graphics::GraphicsWrapper::ConvertToPAK(const char * _filename, GLint _widt
 	unsigned int x = _width / m_level.ChunkSize;
 	unsigned int y = _height / m_level.ChunkSize;
 
+	//Attempts to read 1xChunksize at a time, and write to pak file
 	for (unsigned int k = 0; k < y;k++)
 	{
 		for (unsigned int i = 0; i < m_level.ChunkSize; i++)
