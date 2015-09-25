@@ -455,6 +455,8 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 		glVertexAttribPointer(norm, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	}
 
+	ConvertToPAK("../../../Content/height.raw", m_level.Width, m_level.Height, 1);
+
 	//Add individual patch data like different heightmap
 	for (int i = -4; i < 4; i++)
 	{
@@ -462,7 +464,7 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 		{
 			TerrainPatch* newItem = new TerrainPatch;
 
-			//ConvertToPAK("../../../Content/height.raw", m_level.Width, m_level.Height, 1);
+			
 
 			newItem->TextureDiffuse = LoadTexturePatch("../../../Content/texture.pak", j + m_level.X/2, i+m_level.Y/2, 1, FORMAT_PAK);
 			newItem->ModelMatrix = glm::translate(glm::vec3(j*tileSize, 0, i*tileSize));
