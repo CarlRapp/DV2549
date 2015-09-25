@@ -505,7 +505,7 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 		glVertexAttribPointer(norm, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	}
 
-	ConvertToPAK("../../../Content/height.raw", m_level.Width, m_level.Height, 1);
+	//ConvertToPAK("../../../Content/height.raw", m_level.Width, m_level.Height, 1);
 
 	//Add individual patch data, like different heightmap
 	for (int i = -11; i < 11; i++)
