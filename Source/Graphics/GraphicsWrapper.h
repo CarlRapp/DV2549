@@ -45,11 +45,11 @@ namespace Graphics
 
 		struct Level
 		{
-			unsigned int Width = 10000;
-			unsigned int Height = 5000;
-			unsigned int ChunkSize = 512;
- 			unsigned int X			= 19;
- 			unsigned int Y			= 9;
+			unsigned int Width		= 10000;
+			unsigned int Height		= 5000;
+			unsigned int ChunkSize = 256;
+ 			unsigned int X			= 0;
+ 			unsigned int Y			= 0;
 		};
 
 

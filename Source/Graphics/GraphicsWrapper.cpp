@@ -60,7 +60,8 @@ GraphicsWrapper& GraphicsWrapper::GetInstance()
 
 GraphicsWrapper::GraphicsWrapper()
 {
-
+	m_level.X = m_level.Width / m_level.ChunkSize;
+	m_level.Y = m_level.Height / m_level.ChunkSize;
 }
 GraphicsWrapper::~GraphicsWrapper()
 {
@@ -150,8 +151,8 @@ void GraphicsWrapper::RenderTerrain()
 		m_shaderSTD->SetUniformV("gVM", vm);
 		m_shaderSTD->SetUniformV("gPVM", pvm);
 
-		m_shaderSTD->SetUniformV("innerTessLevel", 256.0f);
-		m_shaderSTD->SetUniformV("outerTessLevel", 256.0f);
+		m_shaderSTD->SetUniformV("innerTessLevel", 64.f);
+		m_shaderSTD->SetUniformV("outerTessLevel", 64.f);
 
 		//GLint gSampler = glGetUniformLocation(m_shaderSTD->GetProgramHandle(), "gSampler");
 		//glUniform1i(gSampler, 0);
@@ -168,7 +169,7 @@ void GraphicsWrapper::RenderTerrain()
 	if (error != GL_NO_ERROR)
 	{
 		printf("Error rendering %d\n", error);
-		//system("pause");
+		system("pause");
 	}
 }
 
@@ -194,10 +195,13 @@ void Graphics::GraphicsWrapper::InitializeGLEW()
 	//GLEW
 	glewExperimental = GL_TRUE;
 	glewInit();
-	glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+	glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 	glViewport(0, 0, m_width, m_height);
 	glDepthRange(0.0, 1.0);
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_TEXTURE_2D);
 
 	//CAMERA
 	m_camera = new GLCamera(45.0f, m_width, m_height, 0.1f, 100.0f);
@@ -363,11 +367,12 @@ GLuint Graphics::GraphicsWrapper::LoadTexturePatch(const char * _filename, unsig
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, _colorSlots == 1 ? GL_RED : GL_RGB, m_level.ChunkSize, m_level.ChunkSize, 0, _colorSlots == 1 ? GL_RED : GL_RGB, GL_UNSIGNED_BYTE,data);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	free(data);
 
@@ -399,11 +404,13 @@ GLuint Graphics::GraphicsWrapper::LoadTextureRAW(const char * _filename, unsigne
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
 	glTexImage2D(GL_TEXTURE_2D, 0, _colorSlots == 1 ? GL_RED : GL_RGB, _width, _height, 0, _colorSlots == 1 ? GL_RED : GL_RGB, GL_UNSIGNED_BYTE, data);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	free(data);
 
@@ -418,7 +425,7 @@ void Graphics::GraphicsWrapper::ConvertToPAK(const char * _filename, GLint _widt
 	FILE * pakFile;
 	// open texture data
 	fopen_s(&textureFile, _filename, "rb");
-	fopen_s(&pakFile, "../../../Content/texture.pak", "ab");
+	fopen_s(&pakFile, "../../../Content/texture2.pak", "ab");
 	if (textureFile == NULL)
 	{
 		printf("error reading file\n");
@@ -507,15 +514,18 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 
 	//ConvertToPAK("../../../Content/height.raw", m_level.Width, m_level.Height, 1);
 
+	int x = m_level.X / 2;
+	int y = m_level.Y / 2;
+
 	//Add individual patch data, like different heightmap
-	for (int i = -11; i < 11; i++)
+	for (int i = -x; i < x; i++)
 	{
- 		for (int j = -5; j < 5; j++)
+ 		for (int j = -y; j < y; j++)
  		{
 			TerrainPatch* newItem = new TerrainPatch;
 
 			//newItem->TextureDiffuse = LoadTextureRAW("../../../Content/test.raw", 512, 512, 3);
-			newItem->TextureDiffuse = LoadTexturePatch("../../../Content/texture.pak", j + m_level.Y/2, i+m_level.X/2, 1);
+			newItem->TextureDiffuse = LoadTexturePatch("../../../Content/texture2.pak", j + m_level.Y/2, i+m_level.X/2, 1);
 			newItem->ModelMatrix = glm::translate(glm::vec3(i*tileSize, 0, j*tileSize));
 
 			m_terrainPatches.push_back(newItem);

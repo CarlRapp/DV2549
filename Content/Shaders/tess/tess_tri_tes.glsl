@@ -49,7 +49,10 @@ void main()
     teTex = tc0 + tc1 + tc2;
 
 	float height = texture(gSampler, teTex).x;
-    pos.y += (height - 0.5)*1.5;
+
+	//rounding hack to not crack tessellation
+	int rounded = int(height * 10);
+    pos.y += (float(rounded)/10 - 0.5)*2;
 
     gl_Position = gPVM * vec4(pos, 1);
 
