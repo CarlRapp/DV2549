@@ -17,7 +17,7 @@ GLCamera::GLCamera(float _fovy, int _width,int _height, float _nearZ, float _far
     m_nearZ = _nearZ;
     m_farZ = _farZ;
 
-    m_position  = glm::vec3(0, 0, 5);
+    m_position  = glm::vec3(0, 0, 0);
     m_forward   = glm::vec3(0, 0, -1);
     m_right     = glm::vec3(1, 0, 0);
     m_up        = glm::vec3(0, 1, 0);
