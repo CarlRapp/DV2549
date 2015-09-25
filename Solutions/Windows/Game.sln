@@ -23,7 +23,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shaders", "Shaders", "{0A67
 		..\..\Content\Shaders\vsStandard.glsl = ..\..\Content\Shaders\vsStandard.glsl
 	EndProjectSection
 EndProject
-<<<<<<< HEAD
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tess", "tess", "{A0ED3F85-F9C3-4896-8EDE-3755696D7A72}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\Content\Shaders\tess\tess_frag.glsl = ..\..\Content\Shaders\tess\tess_frag.glsl
@@ -31,11 +30,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tess", "tess", "{A0ED3F85-F
 		..\..\Content\Shaders\tess\tess_tri_tcs.glsl = ..\..\Content\Shaders\tess\tess_tri_tcs.glsl
 		..\..\Content\Shaders\tess\tess_tri_tes.glsl = ..\..\Content\Shaders\tess\tess_tri_tes.glsl
 		..\..\Content\Shaders\tess\tess_vs.glsl = ..\..\Content\Shaders\tess\tess_vs.glsl
-=======
+	EndProjectSection
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ResourceManager", "ResourceManager\ResourceManager.vcxproj", "{A462FC23-77AE-40F7-B9B5-161A317A6B32}"
 	ProjectSection(ProjectDependencies) = postProject
 		{65AC8BCF-B67B-43E5-B01D-A1D462E629CA} = {65AC8BCF-B67B-43E5-B01D-A1D462E629CA}
->>>>>>> e2a8c138434c3a394edb924f2ed985ed20d2644e
 	EndProjectSection
 EndProject
 Global

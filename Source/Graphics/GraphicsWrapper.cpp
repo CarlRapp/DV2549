@@ -4,28 +4,40 @@
 using namespace Graphics;
 GraphicsWrapper* GraphicsWrapper::m_instance = 0;
 
-const int tileSize = 5;
+const int tileSize = 15;
+
+// float vertices[] = 
+// {
+// 	tileSize,  0, 0,
+// 	-tileSize, 0, 0,
+// 	0, 0, -tileSize,
+// 
+// 	tileSize,  0, 0,
+// 	-tileSize, 0, 0,
+// 	0, 0, tileSize,
+// };
 
 float vertices[] = 
 {
-	tileSize,  0, 0,
-	-tileSize, 0, 0,
-	0, 0, -tileSize,
-
-	tileSize,  0, 0,
-	-tileSize, 0, 0,
+	0,  0, 0,
 	0, 0, tileSize,
+	tileSize, 0, 0,
+
+	0,  0, tileSize,
+	tileSize, 0, 0,
+	tileSize, 0, tileSize,
+	
 };
 
 float texCoords[] = 
 {
 	0, 0,
-	1, 1,
 	0, 1,
+	1, 0,
 
- 	0, 0,
- 	1, 1,
+ 	0, 1,
  	1, 0,
+ 	1, 1,
 };
 
 float normals[] = 
@@ -323,7 +335,7 @@ void Graphics::GraphicsWrapper::LookCameraX(float _val)			{m_camera->Yaw(_val);}
 void Graphics::GraphicsWrapper::LookCameraY(float _val)			{m_camera->Pitch(_val);}
 
 
-GLuint Graphics::GraphicsWrapper::LoadTexturePatch(const char * _filename, unsigned int _x, unsigned int _y, short _colorSlots, GLint _fileFormat)
+GLuint Graphics::GraphicsWrapper::LoadTexturePatch(const char * _filename, unsigned int _x, unsigned int _y, short _colorSlots)
 {
 	GLuint texture;
 	GLubyte * data;
@@ -337,13 +349,12 @@ GLuint Graphics::GraphicsWrapper::LoadTexturePatch(const char * _filename, unsig
 	}
 
 	data = (GLubyte*)malloc(m_level.ChunkSize * m_level.ChunkSize * _colorSlots);
-	if (_fileFormat == FORMAT_PAK)
-	{
-		long location = ((m_level.ChunkSize*m_level.ChunkSize*m_level.X*_y) + m_level.ChunkSize*m_level.ChunkSize*_x) * _colorSlots;
 
-		fseek(file, location, SEEK_SET);
-		fread(data, m_level.ChunkSize * m_level.ChunkSize * _colorSlots, 1, file);
-	}
+	//long location = ((m_level.ChunkSize*m_level.ChunkSize*m_level.X*_y) + m_level.ChunkSize*m_level.ChunkSize*_x) * _colorSlots;
+	long location = (m_level.ChunkSize*m_level.ChunkSize)*(m_level.X*_x + _y) * _colorSlots;
+
+	fseek(file, location, SEEK_SET);
+	fread(data, m_level.ChunkSize * m_level.ChunkSize * _colorSlots, 1, file);
 
  	fclose(file);
 	
@@ -357,6 +368,42 @@ GLuint Graphics::GraphicsWrapper::LoadTexturePatch(const char * _filename, unsig
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, _colorSlots == 1 ? GL_RED : GL_RGB, m_level.ChunkSize, m_level.ChunkSize, 0, _colorSlots == 1 ? GL_RED : GL_RGB, GL_UNSIGNED_BYTE,data);
+
+	free(data);
+
+	return texture;
+
+}
+
+GLuint Graphics::GraphicsWrapper::LoadTextureRAW(const char * _filename, unsigned int _width, unsigned int _height, short _colorSlots)
+{
+	GLuint texture;
+	GLubyte * data;
+	FILE * file;
+	// open texture data
+	fopen_s(&file, _filename, "rb");
+	if (file == NULL)
+	{
+		printf("error reading file\n");
+		return 0;
+	}
+
+	data = (GLubyte*)malloc(_width * _height * _colorSlots);
+
+	fread(data, _width * _height * _colorSlots, 1, file);
+
+	fclose(file);
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexImage2D(GL_TEXTURE_2D, 0, _colorSlots == 1 ? GL_RED : GL_RGB, _width, _height, 0, _colorSlots == 1 ? GL_RED : GL_RGB, GL_UNSIGNED_BYTE, data);
 
 	free(data);
 
@@ -391,11 +438,14 @@ void Graphics::GraphicsWrapper::ConvertToPAK(const char * _filename, GLint _widt
 	//Attempts to read 1xChunksize at a time, and write to pak file
 	for (unsigned int k = 0; k < y;k++)
 	{
-		for (unsigned int i = 0; i < m_level.ChunkSize; i++)
+		for (unsigned int i = 0; i < x; i++)
 		{
 			for (unsigned int j = 0; j < m_level.ChunkSize; j++)
 			{
-				long offset = (i*m_level.ChunkSize + _width*j + m_level.ChunkSize*m_level.ChunkSize*k)*_colorSlots;
+				long x_ = i*m_level.ChunkSize;
+				long y_ = j*m_level.Width + k*m_level.ChunkSize*m_level.Width;
+
+				long offset = (x_ + y_)*_colorSlots;
 
 				fseek(textureFile, offset, SEEK_SET);
 				fread(data, m_level.ChunkSize * _colorSlots, 1, textureFile);
@@ -455,19 +505,20 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 		glVertexAttribPointer(norm, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	}
 
-	ConvertToPAK("../../../Content/height.raw", m_level.Width, m_level.Height, 1);
+	//ConvertToPAK("../../../Content/height.raw", m_level.Width, m_level.Height, 1);
 
-	//Add individual patch data like different heightmap
-	for (int i = -4; i < 4; i++)
+	//Add individual patch data, like different heightmap
+	int x = 0;
+	int y = 0;
+	for (int i = -11; i < 11; i++)
 	{
-		for (int j = -4; j < 4; j++)
-		{
+ 		for (int j = -5; j < 5; j++)
+ 		{
 			TerrainPatch* newItem = new TerrainPatch;
 
-			
-
-			newItem->TextureDiffuse = LoadTexturePatch("../../../Content/texture.pak", j + m_level.X/2, i+m_level.Y/2, 1, FORMAT_PAK);
-			newItem->ModelMatrix = glm::translate(glm::vec3(j*tileSize, 0, i*tileSize));
+			//newItem->TextureDiffuse = LoadTextureRAW("../../../Content/test.raw", 512, 512, 3);
+			newItem->TextureDiffuse = LoadTexturePatch("../../../Content/texture.pak", j + m_level.Y/2, i+m_level.X/2, 1);
+			newItem->ModelMatrix = glm::translate(glm::vec3(i*tileSize, 0, j*tileSize));
 
 			m_terrainPatches.push_back(newItem);
 		}

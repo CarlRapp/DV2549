@@ -16,7 +16,7 @@ void main()
 	vec4 Idiff = vec4(LightDiffuse * max(dot(facetNormal,L), 0.0),1.0);  
 	Idiff = clamp(Idiff, 0.0, 1.0); 
 
-	outColor = texture2D(gSampler, tex);
+	outColor = texture2D(gSampler, tex)*2;
 
 	outColor.y = outColor.x;
 	outColor.z = outColor.x;

@@ -49,7 +49,7 @@ void main()
     teTex = tc0 + tc1 + tc2;
 
 	float height = texture(gSampler, teTex).x;
-    pos.y += (height - 0.5)*2;
+    pos.y += (height - 0.5)*1.5;
 
     gl_Position = gPVM * vec4(pos, 1);
 
