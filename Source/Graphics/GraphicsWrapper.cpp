@@ -2,7 +2,6 @@
 #include "GraphicsWrapper.h"
 
 using namespace Graphics;
-GraphicsWrapper* GraphicsWrapper::m_instance = 0;
 
 const int m_tileSize = 2;
 const int m_patchSize = 16;
@@ -47,8 +46,7 @@ float normals[] =
 
 GraphicsWrapper& GraphicsWrapper::GetInstance()
 {
-	if (!m_instance)
-		m_instance = new GraphicsWrapper();
+	static GraphicsWrapper* m_instance = new GraphicsWrapper();
 	return *m_instance;
 }
 
@@ -75,8 +73,6 @@ GraphicsWrapper::~GraphicsWrapper()
 
 	SDL_GL_DeleteContext(m_context);
 	SDL_Quit();
-
-	m_instance=0;
 }
 
 //NOT USED ATM, FOR MODELS
@@ -349,6 +345,19 @@ void Graphics::GraphicsWrapper::MoveCameraForward(float _val)	{m_camera->Move(_v
 void Graphics::GraphicsWrapper::MoveCameraStrafe(float _val)	{m_camera->Strafe(_val);}
 void Graphics::GraphicsWrapper::LookCameraX(float _val)			{m_camera->Yaw(_val);}
 void Graphics::GraphicsWrapper::LookCameraY(float _val)			{m_camera->Pitch(_val);}
+
+void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int tileX, int tileY)
+{
+	TerrainPatch* newItem = new TerrainPatch;
+
+	//newItem->TextureDiffuse = LoadTextureRAW("../../../Content/test.raw", 512, 512, 3);
+	newItem->TextureHeight = LoadTexturePatch("../../../Content/height.pak", tileY + m_level.Y / 2, tileX + m_level.X / 2, 1);
+	newItem->TextureNormal = LoadTexturePatch("../../../Content/norm.pak", tileY + m_level.Y / 2, tileX + m_level.X / 2, 3);
+	newItem->TextureDiffuse = LoadTexturePatch("../../../Content/diffuse.pak", tileY + m_level.Y / 2, tileX + m_level.X / 2, 3);
+	newItem->ModelMatrix = glm::translate(glm::vec3(tileX*m_patchSize, 0, tileY*m_patchSize));
+
+	m_terrainPatches.push_back(newItem);
+}
 
 
 GLuint Graphics::GraphicsWrapper::LoadTexturePatch(const char * _filename, unsigned int _x, unsigned int _y, short _colorSlots)
@@ -652,19 +661,19 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 	ConvertToPAK("../../../Content/diffuse.raw", m_level.Width, m_level.Height, 3);
 	ConvertToPAK("../../../Content/norm.raw", m_level.Width, m_level.Height, 3);
 	ConvertToPAK("../../../Content/height.raw", m_level.Width, m_level.Height, 1);
+	/*
+	int x = m_level.X / 2;
+	int y = m_level.Y / 2;
 
-	int x =  m_level.X / 2;
-	int y =  m_level.Y / 2;
-
-// 	//Add individual patch data, like different heightmap
+	// 	//Add individual patch data, like different heightmap
 	for (int i = -x; i < x; i++)
 	{
- 		for (int j = -y; j < y; j++)
- 		{
+		for (int j = -y; j < y; j++)
+		{
 			TerrainPatch* newItem = new TerrainPatch;
 
 			//newItem->TextureDiffuse = LoadTextureRAW("../../../Content/test.raw", 512, 512, 3);
-			newItem->TextureHeight = LoadTexturePatch("../../../Content/height.pak", j + m_level.Y/2, i+m_level.X/2, 1);
+			newItem->TextureHeight = LoadTexturePatch("../../../Content/height.pak", j + m_level.Y / 2, i + m_level.X / 2, 1);
 			newItem->TextureNormal = LoadTexturePatch("../../../Content/norm.pak", j + m_level.Y / 2, i + m_level.X / 2, 3);
 			newItem->TextureDiffuse = LoadTexturePatch("../../../Content/diffuse.pak", j + m_level.Y / 2, i + m_level.X / 2, 3);
 			newItem->ModelMatrix = glm::translate(glm::vec3(i*m_patchSize, 0, j*m_patchSize));
@@ -672,6 +681,7 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 			m_terrainPatches.push_back(newItem);
 		}
 	}
+	*/
 
 	GLenum error = glGetError();
 	if (error != GL_NO_ERROR)

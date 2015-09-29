@@ -75,14 +75,18 @@ namespace Graphics
 		void LookCameraX(float _val);
 		void LookCameraY(float _val);
 
+		void LoadSingleTexturePatch(int tileX, int tileY);
+		Level* GetLevel() { return &m_level; }
+
 		GLuint LoadTexturePatch(const char * _filename, unsigned int _x, unsigned int _y, short _colorSlots);
 		GLuint LoadTextureRAW(const char * _filename, unsigned int _width, unsigned int _height, short _colorSlots);
 		void ConvertToPAK(const char * _filename, GLint _width, GLint _height, short colorSlots);
 		SDL_Window* GetWindow() { return m_window; };
 
+		GLCamera*	GetCamera() { return m_camera; }
+
 	private:
 		GraphicsWrapper();
-		static	GraphicsWrapper*	m_instance;
 
 		unsigned int m_width = 0;
 		unsigned int m_height = 0;
