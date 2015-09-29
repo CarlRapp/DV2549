@@ -33,8 +33,11 @@ void GameManager::Update(float dt)
 		{
 			for (int Z = -m_tileRenderDistance; Z <= m_tileRenderDistance; ++Z)
 			{
-				if(std::abs(currentX+X) < sizeX && std::abs(currentZ+Z) < sizeZ)
-					m_graphicsWrapper->LoadSingleTexturePatch(currentX+X, currentZ+Z);
+				if (std::abs(currentX + X) < sizeX && std::abs(currentZ + Z) < sizeZ)
+				{
+					m_graphicsWrapper->LoadSingleTexturePatch(currentX + X, currentZ + Z);
+				}
+					
 			}
 		}
 
