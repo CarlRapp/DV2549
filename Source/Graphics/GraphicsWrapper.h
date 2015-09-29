@@ -11,20 +11,59 @@
 #include "GLCamera.h"
 #include <SDL/SDL.h>
 
+#define FORMAT_RAW 0
+#define FORMAT_PAK 1
+
 namespace Graphics
 {
+
+
+
 	class DECLSPEC GraphicsWrapper
 	{
+		struct RenderInstance
+		{
+			glm::mat4 ModelMatrix;
+		};
+
+		struct RenderItem
+		{
+			GLuint			MatrixBuffer;
+			int				RenderParam = GL_TRIANGLES;
+			unsigned int	Vertices;
+			GLuint			TextureDiffuse;
+			GLuint			VAO;
+
+			std::vector<RenderInstance*> Instances;
+		};
+
+		struct TerrainPatch
+		{
+			glm::mat4		ModelMatrix;
+			GLuint			TextureDiffuse;
+		};
+
+		struct Level
+		{
+			unsigned int Width		= 10000;
+			unsigned int Height		= 5000;
+			unsigned int ChunkSize = 256;
+ 			unsigned int X			= 0;
+ 			unsigned int Y			= 0;
+		};
+
+
+
 	public:
 		~GraphicsWrapper();
 		static GraphicsWrapper& GetInstance();
 
 		void Render();
-
-		void CameraToShader();
+		void RenderTerrain();
 
 		void InitializeSDL(unsigned int _width, unsigned int _height);
 		void InitializeGLEW();
+		void LoadTerrainPatch();
 		void LoadModel();
 		void InitializeShaders();
 
@@ -33,6 +72,9 @@ namespace Graphics
 		void LookCameraX(float _val);
 		void LookCameraY(float _val);
 
+		GLuint LoadTexturePatch(const char * _filename, unsigned int _x, unsigned int _y, short _colorSlots);
+		GLuint LoadTextureRAW(const char * _filename, unsigned int _width, unsigned int _height, short _colorSlots);
+		void ConvertToPAK(const char * _filename, GLint _width, GLint _height, short colorSlots);
 		SDL_Window* GetWindow() { return m_window; };
 
 	private:
@@ -50,6 +92,14 @@ namespace Graphics
 		ShaderHandler* m_shaderSTD;
 
 		GLCamera* m_camera;
+
+		std::vector<RenderItem*> m_renderItems;
+		std::vector<TerrainPatch*> m_terrainPatches;
+		
+		GLuint m_terrainVAO;
+		GLuint m_terrainVBO[3];
+
+		Level m_level;
 	};
 }
 

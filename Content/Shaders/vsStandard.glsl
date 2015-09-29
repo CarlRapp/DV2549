@@ -1,11 +1,13 @@
 #version 450
 
 in vec3 m_position;
+in vec2 m_tex;
+out vec2 texCoord;
 
-uniform mat4 m_matView;
-uniform mat4 m_matProj;
+uniform mat4 gPVM;
 
 void main()
 {
-    gl_Position = m_matProj*m_matView* vec4(m_position, 1.0);
+	texCoord = m_tex;
+    gl_Position = gPVM * vec4(m_position, 1.0);
 }

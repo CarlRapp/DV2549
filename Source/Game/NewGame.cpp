@@ -108,7 +108,7 @@ int main(int argc, char** argv)
 {
 	//TEST STUFF
 	{
-		TempTests();
+		//TempTests();
 
 		/* Stack Alignment Test */
 		//MeasureSQStack(4194304, 4, 4);
@@ -155,7 +155,7 @@ int main(int argc, char** argv)
 	int height = 840;
 	int centerX = width/2;
 	int centerY = height/2;
-	const float cameraSpeed = 3.0f;
+	const float cameraSpeed = 9.0f;
 	const float mouseSensitivity = 3.0f;
 	bool lockMouse = true;
 
@@ -163,7 +163,7 @@ int main(int argc, char** argv)
 	graphics.InitializeSDL(width, height);
 	graphics.InitializeGLEW();
 	graphics.InitializeShaders();
-	graphics.LoadModel();
+	graphics.LoadTerrainPatch();
 
 	//INIT INPUT
 	Input::InputWrapper input = Input::InputWrapper::GetInstance();
@@ -245,10 +245,12 @@ int main(int argc, char** argv)
 				//LOCK MOUSE IN CENTER
 				if(lockMouse)
 					SDL_WarpMouseInWindow(graphics.GetWindow(), centerX, centerY);
+				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_F))
+					lockMouse = !lockMouse;
 			}
 		}
 
-		graphics.Render();
+		graphics.RenderTerrain();
 	}
 	
 	return 0;

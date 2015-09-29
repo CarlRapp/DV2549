@@ -5,6 +5,7 @@ VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Game", "Game\Game.vcxproj", "{B8EFCC27-B82E-4F58-A794-F312D54BDBDD}"
 	ProjectSection(ProjectDependencies) = postProject
+		{A462FC23-77AE-40F7-B9B5-161A317A6B32} = {A462FC23-77AE-40F7-B9B5-161A317A6B32}
 		{3085A924-6090-4B51-AA10-1B9C1F523C48} = {3085A924-6090-4B51-AA10-1B9C1F523C48}
 		{9CBEB33A-B752-47FA-8995-C717E1BC509D} = {9CBEB33A-B752-47FA-8995-C717E1BC509D}
 		{65AC8BCF-B67B-43E5-B01D-A1D462E629CA} = {65AC8BCF-B67B-43E5-B01D-A1D462E629CA}
@@ -20,6 +21,20 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shaders", "Shaders", "{0A67
 	ProjectSection(SolutionItems) = preProject
 		..\..\Content\Shaders\fsStandard.glsl = ..\..\Content\Shaders\fsStandard.glsl
 		..\..\Content\Shaders\vsStandard.glsl = ..\..\Content\Shaders\vsStandard.glsl
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tess", "tess", "{A0ED3F85-F9C3-4896-8EDE-3755696D7A72}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\Content\Shaders\tess\tess_frag.glsl = ..\..\Content\Shaders\tess\tess_frag.glsl
+		..\..\Content\Shaders\tess\tess_geo.glsl = ..\..\Content\Shaders\tess\tess_geo.glsl
+		..\..\Content\Shaders\tess\tess_tri_tcs.glsl = ..\..\Content\Shaders\tess\tess_tri_tcs.glsl
+		..\..\Content\Shaders\tess\tess_tri_tes.glsl = ..\..\Content\Shaders\tess\tess_tri_tes.glsl
+		..\..\Content\Shaders\tess\tess_vs.glsl = ..\..\Content\Shaders\tess\tess_vs.glsl
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ResourceManager", "ResourceManager\ResourceManager.vcxproj", "{A462FC23-77AE-40F7-B9B5-161A317A6B32}"
+	ProjectSection(ProjectDependencies) = postProject
+		{65AC8BCF-B67B-43E5-B01D-A1D462E629CA} = {65AC8BCF-B67B-43E5-B01D-A1D462E629CA}
 	EndProjectSection
 EndProject
 Global
@@ -80,8 +95,23 @@ Global
 		{65AC8BCF-B67B-43E5-B01D-A1D462E629CA}.Release|x64.Build.0 = Release|x64
 		{65AC8BCF-B67B-43E5-B01D-A1D462E629CA}.Release|x86.ActiveCfg = Release|Win32
 		{65AC8BCF-B67B-43E5-B01D-A1D462E629CA}.Release|x86.Build.0 = Release|Win32
+		{A462FC23-77AE-40F7-B9B5-161A317A6B32}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A462FC23-77AE-40F7-B9B5-161A317A6B32}.Debug|Win32.Build.0 = Debug|Win32
+		{A462FC23-77AE-40F7-B9B5-161A317A6B32}.Debug|x64.ActiveCfg = Debug|x64
+		{A462FC23-77AE-40F7-B9B5-161A317A6B32}.Debug|x64.Build.0 = Debug|x64
+		{A462FC23-77AE-40F7-B9B5-161A317A6B32}.Debug|x86.ActiveCfg = Debug|Win32
+		{A462FC23-77AE-40F7-B9B5-161A317A6B32}.Debug|x86.Build.0 = Debug|Win32
+		{A462FC23-77AE-40F7-B9B5-161A317A6B32}.Release|Win32.ActiveCfg = Release|Win32
+		{A462FC23-77AE-40F7-B9B5-161A317A6B32}.Release|Win32.Build.0 = Release|Win32
+		{A462FC23-77AE-40F7-B9B5-161A317A6B32}.Release|x64.ActiveCfg = Release|x64
+		{A462FC23-77AE-40F7-B9B5-161A317A6B32}.Release|x64.Build.0 = Release|x64
+		{A462FC23-77AE-40F7-B9B5-161A317A6B32}.Release|x86.ActiveCfg = Release|Win32
+		{A462FC23-77AE-40F7-B9B5-161A317A6B32}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A0ED3F85-F9C3-4896-8EDE-3755696D7A72} = {0A67CA97-C991-4E39-960B-BD0EE952D655}
 	EndGlobalSection
 EndGlobal
