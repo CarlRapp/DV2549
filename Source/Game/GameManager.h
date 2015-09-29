@@ -19,6 +19,11 @@
 
 		void Update(float dt);
 
+		void SetRenderDistance(unsigned int _chunkDistance);
+
+	private:
+		void LoadSurroundingChunks();
+
 	private:
 		GameManager();
 		Graphics::GraphicsWrapper*	m_graphicsWrapper;
