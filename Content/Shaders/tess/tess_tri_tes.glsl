@@ -1,14 +1,3 @@
-//#version 410 core
-
-//layout(triangles, equal_spacing, ccw) in;
-
-//void main()
-//{	
-//	gl_Position.xyzw =	gl_in[0].gl_Position.xyzw * gl_TessCoord.x +
-//						gl_in[1].gl_Position.xyzw * gl_TessCoord.y +
-//						gl_in[2].gl_Position.xyzw * gl_TessCoord.z;
-//}
-
 #version 450
 
 layout(triangles, equal_spacing, ccw) in;
@@ -47,11 +36,11 @@ void main()
     vec2 tc2 = gl_TessCoord.z * tcTex[2];  
     teTex = tc0 + tc1 + tc2;
 
-	float height = texture(gTexHeight, teTex).x;
+	float height = (texture(gTexHeight, tc0).x + texture(gTexHeight, tc1).x+ texture(gTexHeight, tc2).x)/3;
 
+	//rounding hack to not crack tessellation
 	if(teTex.x == 0 || teTex.x == 1 || teTex.y == 0 || teTex.y == 1)
 	{
-		//rounding hack to not crack tessellation
 		int rounded = int(height * 2);
 		height = (float(rounded)/2);
 	}

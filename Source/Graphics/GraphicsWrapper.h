@@ -16,9 +16,6 @@
 
 namespace Graphics
 {
-
-
-
 	class DECLSPEC GraphicsWrapper
 	{
 		struct RenderInstance
@@ -46,13 +43,26 @@ namespace Graphics
 			GLuint			TextureDiffuse;
 		};
 
+		
+
 		struct Level
 		{
+			int m_tileSize = 2;
+			int m_patchSize = 16;
+
 			unsigned int Width		= 10000;
 			unsigned int Height		= 5000;
 			unsigned int ChunkSize = 256;
  			unsigned int X			= 0;
  			unsigned int Y			= 0;
+
+			float* TerrainVertices;
+			float* TerrainTex;
+			float* TerrainNormals;
+
+			unsigned int Vertices;
+			unsigned int TexCoords;
+			unsigned int Normals;
 		};
 
 
@@ -75,14 +85,19 @@ namespace Graphics
 		void LookCameraX(float _val);
 		void LookCameraY(float _val);
 
+		void LoadSingleTexturePatch(int tileX, int tileY);
+		void DeleteSingleTexturePatch(int tileX, int tileY);
+		Level* GetLevel() { return &m_level; }
+
 		GLuint LoadTexturePatch(const char * _filename, unsigned int _x, unsigned int _y, short _colorSlots);
 		GLuint LoadTextureRAW(const char * _filename, unsigned int _width, unsigned int _height, short _colorSlots);
 		void ConvertToPAK(const char * _filename, GLint _width, GLint _height, short colorSlots);
 		SDL_Window* GetWindow() { return m_window; };
 
+		GLCamera*	GetCamera() { return m_camera; }
+
 	private:
 		GraphicsWrapper();
-		static	GraphicsWrapper*	m_instance;
 
 		unsigned int m_width = 0;
 		unsigned int m_height = 0;
@@ -103,6 +118,8 @@ namespace Graphics
 		GLuint m_terrainVBO[3];
 
 		Level m_level;
+
+		std::vector<std::vector<TerrainPatch*>> m_mapStatus;
 	};
 }
 
