@@ -21,8 +21,8 @@ void GameManager::Update(float dt)
 	//	Check if the camera is in another 
 	//	tile position than last frame
 	glm::vec3	currentPos	= m_graphicsWrapper->GetCamera()->GetPosition();
-	int currentX = (int)(currentPos.x / 16);
-	int currentZ = (int)(currentPos.z / 16);
+	int currentX = (int)(currentPos.x / m_graphicsWrapper->GetLevel()->m_patchSize);
+	int currentZ = (int)(currentPos.z / m_graphicsWrapper->GetLevel()->m_patchSize);
 
 	if(currentX != m_oldPosX || currentZ != m_oldPosZ)
 	{

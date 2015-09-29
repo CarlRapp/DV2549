@@ -47,11 +47,22 @@ namespace Graphics
 
 		struct Level
 		{
+			int m_tileSize = 2;
+			int m_patchSize = 16;
+
 			unsigned int Width		= 10000;
 			unsigned int Height		= 5000;
 			unsigned int ChunkSize = 256;
  			unsigned int X			= 0;
  			unsigned int Y			= 0;
+
+			float* TerrainVertices;
+			float* TerrainTex;
+			float* TerrainNormals;
+
+			unsigned int Vertices;
+			unsigned int TexCoords;
+			unsigned int Normals;
 		};
 
 
