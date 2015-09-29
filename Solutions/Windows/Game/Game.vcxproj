@@ -198,10 +198,12 @@ xcopy "$(SolutionDir)..\..\Externals\Content" "$(OutDir)content" /d /y /s /e </C
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\Source\Game\GameManager.cpp" />
     <ClCompile Include="..\..\..\Source\Game\NewGame.cpp" />
     <ClCompile Include="..\..\..\Source\Game\Timer\Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\Source\Game\GameManager.h" />
     <ClInclude Include="..\..\..\Source\Game\Timer\Timer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
