@@ -24,9 +24,11 @@ out vec2 vTex;
 out vec3 vNormal;
 //out mat4 vModelM;
 
+uniform mat4 gM;
+
 void main() 
 {
-    vPosition = in_position;
+    vPosition = (gM * vec4(in_position,1)).xyz;
     vTex = in_tex;
 	vNormal = in_normal;
 	//vModelM = in_modelM;

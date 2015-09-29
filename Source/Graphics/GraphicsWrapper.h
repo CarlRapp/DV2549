@@ -32,6 +32,7 @@ namespace Graphics
 			int				RenderParam = GL_TRIANGLES;
 			unsigned int	Vertices;
 			GLuint			TextureDiffuse;
+			GLuint			TextureNormal;
 			GLuint			VAO;
 
 			std::vector<RenderInstance*> Instances;
@@ -40,6 +41,8 @@ namespace Graphics
 		struct TerrainPatch
 		{
 			glm::mat4		ModelMatrix;
+			GLuint			TextureHeight;
+			GLuint			TextureNormal;
 			GLuint			TextureDiffuse;
 		};
 

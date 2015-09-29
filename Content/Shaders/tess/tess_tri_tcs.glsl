@@ -30,6 +30,34 @@ out vec3 tcNormal[];
 uniform float innerTessLevel;
 uniform float outerTessLevel;
 
+uniform vec3 gEyePos;
+
+float GetTessLevel(float Distance0, float Distance1)
+{
+    float AvgDistance = (Distance0 + Distance1) / 2.0;
+
+    if (AvgDistance <= 10.0) 
+	{
+        return 64.0;
+    }
+    else if (AvgDistance <= 20.0) 
+	{
+        return 32.0;
+    }
+	else if (AvgDistance <= 40.0) 
+	{
+        return 16.0;
+    }
+	else if (AvgDistance <= 60.0) 
+	{
+        return 8.0;
+    }
+    else 
+	{
+        return 4.0;
+    }
+}
+
 void main()
 {
 
@@ -39,15 +67,14 @@ void main()
     tcPosition[gl_InvocationID] = vPosition[gl_InvocationID];
     tcNormal[gl_InvocationID]   = vNormal[gl_InvocationID];
     tcTex[gl_InvocationID] = vTex[gl_InvocationID];
-	//tcModelM[gl_InvocationID] = vModelM[gl_InvocationID];
 
-    if(gl_InvocationID == 0) 
-	{
-        gl_TessLevelInner[0] = inTess;
-        gl_TessLevelInner[1] = inTess;
-        gl_TessLevelOuter[0] = outTess;
-        gl_TessLevelOuter[1] = outTess;
-        gl_TessLevelOuter[2] = outTess;
-        gl_TessLevelOuter[3] = outTess;
-    }
+	float EyeToVertexDistance0 = distance(gEyePos, vPosition[0]);
+    float EyeToVertexDistance1 = distance(gEyePos, vPosition[1]);
+    float EyeToVertexDistance2 = distance(gEyePos, vPosition[2]);
+
+    gl_TessLevelOuter[0] = GetTessLevel(EyeToVertexDistance1, EyeToVertexDistance2);
+    gl_TessLevelOuter[1] = GetTessLevel(EyeToVertexDistance2, EyeToVertexDistance0);
+    gl_TessLevelOuter[2] = GetTessLevel(EyeToVertexDistance0, EyeToVertexDistance1);
+    gl_TessLevelInner[0] = gl_TessLevelOuter[0];
+	gl_TessLevelInner[1] = gl_TessLevelOuter[1];
 }
