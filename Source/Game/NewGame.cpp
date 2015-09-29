@@ -148,7 +148,6 @@ int main(int argc, char** argv)
 		//MeasureMTPool(4194304, 4, 4);
 		//MeasureMTPool(4194304, 4, 8);
 	}
-
 	Graphics::GraphicsWrapper graphics = Graphics::GraphicsWrapper::GetInstance();
 
 	//SETTINGS
