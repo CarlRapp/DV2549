@@ -7,6 +7,7 @@
 #include "Memory/StackAllocator/StackAllocator_DoubleEnded.h"
 #include "Memory/TestScenarios.h"
 #include "Memory/PoolTest.h"
+#include "GameManager.h"
 #ifdef WIN32
 #ifdef _DEBUG
 #include <VLD/vld.h>
@@ -148,7 +149,7 @@ int main(int argc, char** argv)
 		//MeasureMTPool(4194304, 4, 4);
 		//MeasureMTPool(4194304, 4, 8);
 	}
-
+	GameManager	gameManager = GameManager::GetInstance();
 	Graphics::GraphicsWrapper graphics = Graphics::GraphicsWrapper::GetInstance();
 
 	//SETTINGS
@@ -165,6 +166,12 @@ int main(int argc, char** argv)
 	graphics.InitializeGLEW();
 	graphics.InitializeShaders();
 	graphics.LoadTerrainPatch();
+	gameManager.SetGraphicsWrapper(&graphics);
+
+	graphics.GetCamera()->SetPosition(glm::vec3(0, 2, 0));
+	graphics.GetCamera()->SetForward(glm::vec3(0, 0, -1));
+
+	
 
 	//INIT INPUT
 	Input::InputWrapper input = Input::InputWrapper::GetInstance();
@@ -218,6 +225,8 @@ int main(int argc, char** argv)
 				break;
 			}
 
+			
+
 			//In game commands
 			//Move to some nice place
 			{
@@ -249,6 +258,8 @@ int main(int argc, char** argv)
 				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_F))
 					lockMouse = !lockMouse;
 			}
+
+			gameManager.Update(deltaTime);
 		}
 
 		graphics.RenderTerrain();
