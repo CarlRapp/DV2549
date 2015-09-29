@@ -23,14 +23,13 @@ in vec3 tcNormal[];
 out vec2 teTex;
 out vec3 teNormal;
 
-
 //uniform mat4 gProj;
 //uniform mat4 gView;
 
-uniform mat4 gPVM;
-uniform mat4 gVM;
+uniform mat4 gPV;
 
-uniform sampler2D gSampler;
+uniform sampler2D gTexHeight;
+uniform sampler2D gTexNormal;
 
 void main()
 {
@@ -48,15 +47,20 @@ void main()
     vec2 tc2 = gl_TessCoord.z * tcTex[2];  
     teTex = tc0 + tc1 + tc2;
 
-	float height = texture(gSampler, teTex).x;
+	float height = texture(gTexHeight, teTex).x;
 
-	//rounding hack to not crack tessellation
-	int rounded = int(height * 10);
-    pos.y += (float(rounded)/10 - 0.5)*2;
+	if(teTex.x == 0 || teTex.x == 1 || teTex.y == 0 || teTex.y == 1)
+	{
+		//rounding hack to not crack tessellation
+		int rounded = int(height * 2);
+		height = (float(rounded)/2);
+	}
 
-    gl_Position = gPVM * vec4(pos, 1);
+	pos.y += (height)*2;
 
-	teNormal    = normalize(n0+n1+n2);
+    gl_Position = gPV * vec4(pos, 1);
+
+	teNormal    = texture(gTexNormal, teTex).xyz;
 	
    // tePosition  = vec3(gVM * vec4(pos,1.0)).xyz;
 }
