@@ -56,7 +56,10 @@ GraphicsWrapper::GraphicsWrapper()
 {
 	m_level.X = m_level.Width / m_level.ChunkSize;
 	m_level.Y = m_level.Height / m_level.ChunkSize;
+		
+	//compressionHandler = new Compression::CompressionHandler_zlib(); // Temp. instantiation until integration with ResourceManager.
 }
+
 GraphicsWrapper::~GraphicsWrapper()
 {
 	for (size_t i = m_renderItems.size() -1 ; i > -1 ; i--)
@@ -475,6 +478,8 @@ void Graphics::GraphicsWrapper::ConvertToPAK(const char * _filename, GLint _widt
 
 	printf("Converting...\n");
 	//Attempts to read 1xChunksize at a time, and write to pak file
+	
+	unsigned int bytesToCompress = 0;
 	for (unsigned int k = 0; k < y;k++)
 	{
 		for (unsigned int i = 0; i < x; i++)
@@ -488,11 +493,13 @@ void Graphics::GraphicsWrapper::ConvertToPAK(const char * _filename, GLint _widt
 
 				fseek(textureFile, offset, SEEK_SET);
 				fread(data, m_level.ChunkSize * _colorSlots, 1, textureFile);
-				fwrite(data, 1, m_level.ChunkSize * _colorSlots, pakFile);
+				bytesToCompress += m_level.ChunkSize * _colorSlots; //fwrite(data, 1, m_level.ChunkSize * _colorSlots, pakFile);				
 			}
 		}
 		printf("%d / %d\r",k,y);
 	}
+
+	compressionHandler->compress_memoryToFile(data, bytesToCompress, pakFile);
 
 	fclose(textureFile);
 	fclose(pakFile);

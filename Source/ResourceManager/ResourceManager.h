@@ -11,6 +11,8 @@
 #include <SDL/SDL.h>
 #include <string>
 
+#include "Compression\CompressionHandler_zlib.h"
+
 
 class DECLSPEC ResourceManager
 {
@@ -23,7 +25,7 @@ public:
 	bool LoadAsset();
 	bool UnloadAsset();
 
-
+	Compression::ICompressionHandler *compressionHandler;
 
 private:
 	ResourceManager();

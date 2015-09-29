@@ -10,51 +10,23 @@
     <Filter Include="Source\Pool Allocator">
       <UniqueIdentifier>{425e7922-fa07-47f5-ab25-b384e6a0cb7b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Compression">
+      <UniqueIdentifier>{31768b6f-b312-4abc-88d1-12d56a5ffc80}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\Source\Memory\MemoryWrapper.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\Memory\StackAllocator\StackAllocator_SingleBuffer.cpp">
-      <Filter>Source\Stack Allocator</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\Memory\PoolAllocator\PoolAllocator.cpp">
-      <Filter>Source\Pool Allocator</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\Memory\StackAllocator\StackAllocator_DoubleEnded.cpp">
-      <Filter>Source\Stack Allocator</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\Memory\PoolAllocator\PoolManager.cpp">
-      <Filter>Source\Pool Allocator</Filter>
+    <ClCompile Include="..\..\..\Source\ResourceManager\ResourceManager.cpp" />
+    <ClCompile Include="..\..\..\Source\ResourceManager\Compression\CompressionHandler_zlib.cpp">
+      <Filter>Source\Compression</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\Source\Memory\MemoryWrapper.h">
-      <Filter>Source</Filter>
+    <ClInclude Include="..\..\..\Source\ResourceManager\ResourceManager.h" />
+    <ClInclude Include="..\..\..\Source\ResourceManager\Compression\CompressionHandler_zlib.h">
+      <Filter>Source\Compression</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Source\Memory\StackAllocator\IStackAllocator.h">
-      <Filter>Source\Stack Allocator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Memory\StackAllocator\StackAllocator_SingleBuffer.h">
-      <Filter>Source\Stack Allocator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Memory\MemorySettings.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Memory\PoolAllocator\PoolAllocator.h">
-      <Filter>Source\Pool Allocator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Memory\TestScenarios.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Memory\PoolTest.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Memory\StackAllocator\StackAllocator_DoubleEnded.h">
-      <Filter>Source\Stack Allocator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Memory\PoolAllocator\PoolManager.h">
-      <Filter>Source\Pool Allocator</Filter>
+    <ClInclude Include="..\..\..\Source\ResourceManager\Compression\ICompressionHandler.h">
+      <Filter>Source\Compression</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

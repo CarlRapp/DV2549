@@ -14,6 +14,8 @@
 #define FORMAT_RAW 0
 #define FORMAT_PAK 1
 
+#include "ResourceManager\Compression\CompressionHandler_zlib.h" // Temp. include until integration with ResourceManager.
+
 namespace Graphics
 {
 
@@ -79,6 +81,8 @@ namespace Graphics
 		GLuint LoadTextureRAW(const char * _filename, unsigned int _width, unsigned int _height, short _colorSlots);
 		void ConvertToPAK(const char * _filename, GLint _width, GLint _height, short colorSlots);
 		SDL_Window* GetWindow() { return m_window; };
+			
+		Compression::ICompressionHandler *compressionHandler; // Temp. variable until integration with ResourceManager.
 
 	private:
 		GraphicsWrapper();
