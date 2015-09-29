@@ -1,8 +1,9 @@
 #include "GameManager.h"
 #include "Graphics/GraphicsWrapper.h"
+#include "ResourceManager/ResourceManager.h"
 
 GameManager::GameManager() :
-	m_oldPosX(0), m_oldPosY(0), m_oldPosZ(0), m_tileRenderDistance(1)
+	m_oldPosX(-999), m_oldPosY(0), m_oldPosZ(-999), m_tileRenderDistance(1)
 {
 	
 }
@@ -26,23 +27,11 @@ void GameManager::Update(float dt)
 
 	if(currentX != m_oldPosX || currentZ != m_oldPosZ)
 	{
-		int sizeX = m_graphicsWrapper->GetLevel()->X / 2;
-		int sizeZ = m_graphicsWrapper->GetLevel()->Y / 2;
-
-		for (int X = -m_tileRenderDistance; X <= m_tileRenderDistance; ++X)
-		{
-			for (int Z = -m_tileRenderDistance; Z <= m_tileRenderDistance; ++Z)
-			{
-				if (std::abs(currentX + X) < sizeX && std::abs(currentZ + Z) < sizeZ)
-				{
-					m_graphicsWrapper->LoadSingleTexturePatch(currentX + X, currentZ + Z);
-				}
-					
-			}
-		}
-
 		m_oldPosX	=	currentX;
 		m_oldPosZ	=	currentZ;
+
+		LoadSurroundingChunks();
+	}
 
 /*
 int x =  m_level.X / 2;
@@ -65,8 +54,39 @@ m_terrainPatches.push_back(newItem);
 }
 }
 */
+
+
+
+}
+
+void GameManager::SetRenderDistance(unsigned int _chunkDistance)
+{
+	//	Divide the requested render distance
+	//	since we go from -m_tileRenderDistance to m_ti
+	m_tileRenderDistance	=	_chunkDistance/2;
+
+	//	Delete the current pool from the resourcemanager
+	unsigned int numberOfChunks = (_chunkDistance*2+1) ^ 2;
+
+
+	ResourceManager::GetInstance().CreateChunkPool(numberOfChunks, 6);
+
+	LoadSurroundingChunks();
+}
+
+void GameManager::LoadSurroundingChunks()
+{
+
+	int sizeX = m_graphicsWrapper->GetLevel()->X / 2;
+	int sizeZ = m_graphicsWrapper->GetLevel()->Y / 2;
+
+	for (int X = -m_tileRenderDistance; X <= m_tileRenderDistance; ++X)
+	{
+		for (int Z = -m_tileRenderDistance; Z <= m_tileRenderDistance; ++Z)
+		{
+			if (std::abs(m_oldPosX + X) < sizeX && std::abs(m_oldPosZ + Z) < sizeZ)
+				m_graphicsWrapper->LoadSingleTexturePatch(m_oldPosX + X, m_oldPosZ + Z);
+		}
 	}
-
-
 
 }

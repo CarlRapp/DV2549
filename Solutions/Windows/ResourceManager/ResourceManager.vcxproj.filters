@@ -12,49 +12,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\Source\Memory\MemoryWrapper.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\Memory\StackAllocator\StackAllocator_SingleBuffer.cpp">
-      <Filter>Source\Stack Allocator</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\Memory\PoolAllocator\PoolAllocator.cpp">
-      <Filter>Source\Pool Allocator</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\Memory\StackAllocator\StackAllocator_DoubleEnded.cpp">
-      <Filter>Source\Stack Allocator</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\Memory\PoolAllocator\PoolManager.cpp">
-      <Filter>Source\Pool Allocator</Filter>
-    </ClCompile>
+    <ClCompile Include="..\..\..\Source\ResourceManager\ResourceManager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\Source\Memory\MemoryWrapper.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Memory\StackAllocator\IStackAllocator.h">
-      <Filter>Source\Stack Allocator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Memory\StackAllocator\StackAllocator_SingleBuffer.h">
-      <Filter>Source\Stack Allocator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Memory\MemorySettings.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Memory\PoolAllocator\PoolAllocator.h">
-      <Filter>Source\Pool Allocator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Memory\TestScenarios.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Memory\PoolTest.h">
-      <Filter>Source</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Memory\StackAllocator\StackAllocator_DoubleEnded.h">
-      <Filter>Source\Stack Allocator</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\Memory\PoolAllocator\PoolManager.h">
-      <Filter>Source\Pool Allocator</Filter>
-    </ClInclude>
+    <ClInclude Include="..\..\..\Source\ResourceManager\ResourceManager.h" />
   </ItemGroup>
 </Project>

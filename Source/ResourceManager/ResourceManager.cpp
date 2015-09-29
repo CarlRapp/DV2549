@@ -1,9 +1,9 @@
 #include "ResourceManager.h"
+#include <assert.h>
 
 ResourceManager::ResourceManager()
-	: m_totalMemorySize(0), m_currentAllocatedMemory(0)
+	: m_totalMemorySize(0), m_currentAllocatedMemory(0), m_loadedChunks(0)
 {
-
 
 }
 
@@ -56,4 +56,21 @@ bool ResourceManager::UnloadAsset()
 
 
 	return true;
+}
+
+void ResourceManager::CreateChunkPool(unsigned int _nChunks, unsigned int _chunkSize)
+{
+	//	If the current loaded chunks
+	if(m_loadedChunks)
+	{
+		m_currentAllocatedMemory	-=	m_loadedChunks->GetMaxMemory();
+		delete m_loadedChunks;
+	}
+		
+
+	m_loadedChunks = new PoolAllocator(_nChunks, _chunkSize);
+	m_currentAllocatedMemory += m_loadedChunks->GetMaxMemory();
+	
+	//	No more memory...
+	assert(m_currentAllocatedMemory > m_totalMemorySize);
 }
