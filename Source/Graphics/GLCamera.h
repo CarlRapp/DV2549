@@ -2,6 +2,8 @@
 #ifndef GLCAMERA_H
 #define GLCAMERA_H
 
+#include <SDL/SDL.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -9,7 +11,7 @@
 
 
 
-class GLCamera
+class DECLSPEC GLCamera
 {
 private:
 
