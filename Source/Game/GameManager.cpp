@@ -66,7 +66,10 @@ void GameManager::SetRenderDistance(unsigned int _chunkDistance)
 	m_tileRenderDistance	=	_chunkDistance/2;
 
 	//	Delete the current pool from the resourcemanager
-	ResourceManager::GetInstance().CreateChunkPool(6, 6);
+	unsigned int numberOfChunks = (_chunkDistance*2+1) ^ 2;
+
+
+	ResourceManager::GetInstance().CreateChunkPool(numberOfChunks, 6);
 
 	LoadSurroundingChunks();
 }
