@@ -1,48 +1,15 @@
 #include <GLEW/glew.h>
 #include "GraphicsWrapper.h"
+#include <Memory/MemoryWrapper.h>
 
 using namespace Graphics;
 
-const int m_tileSize = 2;
-const int m_patchSize = 16;
+static const int m_tileSize = 4;
+static const int m_patchSize = 16;
 
 float m_terrainVertices[3 * 3 * 2 * (m_patchSize / m_tileSize) * (m_patchSize / m_tileSize)];
 float m_terrainTex[2 * 3 * 2 * (m_patchSize / m_tileSize) * (m_patchSize / m_tileSize)];
 float m_terrainNormals[3 * 3 * 2 * (m_patchSize / m_tileSize) * (m_patchSize / m_tileSize)];
-
-// float vertices[] = 
-// {
-// 	0,  0, 0,
-// 	0, 0, tileSize,
-// 	tileSize, 0, 0,
-// 
-// 	0,  0, tileSize,
-// 	tileSize, 0, 0,
-// 	tileSize, 0, tileSize,
-// 	
-// };
-
-float texCoords[] = 
-{
-	0, 0,
-	0, 1,
-	1, 0,
-
- 	0, 1,
- 	1, 0,
- 	1, 1,
-};
-
-float normals[] = 
-{
-	0, 1, 0,
-	0, 1, 0,
-	0, 1, 0,
-
-	0, 1, 0,
-	0, 1, 0,
-	0, 1, 0,
-};
 
 GraphicsWrapper& GraphicsWrapper::GetInstance()
 {
@@ -348,17 +315,48 @@ void Graphics::GraphicsWrapper::LookCameraY(float _val)			{m_camera->Pitch(_val)
 
 void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int tileX, int tileY)
 {
-	TerrainPatch* newItem = new TerrainPatch;
+	unsigned int X = tileX + m_level.X / 2;
+	unsigned int Y = tileY + m_level.Y / 2;
 
-	//newItem->TextureDiffuse = LoadTextureRAW("../../../Content/test.raw", 512, 512, 3);
-	newItem->TextureHeight = LoadTexturePatch("../../../Content/height.pak", tileY + m_level.Y / 2, tileX + m_level.X / 2, 1);
-	newItem->TextureNormal = LoadTexturePatch("../../../Content/norm.pak", tileY + m_level.Y / 2, tileX + m_level.X / 2, 3);
-	newItem->TextureDiffuse = LoadTexturePatch("../../../Content/diffuse.pak", tileY + m_level.Y / 2, tileX + m_level.X / 2, 3);
-	newItem->ModelMatrix = glm::translate(glm::vec3(tileX*m_patchSize, 0, tileY*m_patchSize));
+	if (m_mapStatus[Y][X] == 0)
+	{
+		Memory::MemoryWrapper* mem = Memory::MemoryWrapper::GetInstance();
+		TerrainPatch* newItem = static_cast<TerrainPatch*>(mem->GetPoolManager()->pnew(sizeof(TerrainPatch)));
 
-	m_terrainPatches.push_back(newItem);
+		newItem->TextureHeight = LoadTexturePatch("../../../Content/height.pak", Y, X, 1);
+		newItem->TextureNormal = LoadTexturePatch("../../../Content/norm.pak", Y, X, 3);
+		newItem->TextureDiffuse = LoadTexturePatch("../../../Content/diffuse.pak", Y, X, 3);
+		newItem->ModelMatrix = glm::translate(glm::vec3(tileX*m_patchSize, 0, tileY*m_patchSize));
+
+		m_terrainPatches.push_back(newItem);
+		m_mapStatus[Y][X] = newItem;
+	}
 }
 
+
+void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(int tileX, int tileY)
+{
+	unsigned int X = tileX + m_level.X / 2;
+	unsigned int Y = tileY + m_level.Y / 2;
+
+	glDeleteTextures(1, &m_mapStatus[Y][X]->TextureDiffuse);
+	glDeleteTextures(1, &m_mapStatus[Y][X]->TextureNormal);
+	glDeleteTextures(1, &m_mapStatus[Y][X]->TextureHeight);
+
+	Memory::MemoryWrapper* mem = Memory::MemoryWrapper::GetInstance();
+	
+
+	for (int i = 0; i < m_terrainPatches.size(); i++)
+	{
+		if (m_terrainPatches[i] == m_mapStatus[Y][X])
+		{
+			m_terrainPatches.erase(m_terrainPatches.begin() + i);
+			mem->GetPoolManager()->pdelete(m_mapStatus[Y][X], sizeof(TerrainPatch));
+			m_mapStatus[Y][X] = 0;
+			break;
+		}
+	}
+}
 
 GLuint Graphics::GraphicsWrapper::LoadTexturePatch(const char * _filename, unsigned int _x, unsigned int _y, short _colorSlots)
 {
@@ -509,7 +507,6 @@ void Graphics::GraphicsWrapper::ConvertToPAK(const char * _filename, GLint _widt
 	free(data);
 }
 
-
 void Graphics::GraphicsWrapper::LoadTerrainPatch()
 {
 	//Load patch structure once
@@ -600,22 +597,6 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 			}
 		}
 
-// 		0, 0, 0,
-// 		0, 0, 1,
-// 		1, 0, 0,
-// 
-// 		0, 0, 1,
-// 		1, 0, 0,
-// 		1, 0, 1,
-
-// 		0, 0,
-// 		0, 1,
-// 		1, 0,
-// 
-// 		0, 1,
-// 		1, 0,
-// 		1, 1,
-
 		int f = i - size3x;
 		int g = t - size2x;
 
@@ -682,6 +663,19 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 		}
 	}
 	*/
+
+	Memory::MemoryWrapper* mem = Memory::MemoryWrapper::GetInstance();
+	mem->GetPoolManager()->CreatePool(m_level.X*m_level.Y,sizeof(TerrainPatch));
+
+	m_mapStatus.resize(m_level.Y);
+	for (int i = 0; i < m_mapStatus.size(); i++)
+	{
+		m_mapStatus[i].resize(m_level.X);
+		for (int j = 0; j < m_mapStatus[i].size(); j++)
+		{
+			m_mapStatus[i][j] = 0;
+		}
+	}
 
 	GLenum error = glGetError();
 	if (error != GL_NO_ERROR)

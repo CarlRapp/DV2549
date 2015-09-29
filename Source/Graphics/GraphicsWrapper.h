@@ -16,9 +16,6 @@
 
 namespace Graphics
 {
-
-
-
 	class DECLSPEC GraphicsWrapper
 	{
 		struct RenderInstance
@@ -45,6 +42,8 @@ namespace Graphics
 			GLuint			TextureNormal;
 			GLuint			TextureDiffuse;
 		};
+
+		
 
 		struct Level
 		{
@@ -76,6 +75,7 @@ namespace Graphics
 		void LookCameraY(float _val);
 
 		void LoadSingleTexturePatch(int tileX, int tileY);
+		void DeleteSingleTexturePatch(int tileX, int tileY);
 		Level* GetLevel() { return &m_level; }
 
 		GLuint LoadTexturePatch(const char * _filename, unsigned int _x, unsigned int _y, short _colorSlots);
@@ -107,6 +107,8 @@ namespace Graphics
 		GLuint m_terrainVBO[3];
 
 		Level m_level;
+
+		std::vector<std::vector<TerrainPatch*>> m_mapStatus;
 	};
 }
 

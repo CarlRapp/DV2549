@@ -168,7 +168,7 @@ int main(int argc, char** argv)
 	graphics.LoadTerrainPatch();
 	gameManager.SetGraphicsWrapper(&graphics);
 
-	graphics.GetCamera()->SetPosition(glm::vec3(0, 2, 0));
+	graphics.GetCamera()->SetPosition(glm::vec3(0, 0, 0));
 	graphics.GetCamera()->SetForward(glm::vec3(0, 0, -1));
 
 	
