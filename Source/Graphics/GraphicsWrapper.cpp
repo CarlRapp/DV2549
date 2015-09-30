@@ -15,7 +15,7 @@ GraphicsWrapper::GraphicsWrapper()
 	m_level.X = m_level.Width / m_level.ChunkSize;
 	m_level.Y = m_level.Height / m_level.ChunkSize;
 
-	unsigned int width = m_level.m_patchSize / m_level.m_tileSize;
+	unsigned int width = m_level.PatchSize / m_level.TileSize;
 
 	m_level.Vertices = (3 * 3 * 2 * width * width);
 	m_level.TexCoords = (2 * 3 * 2 * width * width);
@@ -91,9 +91,9 @@ void GraphicsWrapper::Render()
 	}
 }
 
+
 void GraphicsWrapper::RenderTerrain()
 {
-	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	m_shaderSTD->UseProgram();
 
@@ -133,6 +133,7 @@ void GraphicsWrapper::RenderTerrain()
 	}
 
 	glBindVertexArray(0);
+	glUseProgram(0);
 
 	SDL_GL_SwapWindow(m_window);
 
@@ -166,7 +167,7 @@ void Graphics::GraphicsWrapper::InitializeGLEW()
 	//GLEW
 	glewExperimental = GL_TRUE;
 	glewInit();
-	glClearColor(0.9f, 0.1f, 0.9f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glViewport(0, 0, m_width, m_height);
 	glDepthRange(0.0, 1.0);
 	glEnable(GL_DEPTH_TEST);
@@ -320,7 +321,7 @@ void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int tileX, int tileY)
 		newItem->TextureHeight = LoadTexturePatch("../../../Content/height.pak", Y, X, 1);
 		newItem->TextureNormal = LoadTexturePatch("../../../Content/norm.pak", Y, X, 3);
 		newItem->TextureDiffuse = LoadTexturePatch("../../../Content/diffuse.pak", Y, X, 3);
-		newItem->ModelMatrix = glm::translate(glm::vec3(tileX*m_level.m_patchSize, 0, tileY*m_level.m_patchSize));
+		newItem->ModelMatrix = glm::translate(glm::vec3(tileX*m_level.PatchSize, 0, tileY*m_level.PatchSize));
 
 		m_terrainPatches.push_back(newItem);
 		m_mapStatus[Y][X] = newItem;
@@ -508,14 +509,14 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 	{
 		int i = 0;
 		int t = 0;
-		unsigned int width = m_level.m_patchSize / m_level.m_tileSize;
+		unsigned int width = m_level.PatchSize / m_level.TileSize;
 
 		for (unsigned int row = 0; row < width; row++)
 		{
 			for (unsigned int col = 0; col < width; col++)
 			{
-				float offsetX = (float)((row)*m_level.m_tileSize);
-				float offsetZ = (float)((col)*m_level.m_tileSize);
+				float offsetX = (float)((row)*m_level.TileSize);
+				float offsetZ = (float)((col)*m_level.TileSize);
 
 				m_level.TerrainNormals[i] = 0;
 				m_level.TerrainVertices[i++] = 0 + offsetX; 
@@ -524,28 +525,28 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 				m_level.TerrainNormals[i] = 0;
 				m_level.TerrainVertices[i++] = 0 + offsetZ; 
 
-				m_level.TerrainTex[t++] = float(offsetX) / (m_level.m_patchSize);
-				m_level.TerrainTex[t++] = float(offsetZ) / (m_level.m_patchSize);
+				m_level.TerrainTex[t++] = float(offsetX) / (m_level.PatchSize);
+				m_level.TerrainTex[t++] = float(offsetZ) / (m_level.PatchSize);
 				
 				m_level.TerrainNormals[i] = 0;
 				m_level.TerrainVertices[i++] = 0 + offsetX; 
 				m_level.TerrainNormals[i] = 1;
 				m_level.TerrainVertices[i++] = 0; 
 				m_level.TerrainNormals[i] = 0;
-				m_level.TerrainVertices[i++] = m_level.m_tileSize + offsetZ;
+				m_level.TerrainVertices[i++] = m_level.TileSize + offsetZ;
 
-				m_level.TerrainTex[t++] = float(offsetX) / (m_level.m_patchSize );
-				m_level.TerrainTex[t++] = float(m_level.m_tileSize+offsetZ) / (m_level.m_patchSize );
+				m_level.TerrainTex[t++] = float(offsetX) / (m_level.PatchSize );
+				m_level.TerrainTex[t++] = float(m_level.TileSize+offsetZ) / (m_level.PatchSize );
 				
 				m_level.TerrainNormals[i] = 0;
-				m_level.TerrainVertices[i++] = m_level.m_tileSize + offsetX;
+				m_level.TerrainVertices[i++] = m_level.TileSize + offsetX;
 				m_level.TerrainNormals[i] = 1;
 				m_level.TerrainVertices[i++] = 0; 
 				m_level.TerrainNormals[i] = 0;
 				m_level.TerrainVertices[i++] = 0 + offsetZ;
 				
-				m_level.TerrainTex[t++] = float(m_level.m_tileSize + offsetX) / (m_level.m_patchSize );
-				m_level.TerrainTex[t++] = float(offsetZ) / (m_level.m_patchSize);
+				m_level.TerrainTex[t++] = float(m_level.TileSize + offsetX) / (m_level.PatchSize );
+				m_level.TerrainTex[t++] = float(offsetZ) / (m_level.PatchSize);
 				
 				
 
@@ -554,34 +555,34 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 				m_level.TerrainNormals[i] = 1;
 				m_level.TerrainVertices[i++] = 0;
 				m_level.TerrainNormals[i] = 0;
-				m_level.TerrainVertices[i++] = m_level.m_tileSize + offsetZ;
+				m_level.TerrainVertices[i++] = m_level.TileSize + offsetZ;
 
-				m_level.TerrainTex[t++] = float( offsetX) / (m_level.m_patchSize );
-				m_level.TerrainTex[t++] = float(m_level.m_tileSize + offsetZ) / (m_level.m_patchSize );
+				m_level.TerrainTex[t++] = float( offsetX) / (m_level.PatchSize );
+				m_level.TerrainTex[t++] = float(m_level.TileSize + offsetZ) / (m_level.PatchSize );
 				
 				
 				
 				m_level.TerrainNormals[i] = 0;
-				m_level.TerrainVertices[i++] = m_level.m_tileSize + offsetX;
+				m_level.TerrainVertices[i++] = m_level.TileSize + offsetX;
 				m_level.TerrainNormals[i] = 1;
 				m_level.TerrainVertices[i++] = 0;
 				m_level.TerrainNormals[i] = 0;
 				m_level.TerrainVertices[i++] = 0 + offsetZ;
 
-				m_level.TerrainTex[t++] = float(m_level.m_tileSize + offsetX) / (m_level.m_patchSize );
-				m_level.TerrainTex[t++] = float(offsetZ) / (m_level.m_patchSize );
+				m_level.TerrainTex[t++] = float(m_level.TileSize + offsetX) / (m_level.PatchSize );
+				m_level.TerrainTex[t++] = float(offsetZ) / (m_level.PatchSize );
 				
 				
 				
 				m_level.TerrainNormals[i] = 0;
-				m_level.TerrainVertices[i++] = m_level.m_tileSize + offsetX;
+				m_level.TerrainVertices[i++] = m_level.TileSize + offsetX;
 				m_level.TerrainNormals[i] = 1;
 				m_level.TerrainVertices[i++] = 0;
 				m_level.TerrainNormals[i] = 0;
-				m_level.TerrainVertices[i++] = m_level.m_tileSize + offsetZ;
+				m_level.TerrainVertices[i++] = m_level.TileSize + offsetZ;
 
-				m_level.TerrainTex[t++] = float(m_level.m_tileSize + offsetX) / (m_level.m_patchSize );
-				m_level.TerrainTex[t++] = float(m_level.m_tileSize + offsetZ) / (m_level.m_patchSize );
+				m_level.TerrainTex[t++] = float(m_level.TileSize + offsetX) / (m_level.PatchSize );
+				m_level.TerrainTex[t++] = float(m_level.TileSize + offsetZ) / (m_level.PatchSize );
 
 			}
 		}
@@ -628,27 +629,27 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 	ConvertToPAK("../../../Content/diffuse.raw", m_level.Width, m_level.Height, 3);
 	ConvertToPAK("../../../Content/norm.raw", m_level.Width, m_level.Height, 3);
 	ConvertToPAK("../../../Content/height.raw", m_level.Width, m_level.Height, 1);
-	/*
-	int x = m_level.X / 2;
-	int y = m_level.Y / 2;
-
-	// 	//Add individual patch data, like different heightmap
-	for (int i = -x; i < x; i++)
-	{
-		for (int j = -y; j < y; j++)
-		{
-			TerrainPatch* newItem = new TerrainPatch;
-
-			//newItem->TextureDiffuse = LoadTextureRAW("../../../Content/test.raw", 512, 512, 3);
-			newItem->TextureHeight = LoadTexturePatch("../../../Content/height.pak", j + m_level.Y / 2, i + m_level.X / 2, 1);
-			newItem->TextureNormal = LoadTexturePatch("../../../Content/norm.pak", j + m_level.Y / 2, i + m_level.X / 2, 3);
-			newItem->TextureDiffuse = LoadTexturePatch("../../../Content/diffuse.pak", j + m_level.Y / 2, i + m_level.X / 2, 3);
-			newItem->ModelMatrix = glm::translate(glm::vec3(i*m_patchSize, 0, j*m_patchSize));
-
-			m_terrainPatches.push_back(newItem);
-		}
-	}
-	*/
+	
+// 	int x = m_level.X / 2;
+// 	int y = m_level.Y / 2;
+// 
+// 	// 	//Add individual patch data, like different heightmap
+// 	for (int i = -x; i < x; i++)
+// 	{
+// 		for (int j = -y; j < y; j++)
+// 		{
+// 			TerrainPatch* newItem = new TerrainPatch;
+// 
+// 			//newItem->TextureDiffuse = LoadTextureRAW("../../../Content/test.raw", 512, 512, 3);
+// 			newItem->TextureHeight = LoadTexturePatch("../../../Content/height.pak", j + m_level.Y / 2, i + m_level.X / 2, 1);
+// 			newItem->TextureNormal = LoadTexturePatch("../../../Content/norm.pak", j + m_level.Y / 2, i + m_level.X / 2, 3);
+// 			newItem->TextureDiffuse = LoadTexturePatch("../../../Content/diffuse.pak", j + m_level.Y / 2, i + m_level.X / 2, 3);
+// 			newItem->ModelMatrix = glm::translate(glm::vec3(i*m_level.PatchSize, 0, j*m_level.PatchSize));
+// 
+// 			m_terrainPatches.push_back(newItem);
+// 		}
+// 	}
+	
 
 	Memory::MemoryWrapper* mem = Memory::MemoryWrapper::GetInstance();
 	mem->GetPoolManager()->CreatePool(m_level.X*m_level.Y,sizeof(TerrainPatch));

@@ -8,7 +8,7 @@ in vec3 tcNormal[];
 
 //in mat4 tcModelM[];
 
-//out vec3 tePosition;
+out vec3 tePosition;
 out vec2 teTex;
 out vec3 teNormal;
 
@@ -36,7 +36,7 @@ void main()
     vec2 tc2 = gl_TessCoord.z * tcTex[2];  
     teTex = tc0 + tc1 + tc2;
 
-	float height = (texture(gTexHeight, tc0).x + texture(gTexHeight, tc1).x+ texture(gTexHeight, tc2).x)/3;
+	float height = texture(gTexHeight, teTex).x;
 
 	//rounding hack to not crack tessellation
 	if(teTex.x == 0 || teTex.x == 1 || teTex.y == 0 || teTex.y == 1)
@@ -44,12 +44,12 @@ void main()
 		int rounded = int(height * 2);
 		height = (float(rounded)/2);
 	}
-
-	pos.y += (height)*2;
+	
+	pos.y += (height);
 
     gl_Position = gPV * vec4(pos, 1);
 
 	teNormal    = texture(gTexNormal, teTex).xyz;
 	
-   // tePosition  = vec3(gVM * vec4(pos,1.0)).xyz;
+    tePosition  = pos;
 }

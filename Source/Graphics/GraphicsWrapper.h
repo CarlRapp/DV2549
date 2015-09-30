@@ -47,8 +47,8 @@ namespace Graphics
 
 		struct Level
 		{
-			int m_tileSize = 2;
-			int m_patchSize = 16;
+			int TileSize = 2;
+			int PatchSize = 16;
 
 			unsigned int Width		= 10000;
 			unsigned int Height		= 5000;
