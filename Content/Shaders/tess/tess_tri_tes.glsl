@@ -1,14 +1,3 @@
-//#version 410 core
-
-//layout(triangles, equal_spacing, ccw) in;
-
-//void main()
-//{	
-//	gl_Position.xyzw =	gl_in[0].gl_Position.xyzw * gl_TessCoord.x +
-//						gl_in[1].gl_Position.xyzw * gl_TessCoord.y +
-//						gl_in[2].gl_Position.xyzw * gl_TessCoord.z;
-//}
-
 #version 450
 
 layout(triangles, equal_spacing, ccw) in;
@@ -19,7 +8,7 @@ in vec3 tcNormal[];
 
 //in mat4 tcModelM[];
 
-//out vec3 tePosition;
+out vec3 tePosition;
 out vec2 teTex;
 out vec3 teNormal;
 
@@ -49,18 +38,18 @@ void main()
 
 	float height = texture(gTexHeight, teTex).x;
 
+	//rounding hack to not crack tessellation
 	if(teTex.x == 0 || teTex.x == 1 || teTex.y == 0 || teTex.y == 1)
 	{
-		//rounding hack to not crack tessellation
 		int rounded = int(height * 2);
 		height = (float(rounded)/2);
 	}
-
-	pos.y += (height)*2;
+	
+	pos.y += (height);
 
     gl_Position = gPV * vec4(pos, 1);
 
 	teNormal    = texture(gTexNormal, teTex).xyz;
 	
-   // tePosition  = vec3(gVM * vec4(pos,1.0)).xyz;
+    tePosition  = pos;
 }
