@@ -10,7 +10,7 @@ uniform sampler2D gTexDiffuse;
 uniform vec3 gEyePos;
 
 vec3 LightDirection = vec3(1,-1.5,0.0);
-vec3 LightDiffuse = vec3(0.7,0.7,0.7);
+vec3 LightDiffuse = vec3(0.9,0.9,0.9);
 vec3 Lightspecular = vec3(0.2,0.2,0.2);
 float Shininess = 2;
 
@@ -34,6 +34,9 @@ void main()
 
 	//}
 
+	float d = distance(facetPosition,gEyePos);
+
+
 	outColor.xyz = texColor * diff + spec;
-	outColor.w = 1.0;
+	outColor.w = max(1-pow(d,3)*0.000001,0);
 }

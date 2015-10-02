@@ -153,11 +153,12 @@ int main(int argc, char** argv)
 	Graphics::GraphicsWrapper graphics = Graphics::GraphicsWrapper::GetInstance();
 
 	//SETTINGS
-	int width = 1024;
-	int height = 840;
+	int width = 1980;
+	int height = 1024;
 	int centerX = width/2;
 	int centerY = height/2;
-	const float cameraSpeed = 9.0f;
+	const float cameraSpeed = 14.0f;
+	int cameraMaxY = 20;
 	const float mouseSensitivity = 3.0f;
 	bool lockMouse = true;
 
@@ -243,6 +244,14 @@ int main(int argc, char** argv)
 					graphics.MoveCameraStrafe(-cameraSpeed*deltaTime);
 				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_D))
 					graphics.MoveCameraStrafe(cameraSpeed*deltaTime);
+
+				glm::vec3 camPos = graphics.GetCamera()->GetPosition();
+
+				if (camPos.y < cameraMaxY)
+				{
+					camPos.y = cameraMaxY;
+					graphics.GetCamera()->SetPosition(camPos);
+				}
 
 				//MOUSELOOK
 				int dx = input.GetMouse()->GetdX();
