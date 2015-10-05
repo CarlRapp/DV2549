@@ -167,12 +167,12 @@ void Graphics::GraphicsWrapper::InitializeGLEW()
 	//GLEW
 	glewExperimental = GL_TRUE;
 	glewInit();
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.1f, 0.0f);
 	glViewport(0, 0, m_width, m_height);
-	glDepthRange(0.0, 1.0);
+	glDepthRange(0.0, 100.0);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_TEXTURE_2D);
 
 	//CAMERA
@@ -310,22 +310,22 @@ void Graphics::GraphicsWrapper::LookCameraY(float _val)			{m_camera->Pitch(_val)
 
 void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int tileX, int tileY)
 {
-	unsigned int X = tileX + m_level.X / 2;
-	unsigned int Y = tileY + m_level.Y / 2;
-
-	if (m_mapStatus[Y][X] == 0)
-	{
-		Memory::MemoryWrapper* mem = Memory::MemoryWrapper::GetInstance();
-		TerrainPatch* newItem = static_cast<TerrainPatch*>(mem->GetPoolManager()->pnew(sizeof(TerrainPatch)));
-
-		newItem->TextureHeight = LoadTexturePatch("../../../Content/height.pak", Y, X, 1);
-		newItem->TextureNormal = LoadTexturePatch("../../../Content/norm.pak", Y, X, 3);
-		newItem->TextureDiffuse = LoadTexturePatch("../../../Content/diffuse.pak", Y, X, 3);
-		newItem->ModelMatrix = glm::translate(glm::vec3(tileX*m_level.PatchSize, 0, tileY*m_level.PatchSize));
-
-		m_terrainPatches.push_back(newItem);
-		m_mapStatus[Y][X] = newItem;
-	}
+// 	unsigned int X = tileX + m_level.X / 2;
+// 	unsigned int Y = tileY + m_level.Y / 2;
+// 
+// 	if (m_mapStatus[Y][X] == 0)
+// 	{
+// 		Memory::MemoryWrapper* mem = Memory::MemoryWrapper::GetInstance();
+// 		TerrainPatch* newItem = static_cast<TerrainPatch*>(mem->GetPoolManager()->pnew(sizeof(TerrainPatch)));
+// 
+// 		newItem->TextureHeight = LoadTexturePatch("../../../Content/height.pak", Y, X, 1);
+// 		newItem->TextureNormal = LoadTexturePatch("../../../Content/norm.pak", Y, X, 3);
+// 		newItem->TextureDiffuse = LoadTexturePatch("../../../Content/diffuse.pak", Y, X, 3);
+// 		newItem->ModelMatrix = glm::translate(glm::vec3(tileX*m_level.PatchSize, 0, tileY*m_level.PatchSize));
+// 
+// 		m_terrainPatches.push_back(newItem);
+// 		m_mapStatus[Y][X] = newItem;
+// 	}
 }
 
 
@@ -630,25 +630,25 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 	ConvertToPAK("../../../Content/norm.raw", m_level.Width, m_level.Height, 3);
 	ConvertToPAK("../../../Content/height.raw", m_level.Width, m_level.Height, 1);
 	
-// 	int x = m_level.X / 2;
-// 	int y = m_level.Y / 2;
-// 
-// 	// 	//Add individual patch data, like different heightmap
-// 	for (int i = -x; i < x; i++)
-// 	{
-// 		for (int j = -y; j < y; j++)
-// 		{
-// 			TerrainPatch* newItem = new TerrainPatch;
-// 
-// 			//newItem->TextureDiffuse = LoadTextureRAW("../../../Content/test.raw", 512, 512, 3);
-// 			newItem->TextureHeight = LoadTexturePatch("../../../Content/height.pak", j + m_level.Y / 2, i + m_level.X / 2, 1);
-// 			newItem->TextureNormal = LoadTexturePatch("../../../Content/norm.pak", j + m_level.Y / 2, i + m_level.X / 2, 3);
-// 			newItem->TextureDiffuse = LoadTexturePatch("../../../Content/diffuse.pak", j + m_level.Y / 2, i + m_level.X / 2, 3);
-// 			newItem->ModelMatrix = glm::translate(glm::vec3(i*m_level.PatchSize, 0, j*m_level.PatchSize));
-// 
-// 			m_terrainPatches.push_back(newItem);
-// 		}
-// 	}
+	int x = m_level.X / 2;
+	int y = m_level.Y / 2;
+
+	// 	//Add individual patch data, like different heightmap
+	for (int i = -x; i < x; i++)
+	{
+		for (int j = -y; j < y; j++)
+		{
+			TerrainPatch* newItem = new TerrainPatch;
+
+			//newItem->TextureDiffuse = LoadTextureRAW("../../../Content/test.raw", 512, 512, 3);
+			newItem->TextureHeight = LoadTexturePatch("../../../Content/height.pak", j + m_level.Y / 2, i + m_level.X / 2, 1);
+			newItem->TextureNormal = LoadTexturePatch("../../../Content/norm.pak", j + m_level.Y / 2, i + m_level.X / 2, 3);
+			newItem->TextureDiffuse = LoadTexturePatch("../../../Content/diffuse.pak", j + m_level.Y / 2, i + m_level.X / 2, 3);
+			newItem->ModelMatrix = glm::translate(glm::vec3(i*m_level.PatchSize, 0, j*m_level.PatchSize));
+
+			m_terrainPatches.push_back(newItem);
+		}
+	}
 	
 
 	Memory::MemoryWrapper* mem = Memory::MemoryWrapper::GetInstance();
