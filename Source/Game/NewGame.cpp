@@ -153,8 +153,8 @@ int main(int argc, char** argv)
 	Graphics::GraphicsWrapper graphics = Graphics::GraphicsWrapper::GetInstance();
 
 	//SETTINGS
-	int width = 1980;
-	int height = 1024;
+	int width = 1680;
+	int height = 920;
 	int centerX = width/2;
 	int centerY = height/2;
 	const float cameraSpeed = 14.0f;
@@ -172,7 +172,9 @@ int main(int argc, char** argv)
 	graphics.GetCamera()->SetPosition(glm::vec3(0, 5, 0));
 	graphics.GetCamera()->SetForward(glm::vec3(0, 0, -1));
 
-	
+	//std::string FPS;
+	std::string fpsString = "fps";
+	graphics.AddString(&fpsString, glm::vec3(0, 1, 0), 2, 0, 0);
 
 	//INIT INPUT
 	Input::InputWrapper input = Input::InputWrapper::GetInstance();
@@ -189,6 +191,9 @@ int main(int argc, char** argv)
 		beginFrame = SDL_GetTicks();
 		double frameTime = (beginFrame - endFrame)*0.001;
 		endFrame = beginFrame;
+
+		fpsString = "DT: " + std::to_string(frameTime);
+		fpsString += "\nFPS: " + std::to_string( int(1.0 / frameTime));
 
 		while (frameTime > 0.0)
 		{
