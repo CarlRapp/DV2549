@@ -175,8 +175,11 @@ int main(int argc, char** argv)
 	//std::string FPS;
 	std::string fpsString = "fps";
 	std::string infoString = "FOG (F)\nMOUSE LOCK (G)";
+	std::string renderDistance = "asd";
+
 	graphics.AddString(&fpsString, glm::vec3(0, 1, 0), 2, 0, 0);
-	graphics.AddString(&infoString, glm::vec3(1, 1, 0), 2, 0, -100);
+	graphics.AddString(&renderDistance, glm::vec3(0, 1, 0), 2, 0, -50);
+	graphics.AddString(&infoString, glm::vec3(1, 1, 0), 2, 0, -150);
 	
 	ResourceManager::GetInstance().SetGraphicsWrapper(&graphics);
 	gameManager.SetRenderDistance(1);
@@ -285,9 +288,23 @@ int main(int argc, char** argv)
 
 				//CHANGE RENDER DISTANCE
 				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_RIGHT) == Input::PRESSED)
-					gameManager.SetRenderDistance(gameManager.GetRenderDistance() + 1);
-				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_LEFT) == Input::PRESSED)
-					gameManager.SetRenderDistance(gameManager.GetRenderDistance() - 1);
+				{
+					int currentDistance = gameManager.GetRenderDistance();
+					gameManager.SetRenderDistance(currentDistance + 1);
+
+					renderDistance = "RENDER DISTANCE ";
+					renderDistance.append(std::to_string(currentDistance));
+
+				}
+				else if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_LEFT) == Input::PRESSED)
+				{
+					int currentDistance = gameManager.GetRenderDistance();
+					gameManager.SetRenderDistance(currentDistance - 1);
+
+					renderDistance = "RENDER DISTANCE ";
+					renderDistance.append(std::to_string(currentDistance));
+				}
+					
 					
 			}
 
