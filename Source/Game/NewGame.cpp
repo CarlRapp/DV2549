@@ -153,8 +153,8 @@ int main(int argc, char** argv)
 	Graphics::GraphicsWrapper graphics = Graphics::GraphicsWrapper::GetInstance();
 
 	//SETTINGS
-	int width = 1980;
-	int height = 1024;
+	int width = 1280;
+	int height = 720;
 	int centerX = width/2;
 	int centerY = height/2;
 	const float cameraSpeed = 14.0f;
@@ -173,7 +173,8 @@ int main(int argc, char** argv)
 	graphics.GetCamera()->SetForward(glm::vec3(0, 0, -1));
 
 	
-
+	ResourceManager::GetInstance().SetGraphicsWrapper(&graphics);
+	gameManager.SetRenderDistance(1);
 	//INIT INPUT
 	Input::InputWrapper input = Input::InputWrapper::GetInstance();
 	input.GetMouse()->SetCenter(centerX, centerY);

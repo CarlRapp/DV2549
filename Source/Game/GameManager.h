@@ -8,7 +8,7 @@
 #else
 #endif
 #include <SDL/SDL.h>
-#include "Graphics/GraphicsWrapper.h"
+#include "ResourceManager/ResourceManager.h"
 
 	class GameManager
 	{

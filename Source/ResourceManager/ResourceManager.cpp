@@ -58,19 +58,68 @@ bool ResourceManager::UnloadAsset()
 	return true;
 }
 
-void ResourceManager::CreateChunkPool(unsigned int _nChunks, unsigned int _chunkSize)
+void ResourceManager::CreateChunkPool(unsigned int _nChunks)
 {
 	//	If the current loaded chunks
 	if(m_loadedChunks)
 	{
-		m_currentAllocatedMemory	-=	m_loadedChunks->GetMaxMemory();
+		m_currentAllocatedMemory	-=	m_loadedChunksN*sizeof(LoadedChunk);
 		delete m_loadedChunks;
 	}
 		
 
-	m_loadedChunks = new PoolAllocator(_nChunks, _chunkSize);
-	m_currentAllocatedMemory += m_loadedChunks->GetMaxMemory();
+	//m_loadedChunks = new PoolAllocator(_nChunks, sizeof(LoadedChunk));
+	//for (int n = 0; n < _nChunks; ++n)
+	//	m_loadedChunks->Allocate();
+
+	m_loadedChunks = new LoadedChunk[_nChunks];
+
+	std::vector<Graphics::GraphicsWrapper::TerrainPatch*> newPatchPointers;
+
+	m_currentAllocatedMemory += _nChunks*sizeof(LoadedChunk);
+	for (int n = 0; n < _nChunks; ++n)
+	{
+		newPatchPointers.push_back(&m_loadedChunks[n].GraphicsPatch);
+		m_loadedChunks[n].LastSeen = _nChunks;
+	}
+	m_graphicsWrapper->ReloadTerrainPatches(newPatchPointers);
+		
+	m_loadedChunksN = _nChunks;
 	
 	//	No more memory...
 	assert(m_currentAllocatedMemory > m_totalMemorySize);
+}
+
+void ResourceManager::LoadChunk(int tileX, int tileZ)
+{
+	//Graphics::GraphicsWrapper::TerrainPatch* tileMemLoc = 0;// (Graphics::GraphicsWrapper::TerrainPatch*)
+
+	LoadedChunk* lastSeenChunk = &m_loadedChunks[0];
+	int lastSeen = m_loadedChunks[0].LastSeen;
+	//	Go through and update LastSeen
+	for (int n = 0; n < m_loadedChunksN; ++n)
+	{
+		LoadedChunk* tChunk = &m_loadedChunks[n];
+
+		//	Update LastSeen
+		if (tileX == tChunk->X && tileZ == tChunk->Z)
+			tChunk->LastSeen++;
+
+		if (tChunk->LastSeen < lastSeen)
+		{
+			lastSeenChunk = &m_loadedChunks[n];
+			lastSeen = tChunk->LastSeen;
+			tChunk->LastSeen++;
+		}
+	}
+
+	if (lastSeenChunk)
+	{
+		m_graphicsWrapper->LoadSingleTexturePatch(tileX, tileZ, &lastSeenChunk->GraphicsPatch);
+		lastSeenChunk->X = tileX;
+		lastSeenChunk->Z = tileZ;
+		lastSeenChunk->LastSeen = 0;
+	}
+	else
+		std::printf("MAX NUMBER OF LOADED CHUNKS!\n");
 }

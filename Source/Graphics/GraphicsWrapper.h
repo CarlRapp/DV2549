@@ -35,20 +35,14 @@ namespace Graphics
 			std::vector<RenderInstance*> Instances;
 		};
 
-		struct TerrainPatch
-		{
-			glm::mat4		ModelMatrix;
-			GLuint			TextureHeight;
-			GLuint			TextureNormal;
-			GLuint			TextureDiffuse;
-		};
+
 
 		
 
 		struct Level
 		{
-			int TileSize = 4;
-			int PatchSize = 24;
+			int TileSize = 2;
+			int PatchSize = 16;
 
 			unsigned int Width		= 10000;
 			unsigned int Height		= 5000;
@@ -63,6 +57,14 @@ namespace Graphics
 			unsigned int Vertices;
 			unsigned int TexCoords;
 			unsigned int Normals;
+		};
+	public:
+		struct TerrainPatch
+		{
+			glm::mat4		ModelMatrix;
+			GLuint			TextureHeight;
+			GLuint			TextureNormal;
+			GLuint			TextureDiffuse;
 		};
 
 
@@ -85,7 +87,8 @@ namespace Graphics
 		void LookCameraX(float _val);
 		void LookCameraY(float _val);
 
-		void LoadSingleTexturePatch(int tileX, int tileY);
+		void ReloadTerrainPatches(std::vector<TerrainPatch*> newPatches);
+		void LoadSingleTexturePatch(int tileX, int tileY, TerrainPatch* memLocation);
 		void DeleteSingleTexturePatch(int tileX, int tileY);
 		Level* GetLevel() { return &m_level; }
 
@@ -95,6 +98,8 @@ namespace Graphics
 		SDL_Window* GetWindow() { return m_window; };
 
 		GLCamera*	GetCamera() { return m_camera; }
+
+
 
 	private:
 		GraphicsWrapper();

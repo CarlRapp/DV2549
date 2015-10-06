@@ -308,24 +308,26 @@ void Graphics::GraphicsWrapper::MoveCameraStrafe(float _val)	{m_camera->Strafe(_
 void Graphics::GraphicsWrapper::LookCameraX(float _val)			{m_camera->Yaw(_val);}
 void Graphics::GraphicsWrapper::LookCameraY(float _val)			{m_camera->Pitch(_val);}
 
-void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int tileX, int tileY)
+void Graphics::GraphicsWrapper::ReloadTerrainPatches(std::vector<TerrainPatch*> newPatches)
 {
-// 	unsigned int X = tileX + m_level.X / 2;
-// 	unsigned int Y = tileY + m_level.Y / 2;
-// 
-// 	if (m_mapStatus[Y][X] == 0)
-// 	{
-// 		Memory::MemoryWrapper* mem = Memory::MemoryWrapper::GetInstance();
-// 		TerrainPatch* newItem = static_cast<TerrainPatch*>(mem->GetPoolManager()->pnew(sizeof(TerrainPatch)));
-// 
-// 		newItem->TextureHeight = LoadTexturePatch("../../../Content/height.pak", Y, X, 1);
-// 		newItem->TextureNormal = LoadTexturePatch("../../../Content/norm.pak", Y, X, 3);
-// 		newItem->TextureDiffuse = LoadTexturePatch("../../../Content/diffuse.pak", Y, X, 3);
-// 		newItem->ModelMatrix = glm::translate(glm::vec3(tileX*m_level.PatchSize, 0, tileY*m_level.PatchSize));
-// 
-// 		m_terrainPatches.push_back(newItem);
-// 		m_mapStatus[Y][X] = newItem;
-// 	}
+	m_terrainPatches.clear();
+
+	for (int n = 0; n < newPatches.size(); ++n)
+		m_terrainPatches.push_back(newPatches[n]);
+}
+
+void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int tileX, int tileY, TerrainPatch* memLocation)
+{
+ 	unsigned int X = tileX + m_level.X / 2;
+ 	unsigned int Y = tileY + m_level.Y / 2;
+ 
+ 	//Memory::MemoryWrapper* mem = Memory::MemoryWrapper::GetInstance();
+ 	//TerrainPatch* newItem = static_cast<TerrainPatch*>(mem->GetPoolManager()->pnew(sizeof(TerrainPatch)));
+ 
+	memLocation->TextureHeight = LoadTexturePatch("../../../Content/height.pak", Y, X, 1);
+	memLocation->TextureNormal = LoadTexturePatch("../../../Content/norm.pak", Y, X, 3);
+	memLocation->TextureDiffuse = LoadTexturePatch("../../../Content/diffuse.pak", Y, X, 3);
+	memLocation->ModelMatrix = glm::translate(glm::vec3(tileX*m_level.PatchSize, 0, tileY*m_level.PatchSize));
 }
 
 
@@ -632,7 +634,7 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 	
 	int x = m_level.X / 2;
 	int y = m_level.Y / 2;
-
+	/*
 	// 	//Add individual patch data, like different heightmap
 	for (int i = -x; i < x; i++)
 	{
@@ -650,7 +652,7 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 		}
 	}
 	
-
+*/
 	Memory::MemoryWrapper* mem = Memory::MemoryWrapper::GetInstance();
 	mem->GetPoolManager()->CreatePool(m_level.X*m_level.Y,sizeof(TerrainPatch));
 

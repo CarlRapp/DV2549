@@ -14,6 +14,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Input", "Input\Input.vcxproj", "{9CBEB33A-B752-47FA-8995-C717E1BC509D}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Graphics", "Graphics\Graphics.vcxproj", "{3085A924-6090-4B51-AA10-1B9C1F523C48}"
+	ProjectSection(ProjectDependencies) = postProject
+		{65AC8BCF-B67B-43E5-B01D-A1D462E629CA} = {65AC8BCF-B67B-43E5-B01D-A1D462E629CA}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Memory", "Memory\Memory.vcxproj", "{65AC8BCF-B67B-43E5-B01D-A1D462E629CA}"
 EndProject
@@ -34,6 +37,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tess", "tess", "{A0ED3F85-F
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ResourceManager", "ResourceManager\ResourceManager.vcxproj", "{A462FC23-77AE-40F7-B9B5-161A317A6B32}"
 	ProjectSection(ProjectDependencies) = postProject
+		{3085A924-6090-4B51-AA10-1B9C1F523C48} = {3085A924-6090-4B51-AA10-1B9C1F523C48}
 		{65AC8BCF-B67B-43E5-B01D-A1D462E629CA} = {65AC8BCF-B67B-43E5-B01D-A1D462E629CA}
 	EndProjectSection
 EndProject
