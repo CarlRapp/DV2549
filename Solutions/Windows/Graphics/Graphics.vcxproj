@@ -21,12 +21,15 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\Source\Graphics\GLCamera.h" />
     <ClInclude Include="..\..\..\Source\Graphics\GLShaderHandler.h" />
+    <ClInclude Include="..\..\..\Source\Graphics\GLText.h" />
     <ClInclude Include="..\..\..\Source\Graphics\GraphicsWrapper.h" />
+    <ClInclude Include="..\..\..\Source\Graphics\TextRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Source\Graphics\GLCamera.cpp" />
     <ClCompile Include="..\..\..\Source\Graphics\GLShaderHandler.cpp" />
     <ClCompile Include="..\..\..\Source\Graphics\GraphicsWrapper.cpp" />
+    <ClCompile Include="..\..\..\Source\Graphics\TextRenderer.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{3085A924-6090-4B51-AA10-1B9C1F523C48}</ProjectGuid>

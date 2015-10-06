@@ -172,6 +172,11 @@ int main(int argc, char** argv)
 	graphics.GetCamera()->SetPosition(glm::vec3(0, 5, 0));
 	graphics.GetCamera()->SetForward(glm::vec3(0, 0, -1));
 
+	//std::string FPS;
+	std::string fpsString = "fps";
+	std::string infoString = "FOG (F)\nMOUSE LOCK (G)";
+	graphics.AddString(&fpsString, glm::vec3(0, 1, 0), 2, 0, 0);
+	graphics.AddString(&infoString, glm::vec3(1, 1, 0), 2, 0, -100);
 	
 	ResourceManager::GetInstance().SetGraphicsWrapper(&graphics);
 	gameManager.SetRenderDistance(1);
@@ -190,6 +195,9 @@ int main(int argc, char** argv)
 		beginFrame = SDL_GetTicks();
 		double frameTime = (beginFrame - endFrame)*0.001;
 		endFrame = beginFrame;
+
+		fpsString = "DT: " + std::to_string(frameTime);
+		fpsString += "\nFPS: " + std::to_string( int(1.0 / frameTime));
 
 		while (frameTime > 0.0)
 		{
@@ -246,8 +254,8 @@ int main(int argc, char** argv)
 				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_D))
 					graphics.MoveCameraStrafe(cameraSpeed*deltaTime);
 
+				//CAMERA MAX HEIGHT
 				glm::vec3 camPos = graphics.GetCamera()->GetPosition();
-
 				if (camPos.y < cameraMaxY)
 				{
 					camPos.y = cameraMaxY;
@@ -255,18 +263,25 @@ int main(int argc, char** argv)
 				}
 
 				//MOUSELOOK
-				int dx = input.GetMouse()->GetdX();
-				int dy = input.GetMouse()->GetdY();
-				if (abs(dx) > 0.0f)
-					graphics.LookCameraX(-dx*deltaTime*mouseSensitivity);
-				if (abs(dy) > 0.0f)
-					graphics.LookCameraY(-dy*deltaTime*mouseSensitivity);
+				if(lockMouse)
+				{
+					int dx = input.GetMouse()->GetdX();
+					int dy = input.GetMouse()->GetdY();
+					if (abs(dx) > 0.0f)
+						graphics.LookCameraX(-dx*deltaTime*mouseSensitivity);
+					if (abs(dy) > 0.0f)
+						graphics.LookCameraY(-dy*deltaTime*mouseSensitivity);
+				}
 
 				//LOCK MOUSE IN CENTER
 				if(lockMouse)
 					SDL_WarpMouseInWindow(graphics.GetWindow(), centerX, centerY);
-				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_F))
+				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_G) == Input::PRESSED)
 					lockMouse = !lockMouse;
+
+				//TOGGLE FOG
+				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_F) == Input::PRESSED)
+					graphics.FogToggle();
 			}
 
 			gameManager.Update(deltaTime);

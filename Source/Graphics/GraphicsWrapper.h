@@ -92,14 +92,18 @@ namespace Graphics
 		void DeleteSingleTexturePatch(int tileX, int tileY);
 		Level* GetLevel() { return &m_level; }
 
-		GLuint LoadTexturePatch(const char * _filename, unsigned int _x, unsigned int _y, short _colorSlots);
 		GLuint LoadTextureRAW(const char * _filename, unsigned int _width, unsigned int _height, short _colorSlots);
+		GLuint LoadTexturePatch(const char * _filename, unsigned int _x, unsigned int _y, short _colorSlots);
 		void ConvertToPAK(const char * _filename, GLint _width, GLint _height, short colorSlots);
 		SDL_Window* GetWindow() { return m_window; };
 
 		GLCamera*	GetCamera() { return m_camera; }
 
 
+
+		unsigned int AddString(std::string* _text, glm::vec3 _color, float _scale, float _x, float _y);
+
+		void FogToggle() { m_fog = !m_fog; }
 
 	private:
 		GraphicsWrapper();
@@ -112,7 +116,8 @@ namespace Graphics
 
 		GLuint m_shaderVSStandard;
 
-		ShaderHandler* m_shaderSTD;
+		ShaderHandler* m_terrainShader;
+		
 
 		GLCamera* m_camera;
 
@@ -125,6 +130,8 @@ namespace Graphics
 		Level m_level;
 
 		std::vector<std::vector<TerrainPatch*>> m_mapStatus;
+
+		bool m_fog = true;
 	};
 }
 
