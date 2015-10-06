@@ -2,7 +2,7 @@
 #include <assert.h>
 
 ResourceManager::ResourceManager()
-	: m_totalMemorySize(0), m_currentAllocatedMemory(0), m_loadedChunks(0)
+	: m_totalMemorySize(0), m_currentAllocatedMemory(0), m_loadedChunks(0), m_ticks(0)
 {
 
 }
@@ -80,7 +80,7 @@ void ResourceManager::CreateChunkPool(unsigned int _nChunks)
 	for (int n = 0; n < _nChunks; ++n)
 	{
 		newPatchPointers.push_back(&m_loadedChunks[n].GraphicsPatch);
-		m_loadedChunks[n].LastSeen = _nChunks;
+		m_loadedChunks[n].Popularity = n;
 	}
 	m_graphicsWrapper->ReloadTerrainPatches(newPatchPointers);
 		
@@ -94,32 +94,43 @@ void ResourceManager::LoadChunk(int tileX, int tileZ)
 {
 	//Graphics::GraphicsWrapper::TerrainPatch* tileMemLoc = 0;// (Graphics::GraphicsWrapper::TerrainPatch*)
 
-	LoadedChunk* lastSeenChunk = &m_loadedChunks[0];
-	int lastSeen = m_loadedChunks[0].LastSeen;
-	//	Go through and update LastSeen
-	for (int n = 0; n < m_loadedChunksN; ++n)
+	LoadedChunk*	chunkToOverwrite = &m_loadedChunks[GetLeastPopularChunkIndex()];
+	if (chunkToOverwrite)
 	{
-		LoadedChunk* tChunk = &m_loadedChunks[n];
-
-		//	Update LastSeen
-		if (tileX == tChunk->X && tileZ == tChunk->Z)
-			tChunk->LastSeen++;
-
-		if (tChunk->LastSeen < lastSeen)
-		{
-			lastSeenChunk = &m_loadedChunks[n];
-			lastSeen = tChunk->LastSeen;
-			tChunk->LastSeen++;
-		}
-	}
-
-	if (lastSeenChunk)
-	{
-		m_graphicsWrapper->LoadSingleTexturePatch(tileX, tileZ, &lastSeenChunk->GraphicsPatch);
-		lastSeenChunk->X = tileX;
-		lastSeenChunk->Z = tileZ;
-		lastSeenChunk->LastSeen = 0;
+		m_graphicsWrapper->DeleteSingleTexturePatch(chunkToOverwrite->X, chunkToOverwrite->Z);
+		m_graphicsWrapper->LoadSingleTexturePatch(tileX, tileZ, &chunkToOverwrite->GraphicsPatch);
+		chunkToOverwrite->X = tileX;
+		chunkToOverwrite->Z = tileZ;
+		chunkToOverwrite->Popularity = SDL_GetTicks();
 	}
 	else
 		std::printf("MAX NUMBER OF LOADED CHUNKS!\n");
+}
+
+void ResourceManager::Update(float _dt)
+{
+	for (int n = 0; n < m_loadedChunksN; ++n)
+		m_loadedChunks[n].Popularity += 1;
+		
+
+	m_ticks++;
+}
+
+int ResourceManager::GetLeastPopularChunkIndex()
+{
+	int lowestPopularity = INT_MAX;
+	int returnIndex = 0;
+	for (int n = 0; n < m_loadedChunksN; ++n)
+	{
+		LoadedChunk tChunk = m_loadedChunks[n];
+
+		if (tChunk.Popularity < lowestPopularity)
+		{
+			lowestPopularity = tChunk.Popularity;
+			returnIndex = n;
+		}
+	}
+
+
+	return returnIndex;
 }

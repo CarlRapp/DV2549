@@ -20,6 +20,7 @@
 		void Update(float dt);
 
 		void SetRenderDistance(unsigned int _chunkDistance);
+		int GetRenderDistance() { return m_tileRenderDistance; }
 
 	private:
 		void LoadSurroundingChunks();

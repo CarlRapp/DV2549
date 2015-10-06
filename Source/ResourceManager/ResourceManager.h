@@ -22,7 +22,7 @@ public:
 	struct LoadedChunk
 	{
 		Graphics::GraphicsWrapper::TerrainPatch GraphicsPatch;
-		size_t LastSeen;
+		size_t Popularity;
 		size_t X, Z;
 	};
 
@@ -40,6 +40,9 @@ public:
 	void CreateChunkPool(unsigned int _nChunks);
 	void LoadChunk(int tileX, int tileY);
 
+	void Update(float _dt);
+	
+
 private:
 	ResourceManager();
 
@@ -50,11 +53,13 @@ private:
 	Graphics::GraphicsWrapper*	m_graphicsWrapper;
 
 
+	size_t			m_lastCheckedChunk;
 	size_t			m_loadedChunksN;
 	LoadedChunk*	m_loadedChunks;
 	
+	int	GetLeastPopularChunkIndex();
 
-
+	size_t m_ticks;
 };
 
 

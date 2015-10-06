@@ -22,11 +22,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Memory", "Memory\Memory.vcx
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shaders", "Shaders", "{0A67CA97-C991-4E39-960B-BD0EE952D655}"
 	ProjectSection(SolutionItems) = preProject
-		..\..\Content\Shaders\fs2D.glsl = ..\..\Content\Shaders\fs2D.glsl
 		..\..\Content\Shaders\fsStandard.glsl = ..\..\Content\Shaders\fsStandard.glsl
-		..\..\Content\Shaders\text_fragment.glsl = ..\..\Content\Shaders\text_fragment.glsl
-		..\..\Content\Shaders\text_vertex.glsl = ..\..\Content\Shaders\text_vertex.glsl
-		..\..\Content\Shaders\vs2D.glsl = ..\..\Content\Shaders\vs2D.glsl
 		..\..\Content\Shaders\vsStandard.glsl = ..\..\Content\Shaders\vsStandard.glsl
 	EndProjectSection
 EndProject

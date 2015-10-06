@@ -47,6 +47,17 @@ void GameManager::SetRenderDistance(unsigned int _chunkDistance)
 
 
 	ResourceManager::GetInstance().CreateChunkPool(numberOfChunks);
+	glm::vec3	currentPos = m_graphicsWrapper->GetCamera()->GetPosition();
+	int currentX = (int)(currentPos.x / m_graphicsWrapper->GetLevel()->PatchSize);
+	int currentZ = (int)(currentPos.z / m_graphicsWrapper->GetLevel()->PatchSize);
+
+	if (currentX != m_oldPosX || currentZ != m_oldPosZ)
+	{
+		m_oldPosX = currentX;
+		m_oldPosZ = currentZ;
+
+		LoadSurroundingChunks();
+	}
 
 	LoadSurroundingChunks();
 }

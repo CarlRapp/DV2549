@@ -169,8 +169,8 @@ int main(int argc, char** argv)
 	graphics.LoadTerrainPatch();
 	gameManager.SetGraphicsWrapper(&graphics);
 
-	graphics.GetCamera()->SetPosition(glm::vec3(0, 5, 0));
-	graphics.GetCamera()->SetForward(glm::vec3(0, 0, -1));
+	graphics.GetCamera()->SetPosition(glm::vec3(graphics.GetLevel()->PatchSize*0.5f, 5, graphics.GetLevel()->PatchSize*0.5f));
+	graphics.GetCamera()->SetForward(glm::vec3(0, -0.9, -1));
 
 	//std::string FPS;
 	std::string fpsString = "fps";
@@ -282,9 +282,17 @@ int main(int argc, char** argv)
 				//TOGGLE FOG
 				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_F) == Input::PRESSED)
 					graphics.FogToggle();
+
+				//CHANGE RENDER DISTANCE
+				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_RIGHT) == Input::PRESSED)
+					gameManager.SetRenderDistance(gameManager.GetRenderDistance() + 1);
+				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_LEFT) == Input::PRESSED)
+					gameManager.SetRenderDistance(gameManager.GetRenderDistance() - 1);
+					
 			}
 
 			gameManager.Update(deltaTime);
+			ResourceManager::GetInstance().Update(deltaTime);
 		}
 
 		graphics.RenderTerrain();
