@@ -329,16 +329,23 @@ void Graphics::GraphicsWrapper::ReloadTerrainPatches(std::vector<TerrainPatch*> 
 
 void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int tileX, int tileY, TerrainPatch* memLocation)
 {
- 	unsigned int X = tileX + m_level.X / 2;
- 	unsigned int Y = tileY + m_level.Y / 2;
- 
- 	//Memory::MemoryWrapper* mem = Memory::MemoryWrapper::GetInstance();
- 	//TerrainPatch* newItem = static_cast<TerrainPatch*>(mem->GetPoolManager()->pnew(sizeof(TerrainPatch)));
- 
+	unsigned int X = tileX + m_level.X / 2;
+	unsigned int Y = tileY + m_level.Y / 2;
+
+	//Memory::MemoryWrapper* mem = Memory::MemoryWrapper::GetInstance();
+	//TerrainPatch* newItem = static_cast<TerrainPatch*>(mem->GetPoolManager()->pnew(sizeof(TerrainPatch)));
+
 	memLocation->TextureHeight = LoadTexturePatch("../../../Content/height.pak", Y, X, 1);
 	memLocation->TextureNormal = LoadTexturePatch("../../../Content/norm.pak", Y, X, 3);
 	memLocation->TextureDiffuse = LoadTexturePatch("../../../Content/diffuse.pak", Y, X, 3);
 	memLocation->ModelMatrix = glm::translate(glm::vec3(tileX*m_level.PatchSize, 0, tileY*m_level.PatchSize));
+}
+
+void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(TerrainPatch* memLocation)
+{
+	glDeleteTextures(1, &memLocation->TextureDiffuse);
+	glDeleteTextures(1, &memLocation->TextureNormal);
+	glDeleteTextures(1, &memLocation->TextureHeight);
 }
 
 

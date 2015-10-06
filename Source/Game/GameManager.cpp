@@ -38,12 +38,13 @@ void GameManager::Update(float dt)
 
 void GameManager::SetRenderDistance(unsigned int _chunkDistance)
 {
+	int a = 2;
 	//	Divide the requested render distance
 	//	since we go from -m_tileRenderDistance to m_tileRenderDistance
-	m_tileRenderDistance	= _chunkDistance <= 1 ? 1 :_chunkDistance/2;
+	m_tileRenderDistance	= _chunkDistance <= 1 ? 1 : _chunkDistance;
 
 	//	Delete the current pool from the resourcemanager
-	unsigned int numberOfChunks = (_chunkDistance*2+1)*(_chunkDistance * 2 + 1);
+	unsigned int numberOfChunks = (m_tileRenderDistance *2+1)*(m_tileRenderDistance * 2 + 1);
 
 
 	ResourceManager::GetInstance().CreateChunkPool(numberOfChunks);
@@ -55,8 +56,6 @@ void GameManager::SetRenderDistance(unsigned int _chunkDistance)
 	{
 		m_oldPosX = currentX;
 		m_oldPosZ = currentZ;
-
-		LoadSurroundingChunks();
 	}
 
 	LoadSurroundingChunks();

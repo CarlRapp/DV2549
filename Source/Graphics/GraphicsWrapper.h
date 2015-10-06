@@ -90,6 +90,7 @@ namespace Graphics
 		void ReloadTerrainPatches(std::vector<TerrainPatch*> newPatches);
 		void LoadSingleTexturePatch(int tileX, int tileY, TerrainPatch* memLocation);
 		void DeleteSingleTexturePatch(int tileX, int tileY);
+		void DeleteSingleTexturePatch(TerrainPatch* memLocation);
 		Level* GetLevel() { return &m_level; }
 
 		GLuint LoadTextureRAW(const char * _filename, unsigned int _width, unsigned int _height, short _colorSlots);
