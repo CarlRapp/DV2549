@@ -130,6 +130,8 @@ void GraphicsWrapper::RenderTerrain()
 		m_terrainShader->SetUniformV("gPV", *m_camera->GetProjection() * *m_camera->GetView());
 		m_terrainShader->SetUniformV("gPVM", pvm);
 
+		m_terrainShader->SetUniformV("gFog", m_fog);
+
 		glBindVertexArray(m_terrainVAO);
 
 		glDrawArrays(GL_PATCHES, 0, m_level.Vertices);

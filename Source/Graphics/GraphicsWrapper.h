@@ -98,6 +98,8 @@ namespace Graphics
 
 		unsigned int AddString(std::string* _text, glm::vec3 _color, float _scale, float _x, float _y);
 
+		void FogToggle() { m_fog = !m_fog; }
+
 	private:
 		GraphicsWrapper();
 
@@ -123,6 +125,8 @@ namespace Graphics
 		Level m_level;
 
 		std::vector<std::vector<TerrainPatch*>> m_mapStatus;
+
+		bool m_fog = true;
 	};
 }
 
