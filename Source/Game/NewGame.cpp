@@ -62,7 +62,7 @@ static int TestDoubleEnded(void* ptr)
 
 void TempTests()
 {
-	int stackSize = 1024;
+	/*int stackSize = 1024;
 	int alignment = 4;
 	//Memory::StackAllocator_DoubleEnded* stack = new Memory::StackAllocator_DoubleEnded(stackSize, alignment);
 	Memory::MemoryWrapper::GetInstance()->CreateGlobalStack(stackSize, alignment);
@@ -102,7 +102,7 @@ void TempTests()
 	}
 	printf("\n");
 
-	system("pause");
+	system("pause");*/
 }
 
 int main(int argc, char** argv)
@@ -151,6 +151,8 @@ int main(int argc, char** argv)
 	}
 	GameManager	gameManager = GameManager::GetInstance();
 	Graphics::GraphicsWrapper graphics = Graphics::GraphicsWrapper::GetInstance();
+	Memory::MemoryWrapper* memory = Memory::MemoryWrapper::GetInstance();
+	memory->CreateGlobalStack(graphics.GetLevel()->ChunkSize*graphics.GetLevel()->ChunkSize * 3, 8);
 
 	//SETTINGS
 	int width = 1280;
@@ -158,6 +160,7 @@ int main(int argc, char** argv)
 	int centerX = width/2;
 	int centerY = height/2;
 	const float cameraSpeed = 14.0f;
+	float speedMultiplier = 1.0f;
 	int cameraMaxY = 20;
 	const float mouseSensitivity = 3.0f;
 	bool lockMouse = true;
@@ -169,13 +172,16 @@ int main(int argc, char** argv)
 	graphics.LoadTerrainPatch();
 	gameManager.SetGraphicsWrapper(&graphics);
 
+	//	Create a stack that fits the fucking world textures.
+	
+
 	graphics.GetCamera()->SetPosition(glm::vec3(graphics.GetLevel()->PatchSize*0.5f, 5, graphics.GetLevel()->PatchSize*0.5f));
 	graphics.GetCamera()->SetForward(glm::vec3(0, -0.9, -1));
 
 	//std::string FPS;
 	std::string fpsString = "fps";
 	std::string infoString = "FOG (F)\nMOUSE LOCK (G)";
-	std::string renderDistance = "asd";
+	std::string renderDistance = "RENDER DISTANCE 1";
 
 	graphics.AddString(&fpsString, glm::vec3(0, 1, 0), 2, 0, 0);
 	graphics.AddString(&renderDistance, glm::vec3(0, 1, 0), 2, 0, -50);
@@ -247,15 +253,20 @@ int main(int argc, char** argv)
 				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_ESCAPE))
 					quit = true;
 
+				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_LSHIFT) == Input::DOWN)
+					speedMultiplier = 4;
+				else
+					speedMultiplier = 1;
+
 				//WASD MOVEMENT
 				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_W))
-					graphics.MoveCameraForward(-cameraSpeed*deltaTime);
+					graphics.MoveCameraForward(-cameraSpeed*deltaTime*speedMultiplier);
 				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_S))
-					graphics.MoveCameraForward(cameraSpeed*deltaTime);
+					graphics.MoveCameraForward(cameraSpeed*deltaTime*speedMultiplier);
 				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_A))
-					graphics.MoveCameraStrafe(-cameraSpeed*deltaTime);
+					graphics.MoveCameraStrafe(-cameraSpeed*deltaTime*speedMultiplier);
 				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_D))
-					graphics.MoveCameraStrafe(cameraSpeed*deltaTime);
+					graphics.MoveCameraStrafe(cameraSpeed*deltaTime*speedMultiplier);
 
 				//CAMERA MAX HEIGHT
 				glm::vec3 camPos = graphics.GetCamera()->GetPosition();
@@ -293,7 +304,7 @@ int main(int argc, char** argv)
 					gameManager.SetRenderDistance(currentDistance + 1);
 
 					renderDistance = "RENDER DISTANCE ";
-					renderDistance.append(std::to_string(currentDistance));
+					renderDistance.append(std::to_string(gameManager.GetRenderDistance()));
 
 				}
 				else if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_LEFT) == Input::PRESSED)
@@ -302,7 +313,7 @@ int main(int argc, char** argv)
 					gameManager.SetRenderDistance(currentDistance - 1);
 
 					renderDistance = "RENDER DISTANCE ";
-					renderDistance.append(std::to_string(currentDistance));
+					renderDistance.append(std::to_string(gameManager.GetRenderDistance()));
 				}
 					
 					
@@ -313,6 +324,7 @@ int main(int argc, char** argv)
 		}
 
 		graphics.RenderTerrain();
+		memory->ResetStacks();
 	}
 	
 	return 0;

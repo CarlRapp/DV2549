@@ -1,5 +1,6 @@
 #include <GLEW/glew.h>
 #include "GraphicsWrapper.h"
+#include <Memory/StackAllocator/StackAllocator_SingleBuffer.h>
 #include <Memory/MemoryWrapper.h>
 #include "TextRenderer.h"
 
@@ -121,7 +122,6 @@ void GraphicsWrapper::RenderTerrain()
 
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, m_terrainPatches[i]->TextureDiffuse);
-
 
 		glm::mat4 vm = *m_camera->GetView() * m_terrainPatches[i]->ModelMatrix;
 		glm::mat4 pvm = *m_camera->GetProjection() * vm;
@@ -358,7 +358,7 @@ void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(int tileX, int tileY)
 	glDeleteTextures(1, &m_mapStatus[Y][X]->TextureNormal);
 	glDeleteTextures(1, &m_mapStatus[Y][X]->TextureHeight);
 
-	Memory::MemoryWrapper* mem = Memory::MemoryWrapper::GetInstance();
+	/*Memory::MemoryWrapper* mem = Memory::MemoryWrapper::GetInstance();
 	
 
 	for (int i = 0; i < m_terrainPatches.size(); i++)
@@ -370,11 +370,13 @@ void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(int tileX, int tileY)
 			m_mapStatus[Y][X] = 0;
 			break;
 		}
-	}
+	}*/
 }
 
 GLuint Graphics::GraphicsWrapper::LoadTexturePatch(const char * _filename, unsigned int _x, unsigned int _y, short _colorSlots)
 {
+	Memory::StackAllocator_SingleBuffer* tempStack = (Memory::StackAllocator_SingleBuffer*)Memory::MemoryWrapper::GetInstance()->GetGlobalStack();
+
 	GLuint texture;
 	GLubyte * data;
 	FILE * file;
@@ -385,8 +387,9 @@ GLuint Graphics::GraphicsWrapper::LoadTexturePatch(const char * _filename, unsig
 		printf("missing file %s\n", _filename);
 		return 0;
 	}
-
-	data = (GLubyte*)malloc(m_level.ChunkSize * m_level.ChunkSize * _colorSlots);
+	//data = (GLubyte*)malloc(m_level.ChunkSize * m_level.ChunkSize * _colorSlots);
+	size_t memoryTop = tempStack->GetTop();
+	data = (GLubyte*)tempStack->Reserve(m_level.ChunkSize * m_level.ChunkSize * _colorSlots);
 
 	//long location = ((m_level.ChunkSize*m_level.ChunkSize*m_level.X*_y) + m_level.ChunkSize*m_level.ChunkSize*_x) * _colorSlots;
 	long location = (m_level.ChunkSize*m_level.ChunkSize)*(m_level.X*_x + _y) * _colorSlots;
@@ -408,7 +411,8 @@ GLuint Graphics::GraphicsWrapper::LoadTexturePatch(const char * _filename, unsig
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	free(data);
+	//free(data);
+	tempStack->FreeTo(memoryTop);
 
 	return texture;
 
@@ -416,6 +420,8 @@ GLuint Graphics::GraphicsWrapper::LoadTexturePatch(const char * _filename, unsig
 
 void Graphics::GraphicsWrapper::ConvertToPAK(const char * _filename, GLint _width, GLint _height, short _colorSlots)
 {
+	Memory::StackAllocator_SingleBuffer* tempStack = (Memory::StackAllocator_SingleBuffer*)Memory::MemoryWrapper::GetInstance()->GetGlobalStack();
+
 	GLubyte * data;
 	FILE * textureFile;
 	FILE * pakFile;
@@ -452,7 +458,9 @@ void Graphics::GraphicsWrapper::ConvertToPAK(const char * _filename, GLint _widt
 		return;
 	}
 
-	data = (GLubyte*)malloc(m_level.ChunkSize * _colorSlots);
+	//data = (GLubyte*)malloc(m_level.ChunkSize * _colorSlots);
+	size_t tempTop = tempStack->GetTop();
+	data = (GLubyte*)tempStack->Reserve(m_level.ChunkSize * _colorSlots);//(GLubyte*)malloc(m_level.ChunkSize * m_level.ChunkSize * _colorSlots);
 
 	unsigned int x = _width / m_level.ChunkSize;
 	unsigned int y = _height / m_level.ChunkSize;
@@ -481,7 +489,8 @@ void Graphics::GraphicsWrapper::ConvertToPAK(const char * _filename, GLint _widt
 	fclose(textureFile);
 	fclose(pakFile);
 
-	free(data);
+	//free(data);
+	tempStack->FreeTo(tempTop);
 }
 
 unsigned int Graphics::GraphicsWrapper::AddString(std::string* _text, glm::vec3 _color, float _scale, float _x, float _y)
@@ -637,8 +646,8 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 		}
 	}
 	
-*/
-	Memory::MemoryWrapper* mem = Memory::MemoryWrapper::GetInstance();
+
+	Memory::MemoryWrapper mem = Memory::MemoryWrapper::GetInstance();
 	mem->GetPoolManager()->CreatePool(m_level.X*m_level.Y,sizeof(TerrainPatch));
 
 	m_mapStatus.resize(m_level.Y);
@@ -650,7 +659,7 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 			m_mapStatus[i][j] = 0;
 		}
 	}
-
+	*/
 	GLenum error = glGetError();
 	if (error != GL_NO_ERROR)
 	{
