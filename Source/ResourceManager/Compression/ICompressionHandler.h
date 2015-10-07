@@ -27,7 +27,7 @@ namespace Compression
 		/*	Loads data from a file, compresses the data, and stores the compressed data in a file.
 		Returns a pointer to the compressed data if the compression of it succeeded.
 		Returns a NULL pointer if the compression of the data failed. */
-		virtual FILE* compress_fileToFile(FILE *source, FILE *dest, unsigned int nBytes = -1) = 0;
+		virtual int compress_fileToFile(FILE *source, FILE *dest, unsigned int nBytes = -1) = 0;
 
 		/*	Loads data from a file, compresses the data, and stores the compressed data in the memory.
 		Returns a pointer to the compressed data if the compression of it succeeded.
@@ -54,7 +54,7 @@ namespace Compression
 		/*	Loads data from a file, decompresses the data, and stores the decompressed data in the memory.
 		Returns a pointer to the compressed data if the compression of it succeeded.
 		Returns a NULL pointer if the compression of the data failed. */
-		virtual void* deCompress_fileToMemory(FILE *source, void *dest, unsigned int nBytes = -1) = 0;
+		virtual int deCompress_fileToMemory(FILE *source, unsigned int sourceOffset, void *dest, unsigned int nBytes = -1) = 0;
 	};
 }
 #endif

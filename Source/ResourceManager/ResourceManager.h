@@ -14,31 +14,6 @@
 #include "Memory/PoolAllocator/PoolAllocator.h"
 #include "Compression\CompressionHandler_zlib.h"
 
-
-class DECLSPEC ResourceManager
-{
-public:
-	~ResourceManager();
-	static ResourceManager& GetInstance();
-
-	bool InitResourceManager(size_t _totalMemorySize);
-
-	bool LoadAsset();
-	bool UnloadAsset();
-
-
-class DECLSPEC ResourceManager
-{
-public:
-	~ResourceManager();
-	static ResourceManager& GetInstance();
-
-	bool InitResourceManager(size_t _totalMemorySize);
-
-	bool LoadAsset();
-	bool UnloadAsset();
-
-
 class DECLSPEC ResourceManager
 {
 public:

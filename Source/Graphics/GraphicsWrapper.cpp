@@ -22,7 +22,7 @@ GraphicsWrapper::GraphicsWrapper()
 	m_level.X = m_level.Width / m_level.ChunkSize;
 	m_level.Y = m_level.Height / m_level.ChunkSize;
 		
-	//compressionHandler = new Compression::CompressionHandler_zlib(); // Temp. instantiation until integration with ResourceManager.
+	compressionHandler = new Compression::CompressionHandler_zlib(); // Temp. instantiation until integration with ResourceManager.
 }
 
 GraphicsWrapper::~GraphicsWrapper()
@@ -440,8 +440,36 @@ GLuint Graphics::GraphicsWrapper::LoadTextureRAW(const char * _filename, unsigne
 
 }
 
+
 void Graphics::GraphicsWrapper::ConvertToPAK(const char * _filename, GLint _width, GLint _height, short _colorSlots)
 {
+	// ************* Test code: ************
+
+	//PackageReaderWriter *pakRW = new PackageReaderWriter(compressionHandler); // compressionHandler);
+
+	// Test #1: Create a package:
+
+	//std::vector<std::string> filePaths;
+	//filePaths.push_back("../../../Content/diffuse.raw");
+	//filePaths.push_back("../../../Content/norm.raw");
+	//filePaths.push_back("../../../Content/height.raw");
+	//pakRW->createPackageFromFiles("../../../Content/texturePak_lz4.pak", filePaths);
+
+	// Test #2: Load files within package:
+
+	//char *loadedDiffuseData = new char[150000000]; //[145686528];
+	//pakRW->loadPackageData("../../../Content/texturePak_lz4.pak", loadedDiffuseData, 0, 0);
+
+	//char *loadedNormData = new char[150000000]; //[145686528];
+	//pakRW->loadPackageData("../../../Content/texturePak_lz4.pak", loadedNormData, 1, 1);
+
+	//char *loadedHeightData = new char[50000000]; //[145686528];
+	//pakRW->loadPackageData("../../../Content/texturePak_lz4.pak", loadedHeightData, 2, 2);
+
+	//delete pakRW;
+	
+	// *************************************
+
 	GLubyte * data;
 	FILE * textureFile;
 	FILE * pakFile;
@@ -477,16 +505,17 @@ void Graphics::GraphicsWrapper::ConvertToPAK(const char * _filename, GLint _widt
 		printf("unknown error converting file\n");
 		return;
 	}
-
-	data = (GLubyte*)malloc(m_level.ChunkSize * _colorSlots);
-
+	
 	unsigned int x = _width / m_level.ChunkSize;
 	unsigned int y = _height / m_level.ChunkSize;
+
+	data = (GLubyte*)malloc(m_level.ChunkSize * _colorSlots); // *x * y);
 
 	printf("Converting...\n");
 	//Attempts to read 1xChunksize at a time, and write to pak file
 	
-	unsigned int bytesToCompress = 0;
+	unsigned long bytesHandled = 0;
+	unsigned long elementsRead = 0;
 	for (unsigned int k = 0; k < y;k++)
 	{
 		for (unsigned int i = 0; i < x; i++)
@@ -500,13 +529,15 @@ void Graphics::GraphicsWrapper::ConvertToPAK(const char * _filename, GLint _widt
 
 				fseek(textureFile, offset, SEEK_SET);
 				fread(data, m_level.ChunkSize * _colorSlots, 1, textureFile);
-				bytesToCompress += m_level.ChunkSize * _colorSlots; //fwrite(data, 1, m_level.ChunkSize * _colorSlots, pakFile);				
+				bytesHandled += elementsRead * m_level.ChunkSize * _colorSlots;
+				//compressionHandler->compress_memoryToFile(data,  m_level.ChunkSize * _colorSlots, pakFile);
+				fwrite(data, 1, m_level.ChunkSize * _colorSlots, pakFile);	//		bytesToCompress += m_level.ChunkSize * _colorSlots; //	
 			}
 		}
 		printf("%d / %d\r",k,y);
 	}
 
-	compressionHandler->compress_memoryToFile(data, bytesToCompress, pakFile);
+	//compressionHandler->compress_memoryToFile(data, bytesHandled, pakFile);
 
 	fclose(textureFile);
 	fclose(pakFile);

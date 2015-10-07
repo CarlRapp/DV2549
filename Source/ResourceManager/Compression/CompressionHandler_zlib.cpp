@@ -109,11 +109,12 @@ FILE* Compression::CompressionHandler_zlib::compress_memoryToFile(void *source, 
 	return dest;
 }
 
-FILE* Compression::CompressionHandler_zlib::compress_fileToFile(FILE *source, FILE *dest, unsigned int nBytes)
+int Compression::CompressionHandler_zlib::compress_fileToFile(FILE *source, FILE *dest, unsigned int nBytes)
 {
 	int zResult = Z_OK;
 
-	unsigned nBytesCompToFile = 0;
+	unsigned int nBytesCompToFile = 0;
+	int nBytesWrittenToFile = 0;
 
 	int flush;
 	unsigned have;
@@ -155,7 +156,8 @@ FILE* Compression::CompressionHandler_zlib::compress_fileToFile(FILE *source, FI
 				zResult = deflate(&strm, flush);    /* no bad return value */
 				assert(zResult != Z_STREAM_ERROR);  /* state not clobbered */
 				have = CHUNK - strm.avail_out;
-				if (fwrite(out, 1, have, dest) != have || ferror(dest)) {
+				int bytesWritten = fwrite(out, 1, have, dest);
+				if (bytesWritten != have || ferror(dest)) {
 					(void)deflateEnd(&strm);
 					zResult = Z_ERRNO;
 					break;
@@ -164,7 +166,8 @@ FILE* Compression::CompressionHandler_zlib::compress_fileToFile(FILE *source, FI
 				if (zResult == Z_ERRNO)
 					break;
 
-				nBytesCompToFile += have;
+				nBytesCompToFile += have; // Should it not be the return value of fwrite rather?
+				nBytesWrittenToFile += bytesWritten;
 			} while (strm.avail_out == 0);
 			assert(strm.avail_in == 0);     /* all input will be used */
 
@@ -176,7 +179,7 @@ FILE* Compression::CompressionHandler_zlib::compress_fileToFile(FILE *source, FI
 
 											/* clean up and return */
 		(void)deflateEnd(&strm);
-		return Z_OK;
+		return nBytesWrittenToFile; //return Z_OK;
 	}
 
 	if (zResult != Z_OK)
@@ -185,7 +188,7 @@ FILE* Compression::CompressionHandler_zlib::compress_fileToFile(FILE *source, FI
 		dest = NULL;
 	}
 
-	return dest;
+	
 }
 
 void* Compression::CompressionHandler_zlib::compress_fileToMemory(FILE *source, void *dest, unsigned int nBytes)
@@ -296,12 +299,13 @@ FILE* Compression::CompressionHandler_zlib::deCompress_fileToFile(FILE *source, 
 	return dest;
 }
 
-void* Compression::CompressionHandler_zlib::deCompress_fileToMemory(FILE *source, void *dest, unsigned int nBytes)
+int Compression::CompressionHandler_zlib::deCompress_fileToMemory(FILE *source, unsigned int sourceOffset, void *dest, unsigned int nBytes)
 {
+	unsigned int nBytesDecompressed = 0;
+
 	int zResult = Z_OK;
 
-	unsigned nBytesDecompToMem = 0;
-
+	int ret;
 	unsigned have;
 	z_stream strm;
 	unsigned char in[CHUNK];
@@ -322,60 +326,233 @@ void* Compression::CompressionHandler_zlib::deCompress_fileToMemory(FILE *source
 			if (ferror(source)) {
 				(void)inflateEnd(&strm);
 				zResult = Z_ERRNO;
-				break;
 			}
 
-			if (zResult == Z_ERRNO)
-				break;
-
-			if (strm.avail_in == 0)
-				break;
-			strm.next_in = in;
-
-			/* run inflate() on input until output buffer not full */
-			do {
-				//if (nBytes == -1)
-					strm.avail_out = CHUNK;
-				//else if (nBytesDecompToMem + CHUNK > nBytes)
-				//	strm.avail_out = CHUNK - ((nBytesDecompToMem + CHUNK) - nBytes);
-
-				strm.next_out = (Bytef*)dest + nBytesDecompToMem;
-				zResult = inflate(&strm, Z_NO_FLUSH);
-				assert(zResult != Z_STREAM_ERROR);  /* state not clobbered */
-				switch (zResult) {
-				case Z_NEED_DICT:
-					zResult = Z_DATA_ERROR;     /* and fall through */
-				case Z_DATA_ERROR:
-				case Z_MEM_ERROR:
-					(void)inflateEnd(&strm);
-					break;
-				}
-				have = CHUNK - strm.avail_out;
-
-				nBytesDecompToMem += have;
-			} while (strm.avail_out == 0);
-
-			if (zResult == Z_STREAM_END)
+			if (zResult != Z_ERRNO)
 			{
-				int test = 3;
+				if (strm.avail_in == 0)
+					break;
+				strm.next_in = in;
+
+				/* run inflate() on input until output buffer not full */
+				do {
+					strm.avail_out = CHUNK;
+					strm.next_out = out;
+					zResult = inflate(&strm, Z_NO_FLUSH);
+					assert(zResult != Z_STREAM_ERROR);  /* state not clobbered */
+					switch (zResult) {
+					case Z_NEED_DICT:
+						zResult = Z_DATA_ERROR;     /* and fall through */
+					case Z_DATA_ERROR:
+					case Z_MEM_ERROR:
+						(void)inflateEnd(&strm);
+						break; // return ret;
+					}
+					have = CHUNK - strm.avail_out;
+
+					memcpy((char*)dest + nBytesDecompressed, out, have);
+					nBytesDecompressed += have;
+
+					/*	if (fwrite(out, 1, have, dest) != have || ferror(dest)) {
+							(void)inflateEnd(&strm);
+							return Z_ERRNO;
+						}*/
+				} while (strm.avail_out == 0);
+
+				if (zResult == Z_ERRNO || zResult == Z_NEED_DICT || zResult == Z_DATA_ERROR || zResult == Z_MEM_ERROR)
+					break;
 			}
+
+			if (zResult == Z_ERRNO || zResult == Z_NEED_DICT || zResult == Z_DATA_ERROR || zResult == Z_MEM_ERROR)
+				break;
 
 			/* done when inflate() says it's done */
-		} while (zResult != Z_STREAM_END && (nBytes == -1 || nBytesDecompToMem < nBytes));
+		} while (zResult != Z_STREAM_END);
+
+		/* clean up and return */
+		(void)inflateEnd(&strm);
+		zResult = zResult == Z_STREAM_END ? Z_OK : Z_DATA_ERROR;
+		if (zResult != Z_OK)
+		{
+			int test = 5;
+
+			Compression::CompressionHandler_zlib::zerr(zResult);
+		}
+
+		return nBytesDecompressed;
 	}
-
-	/* clean up and return */
-	(void)inflateEnd(&strm);
-	zResult = (zResult == Z_STREAM_END) ? Z_OK : Z_DATA_ERROR;
-
-	if (zResult != Z_OK)
-	{
-		zerr(zResult);
-		dest = NULL;
-	}
-
-	return dest;
 }
+
+//int Compression::CompressionHandler_zlib::deCompress_fileToMemory(FILE *source, void *dest, unsigned int nBytes)
+//{
+//	int zResult = Z_OK;
+//
+//	unsigned nBytesLoaded = 0;
+//	unsigned nBytesDecompToMem = 0;
+//
+//	unsigned have;
+//	z_stream strm;
+//	unsigned char in[CHUNK];
+//	unsigned char out[CHUNK];
+//
+//	/* allocate inflate state */
+//	strm.zalloc = Z_NULL;
+//	strm.zfree = Z_NULL;
+//	strm.opaque = Z_NULL;
+//	strm.avail_in = 0;
+//	strm.next_in = Z_NULL;
+//	zResult = inflateInit(&strm);
+//	if (zResult == Z_OK)
+//	{
+//		/* decompress until deflate stream ends or end of file */
+//		do {
+//			strm.avail_in = fread(in, 1, CHUNK, source);
+//			if (ferror(source)) {
+//				(void)inflateEnd(&strm);
+//				zResult = Z_ERRNO;
+//				break;
+//			}
+//
+//			if (zResult == Z_ERRNO)
+//				break;
+//
+//			if (strm.avail_in == 0)
+//				break;
+//			strm.next_in = in;
+//
+//			/* run inflate() on input until output buffer not full */
+//			do {
+//				//if (nBytes == -1)
+//					strm.avail_out = CHUNK;
+//				//else if (nBytesDecompToMem + CHUNK > nBytes)
+//				//	strm.avail_out = CHUNK - ((nBytesDecompToMem + CHUNK) - nBytes);
+//
+//				strm.next_out = out; // (Bytef*)dest + nBytesDecompToMem;
+//				zResult = inflate(&strm, Z_NO_FLUSH);
+//				assert(zResult != Z_STREAM_ERROR);  /* state not clobbered */
+//				switch (zResult) {
+//				case Z_NEED_DICT:
+//					zResult = Z_DATA_ERROR;     /* and fall through */
+//				case Z_DATA_ERROR:
+//				case Z_MEM_ERROR:
+//					(void)inflateEnd(&strm);
+//					break;
+//				}
+//				have = CHUNK - strm.avail_out;
+//				if (  fwrite(out, 1, have, dest) != have || ferror(dest)) {
+//					(void)inflateEnd(&strm);
+//					zResult = Z_ERRNO;
+//					break;
+//				}
+//
+//				nBytesDecompToMem += have;
+//			} while (strm.avail_out == 0);
+//
+//			if (zResult == Z_STREAM_END)
+//			{
+//				int test = 3;
+//			}
+//
+//			/* done when inflate() says it's done */
+//		} while (zResult != Z_STREAM_END && (nBytes == -1 || nBytesDecompToMem < nBytes));
+//	}
+//
+//	/* clean up and return */
+//	(void)inflateEnd(&strm);
+//	zResult = (zResult == Z_STREAM_END) ? Z_OK : Z_DATA_ERROR;
+//
+//	if (zResult != Z_OK)
+//	{
+//		zerr(zResult);
+//		dest = NULL;
+//	}
+//
+//	return nBytesDecompToMem;
+//}
+
+//
+//int Compression::CompressionHandler_zlib::deCompress_fileToMemory(FILE *source, void *dest, unsigned int nBytes)
+//{
+//	int zResult = Z_OK;
+//
+//	unsigned nBytesLoaded = 0;
+//	unsigned nBytesDecompToMem = 0;
+//
+//	unsigned have;
+//	z_stream strm;
+//	unsigned char in[CHUNK];
+//	unsigned char out[CHUNK];
+//
+//	/* allocate inflate state */
+//	strm.zalloc = Z_NULL;
+//	strm.zfree = Z_NULL;
+//	strm.opaque = Z_NULL;
+//	strm.avail_in = 0;
+//	strm.next_in = Z_NULL;
+//	zResult = inflateInit(&strm);
+//	if (zResult == Z_OK)
+//	{
+//		/* decompress until deflate stream ends or end of file */
+//		do {
+//			strm.avail_in = fread(in, 1, CHUNK, source);
+//			if (ferror(source)) {
+//				(void)inflateEnd(&strm);
+//				zResult = Z_ERRNO;
+//				break;
+//			}
+//
+//			if (zResult == Z_ERRNO)
+//				break;
+//
+//			if (strm.avail_in == 0)
+//				break;
+//			strm.next_in = in;
+//
+//			/* run inflate() on input until output buffer not full */
+//			do {
+//				//if (nBytes == -1)
+//				strm.avail_out = CHUNK;
+//				//else if (nBytesDecompToMem + CHUNK > nBytes)
+//				//	strm.avail_out = CHUNK - ((nBytesDecompToMem + CHUNK) - nBytes);
+//
+//				strm.next_out = out; // (Bytef*)dest + nBytesDecompToMem;
+//				zResult = inflate(&strm, Z_NO_FLUSH);
+//				assert(zResult != Z_STREAM_ERROR);  /* state not clobbered */
+//				switch (zResult) {
+//				case Z_NEED_DICT:
+//					zResult = Z_DATA_ERROR;     /* and fall through */
+//				case Z_DATA_ERROR:
+//				case Z_MEM_ERROR:
+//					(void)inflateEnd(&strm);
+//					break;
+//				}
+//				have = CHUNK - strm.avail_out;
+//
+//				nBytesDecompToMem += have;
+//			} while (strm.avail_out == 0);
+//
+//			if (zResult == Z_STREAM_END)
+//			{
+//				int test = 3;
+//			}
+//
+//			/* done when inflate() says it's done */
+//		} while (zResult != Z_STREAM_END && (nBytes == -1 || nBytesDecompToMem < nBytes));
+//	}
+//
+//	/* clean up and return */
+//	(void)inflateEnd(&strm);
+//	zResult = (zResult == Z_STREAM_END) ? Z_OK : Z_DATA_ERROR;
+//
+//	if (zResult != Z_OK)
+//	{
+//		zerr(zResult);
+//		dest = NULL;
+//	}
+//
+//	return nBytesDecompToMem;
+//}
+
 
 void Compression::CompressionHandler_zlib::zerr(int ret)
 {

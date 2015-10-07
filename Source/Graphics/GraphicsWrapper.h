@@ -14,7 +14,9 @@
 #define FORMAT_RAW 0
 #define FORMAT_PAK 1
 
+#include "ResourceManager\Compression\CompressionHandler_lz4.h" // Temp. include until integration with ResourceManager.
 #include "ResourceManager\Compression\CompressionHandler_zlib.h" // Temp. include until integration with ResourceManager.
+#include "ResourceManager\PackageReaderWriter.h"
 
 namespace Graphics
 {
