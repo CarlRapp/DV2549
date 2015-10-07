@@ -42,6 +42,12 @@ GraphicsWrapper::~GraphicsWrapper()
 	delete m_terrainShader;
 	delete m_camera;
 
+	for (int i = 0; i < m_terrainPatches.size(); i++)
+	{
+		glDeleteTextures(1, &m_terrainPatches[i]->TextureDiffuse);
+		glDeleteTextures(1, &m_terrainPatches[i]->TextureNormal);
+		glDeleteTextures(1, &m_terrainPatches[i]->TextureHeight);
+	}
 
 	SDL_GL_DeleteContext(m_context);
 	SDL_Quit();
@@ -335,7 +341,9 @@ void Graphics::GraphicsWrapper::ReloadTerrainPatches(std::vector<TerrainPatch*> 
 	m_terrainPatches.clear();
 
 	for (int n = 0; n < newPatches.size(); ++n)
+	{
 		m_terrainPatches.push_back(newPatches[n]);
+	}	
 }
 
 void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int tileX, int tileY, TerrainPatch* memLocation)
@@ -419,6 +427,12 @@ GLuint Graphics::GraphicsWrapper::LoadTexturePatch(const char * _filename, unsig
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 	free(data);
+
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		printf("Error loading texture patch %d\n", error);
+	}
 
 	return texture;
 
