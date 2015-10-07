@@ -65,6 +65,7 @@ namespace Graphics
 			GLuint			TextureHeight;
 			GLuint			TextureNormal;
 			GLuint			TextureDiffuse;
+			bool			IsActive;
 		};
 
 

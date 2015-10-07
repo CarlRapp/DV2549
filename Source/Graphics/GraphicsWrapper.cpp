@@ -109,36 +109,39 @@ void GraphicsWrapper::RenderTerrain()
 
 	for (int i = 0; i < m_terrainPatches.size(); i++)
 	{
-		GLuint tex = glGetUniformLocation(m_terrainShader->GetProgramHandle(), "gTexHeight");
-		glUniform1i(tex, 0);
+		if (m_terrainPatches[i]->IsActive)
+		{
+			GLuint tex = glGetUniformLocation(m_terrainShader->GetProgramHandle(), "gTexHeight");
+			glUniform1i(tex, 0);
 
-		tex = glGetUniformLocation(m_terrainShader->GetProgramHandle(), "gTexNormal");
-		glUniform1i(tex, 1);
+			tex = glGetUniformLocation(m_terrainShader->GetProgramHandle(), "gTexNormal");
+			glUniform1i(tex, 1);
 
-		tex = glGetUniformLocation(m_terrainShader->GetProgramHandle(), "gTexDiffuse");
-		glUniform1i(tex, 2);
+			tex = glGetUniformLocation(m_terrainShader->GetProgramHandle(), "gTexDiffuse");
+			glUniform1i(tex, 2);
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, m_terrainPatches[i]->TextureHeight);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, m_terrainPatches[i]->TextureHeight);
 
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, m_terrainPatches[i]->TextureNormal);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, m_terrainPatches[i]->TextureNormal);
 
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, m_terrainPatches[i]->TextureDiffuse);
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, m_terrainPatches[i]->TextureDiffuse);
 
-		glm::mat4 vm = *m_camera->GetView() * m_terrainPatches[i]->ModelMatrix;
-		glm::mat4 pvm = *m_camera->GetProjection() * vm;
+			glm::mat4 vm = *m_camera->GetView() * m_terrainPatches[i]->ModelMatrix;
+			glm::mat4 pvm = *m_camera->GetProjection() * vm;
 
-		m_terrainShader->SetUniformV("gM", m_terrainPatches[i]->ModelMatrix);
-		m_terrainShader->SetUniformV("gPV", *m_camera->GetProjection() * *m_camera->GetView());
-		m_terrainShader->SetUniformV("gPVM", pvm);
+			m_terrainShader->SetUniformV("gM", m_terrainPatches[i]->ModelMatrix);
+			m_terrainShader->SetUniformV("gPV", *m_camera->GetProjection() * *m_camera->GetView());
+			m_terrainShader->SetUniformV("gPVM", pvm);
 
-		m_terrainShader->SetUniformV("gFog", m_fog);
+			m_terrainShader->SetUniformV("gFog", m_fog);
 
-		glBindVertexArray(m_terrainVAO);
+			glBindVertexArray(m_terrainVAO);
 
-		glDrawArrays(GL_PATCHES, 0, m_level.Vertices);
+			glDrawArrays(GL_PATCHES, 0, m_level.Vertices);
+		}
 	}
 
 	glBindVertexArray(0);
@@ -350,6 +353,7 @@ void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int tileX, int tileY, Ter
 	memLocation->TextureNormal = LoadTexturePatch("../../../Content/norm.pak", Y, X, 3);
 	memLocation->TextureDiffuse = LoadTexturePatch("../../../Content/diffuse.pak", Y, X, 3);
 	memLocation->ModelMatrix = glm::translate(glm::vec3(tileX*m_level.PatchSize, 0, tileY*m_level.PatchSize));
+	memLocation->IsActive = true;
 }
 
 void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(TerrainPatch* memLocation)
@@ -357,6 +361,7 @@ void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(TerrainPatch* memLocati
 	glDeleteTextures(1, &memLocation->TextureDiffuse);
 	glDeleteTextures(1, &memLocation->TextureNormal);
 	glDeleteTextures(1, &memLocation->TextureHeight);
+	memLocation->IsActive = false;
 }
 
 void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(int tileX, int tileY)

@@ -72,15 +72,8 @@ void GameManager::LoadSurroundingChunks()
 	int sizeZ = m_graphicsWrapper->GetLevel()->Y / 2;
 
 	for (int X = -m_tileRenderDistance; X <= m_tileRenderDistance; ++X)
-	{
 		for (int Z = -m_tileRenderDistance; Z <= m_tileRenderDistance; ++Z)
-		{
 			if (std::abs(m_oldPosX + X) < sizeX && std::abs(m_oldPosZ + Z) < sizeZ)
-			{
 				ResourceManager::GetInstance().LoadChunk(m_oldPosX + X, m_oldPosZ + Z);
-				//m_graphicsWrapper->LoadSingleTexturePatch(m_oldPosX + X, m_oldPosZ + Z);
-			}
-		}
-	}
 
 }

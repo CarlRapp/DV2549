@@ -269,6 +269,9 @@ int main(int argc, char** argv)
 				else
 					speedMultiplier = 1;
 
+				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_O) == Input::PRESSED)
+					system("cls");
+
 				//WASD MOVEMENT
 				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_W))
 					graphics.MoveCameraForward(-cameraSpeed*deltaTime*speedMultiplier);

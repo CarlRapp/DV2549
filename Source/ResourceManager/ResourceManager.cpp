@@ -68,6 +68,7 @@ void ResourceManager::CreateChunkPool(unsigned int _nChunks)
 			m_graphicsWrapper->DeleteSingleTexturePatch(&m_loadedChunks[n].GraphicsPatch);
 
 		delete m_loadedChunks;
+		m_loadedChunks = 0;
 	}
 		
 
@@ -83,6 +84,7 @@ void ResourceManager::CreateChunkPool(unsigned int _nChunks)
 	for (int n = 0; n < _nChunks; ++n)
 	{
 		newPatchPointers.push_back(&m_loadedChunks[n].GraphicsPatch);
+		m_loadedChunks[n].GraphicsPatch.IsActive = false;
 		m_loadedChunks[n].Popularity = SDL_GetTicks();
 	}
 	m_graphicsWrapper->ReloadTerrainPatches(newPatchPointers);
@@ -106,8 +108,7 @@ void ResourceManager::LoadChunk(int tileX, int tileZ)
 		chunkToOverwrite->Z = tileZ;
 		chunkToOverwrite->Popularity = SDL_GetTicks();
 	}
-	else
-		std::printf("MAX NUMBER OF LOADED CHUNKS!\n");
+
 }
 
 void ResourceManager::Update(float _dt)
