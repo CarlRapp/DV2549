@@ -14,10 +14,11 @@
 #define FORMAT_RAW 0
 #define FORMAT_PAK 1
 
+/*
 #include "ResourceManager\Compression\CompressionHandler_lz4.h" // Temp. include until integration with ResourceManager.
 #include "ResourceManager\Compression\CompressionHandler_zlib.h" // Temp. include until integration with ResourceManager.
 #include "ResourceManager\PackageReaderWriter.h"
-
+*/
 namespace Graphics
 {
 	class DECLSPEC GraphicsWrapper
@@ -103,7 +104,7 @@ namespace Graphics
 		void ConvertToPAK(const char * _filename, GLint _width, GLint _height, short colorSlots);
 		SDL_Window* GetWindow() { return m_window; };
 			
-		Compression::ICompressionHandler *compressionHandler; // Temp. variable until integration with ResourceManager.
+		//Compression::ICompressionHandler *compressionHandler; // Temp. variable until integration with ResourceManager.
 
 		GLCamera*	GetCamera() { return m_camera; }
 

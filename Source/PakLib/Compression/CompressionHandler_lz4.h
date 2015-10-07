@@ -1,11 +1,14 @@
-#ifndef COMPRESSIONHANDLER_ZLIB
-#define COMPRESSIONHANDLER_ZLIB
+#ifndef COMPRESSIONHANDLER_LZ4
+#define COMPRESSIONHANDLER_LZ4
 
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <sdl/sdl.h>
-#include "zlib/zlib.h"
+#include "lz4\lz4.h"
+#include "lz4\lz4hc.h"
+//#include "ResourceManager\Compression\lz4mt\lz4mt.h"
+//#include "ResourceManager\Compression\lz4mt\lz4mt_io_cstdio.h"
 
 #if defined(MSDOS) || defined(OS2) || defined(WIN32) || defined(__CYGWIN__)
 #  include <fcntl.h>
@@ -15,17 +18,17 @@
 #  define SET_BINARY_MODE(file)
 #endif
 
-#include "ResourceManager\Compression\ICompressionHandler.h"
+#include "ICompressionHandler.h"
 
 #define CHUNK 512000 //16384 //256000 //16384
 
 namespace Compression
 {
-	class DECLSPEC CompressionHandler_zlib : public ICompressionHandler
+	class DECLSPEC CompressionHandler_lz4 : public ICompressionHandler
 	{
 	public:
-		CompressionHandler_zlib();
-		~CompressionHandler_zlib();
+		CompressionHandler_lz4();
+		~CompressionHandler_lz4();
 
 		// Compression methods:
 

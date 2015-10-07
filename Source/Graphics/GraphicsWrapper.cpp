@@ -17,7 +17,7 @@ GraphicsWrapper::GraphicsWrapper()
 	m_level.X = m_level.Width / m_level.ChunkSize;
 	m_level.Y = m_level.Height / m_level.ChunkSize;
 		
-	compressionHandler = new Compression::CompressionHandler_zlib(); // Temp. instantiation until integration with ResourceManager.
+	//compressionHandler = new Compression::CompressionHandler_zlib(); // Temp. instantiation until integration with ResourceManager.
 
 	unsigned int width = m_level.PatchSize / m_level.TileSize;
 

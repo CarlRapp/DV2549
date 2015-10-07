@@ -7,7 +7,7 @@
 //#define NOMINMAX
 #include <Windows.h>
 
-#include "ResourceManager\Compression\CompressionHandler_zlib.h"
+#include "Compression\CompressionHandler_zlib.h"
 
 struct PackageHeader
 {

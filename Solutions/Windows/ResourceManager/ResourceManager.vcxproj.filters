@@ -1,91 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source\Compression">
-      <UniqueIdentifier>{31768b6f-b312-4abc-88d1-12d56a5ffc80}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Compression\lz4">
-      <UniqueIdentifier>{db189f21-b5c2-4c24-ae34-702e2daf83ff}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Compression\lz4\programs">
-      <UniqueIdentifier>{5aa4481a-c30e-4f92-8900-d2f7271ed23b}</UniqueIdentifier>
-    </Filter>
     <ClCompile Include="..\..\..\Source\ResourceManager\ResourceManager.cpp" />
-    <ClCompile Include="..\..\..\Source\ResourceManager\Compression\CompressionHandler_zlib.cpp">
-      <Filter>Source\Compression</Filter>
-    </ClCompile>
-    <ClCompile Include="PackageReaderWriter.cpp" />
-    <ClCompile Include="..\..\..\Source\ResourceManager\Compression\lz4\lz4.c">
-      <Filter>Source\Compression\lz4</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\ResourceManager\Compression\lz4\lz4hc.c">
-      <Filter>Source\Compression\lz4</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\ResourceManager\Compression\CompressionHandler_lz4.cpp">
-      <Filter>Source\Compression</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\ResourceManager\Compression\lz4\programs\bench.c">
-      <Filter>Source\Compression\lz4\programs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\ResourceManager\Compression\lz4\programs\fullbench.c">
-      <Filter>Source\Compression\lz4\programs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\ResourceManager\Compression\lz4\programs\fuzzer.c">
-      <Filter>Source\Compression\lz4\programs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\ResourceManager\Compression\lz4\programs\lz4cli.c">
-      <Filter>Source\Compression\lz4\programs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\ResourceManager\Compression\lz4\programs\lz4io.c">
-      <Filter>Source\Compression\lz4\programs</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\ResourceManager\Compression\lz4\programs\xxhash.c">
-      <Filter>Source\Compression\lz4\programs</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Source\ResourceManager\ResourceManager.h" />
-    <ClInclude Include="..\..\..\Source\ResourceManager\Compression\CompressionHandler_zlib.h">
-      <Filter>Source\Compression</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\ResourceManager\Compression\ICompressionHandler.h">
-      <Filter>Source\Compression</Filter>
-    </ClInclude>
-    <ClInclude Include="PackageReaderWriter.h" />
-    <ClInclude Include="..\..\..\Source\ResourceManager\Compression\lz4\lz4.h">
-      <Filter>Source\Compression\lz4</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\ResourceManager\Compression\lz4\lz4hc.h">
-      <Filter>Source\Compression\lz4</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\ResourceManager\Compression\CompressionHandler_lz4.h">
-      <Filter>Source\Compression</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\ResourceManager\Compression\lz4\programs\bench.h">
-      <Filter>Source\Compression\lz4\programs</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\ResourceManager\Compression\lz4\programs\lz4io.h">
-      <Filter>Source\Compression\lz4\programs</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Source\ResourceManager\Compression\lz4\programs\xxhash.h">
-      <Filter>Source\Compression\lz4\programs</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\..\..\Source\ResourceManager\Compression\lz4\programs\COPYING">
-      <Filter>Source\Compression\lz4\programs</Filter>
-    </None>
-    <None Include="..\..\..\Source\ResourceManager\Compression\lz4\programs\lz4.1">
-      <Filter>Source\Compression\lz4\programs</Filter>
-    </None>
-    <None Include="..\..\..\Source\ResourceManager\Compression\lz4\programs\lz4c.1">
-      <Filter>Source\Compression\lz4\programs</Filter>
-    </None>
-    <None Include="..\..\..\Source\ResourceManager\Compression\lz4\programs\lz4cat.1">
-      <Filter>Source\Compression\lz4\programs</Filter>
-    </None>
-    <None Include="..\..\..\Source\ResourceManager\Compression\lz4\programs\Makefile">
-      <Filter>Source\Compression\lz4\programs</Filter>
-    </None>
   </ItemGroup>
 </Project>
