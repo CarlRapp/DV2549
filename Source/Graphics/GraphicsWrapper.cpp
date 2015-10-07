@@ -15,6 +15,8 @@ GraphicsWrapper::GraphicsWrapper()
 {
 	m_level.X = m_level.Width / m_level.ChunkSize;
 	m_level.Y = m_level.Height / m_level.ChunkSize;
+		
+	compressionHandler = new Compression::CompressionHandler_zlib(); // Temp. instantiation until integration with ResourceManager.
 
 	unsigned int width = m_level.PatchSize / m_level.TileSize;
 
@@ -26,6 +28,7 @@ GraphicsWrapper::GraphicsWrapper()
 	m_level.TerrainTex = (float*)malloc(m_level.TexCoords*sizeof(float));
 	m_level.TerrainNormals = (float*)malloc(m_level.Normals*sizeof(float));
 }
+
 GraphicsWrapper::~GraphicsWrapper()
 {
 	for (size_t i = m_renderItems.size() -1 ; i > -1 ; i--)
@@ -42,6 +45,12 @@ GraphicsWrapper::~GraphicsWrapper()
 	delete m_terrainShader;
 	delete m_camera;
 
+	for (int i = 0; i < m_terrainPatches.size(); i++)
+	{
+		glDeleteTextures(1, &m_terrainPatches[i]->TextureDiffuse);
+		glDeleteTextures(1, &m_terrainPatches[i]->TextureNormal);
+		glDeleteTextures(1, &m_terrainPatches[i]->TextureHeight);
+	}
 
 	SDL_GL_DeleteContext(m_context);
 	SDL_Quit();
@@ -102,6 +111,10 @@ void GraphicsWrapper::RenderTerrain()
 
 	m_terrainShader->SetUniformV("gEyePos", m_camera->GetPosition());
 
+	GLint availableMem;
+
+	//glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &availableMem);
+
 	for (int i = 0; i < m_terrainPatches.size(); i++)
 	{
 		GLuint tex = glGetUniformLocation(m_terrainShader->GetProgramHandle(), "gTexHeight");
@@ -140,16 +153,18 @@ void GraphicsWrapper::RenderTerrain()
 	glBindVertexArray(0);
 	glUseProgram(0);
 
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		printf("Error rendering terrain %d\n", error);
+		//system("pause");
+	}
+
 	TextRenderer::GetInstance().RenderText(m_width,m_height);
 
 	SDL_GL_SwapWindow(m_window);
 
-	GLenum error = glGetError();
-	if (error != GL_NO_ERROR)
-	{
-		printf("Error rendering %d\n", error);
-		system("pause");
-	}
+
 }
 
 void Graphics::GraphicsWrapper::InitializeSDL(unsigned int _width, unsigned int _height)
@@ -205,11 +220,16 @@ void Graphics::GraphicsWrapper::InitializeGLEW()
 	GLint major, minor;
 	glGetIntegerv(GL_MAJOR_VERSION, &major);
 	glGetIntegerv(GL_MINOR_VERSION, &minor);
-	printf("GL Vendor : %s\n", vendor);
+	printf("\nGL Vendor : %s\n", vendor);
 	printf("GL Renderer : %s\n", renderer);
 	printf("GL Version (string) : %s\n", version);
 	printf("GL Version (integer) : %d.%d\n", major, minor);
 	printf("GLSL Version : %s\n", glslVersion);
+
+	GLint textureUnits;
+
+	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &textureUnits);
+	printf("Max bound textures : %d\n\n", textureUnits);
 }
 
 //NOT USED ATM
@@ -324,7 +344,9 @@ void Graphics::GraphicsWrapper::ReloadTerrainPatches(std::vector<TerrainPatch*> 
 	m_terrainPatches.clear();
 
 	for (int n = 0; n < newPatches.size(); ++n)
+	{
 		m_terrainPatches.push_back(newPatches[n]);
+	}	
 }
 
 void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int tileX, int tileY, TerrainPatch* memLocation)
@@ -347,7 +369,6 @@ void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(TerrainPatch* memLocati
 	glDeleteTextures(1, &memLocation->TextureNormal);
 	glDeleteTextures(1, &memLocation->TextureHeight);
 }
-
 
 void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(int tileX, int tileY)
 {
@@ -410,12 +431,46 @@ GLuint Graphics::GraphicsWrapper::LoadTexturePatch(const char * _filename, unsig
 
 	free(data);
 
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		printf("Error loading texture patch %d\n", error);
+	}
+
 	return texture;
 
 }
 
+
 void Graphics::GraphicsWrapper::ConvertToPAK(const char * _filename, GLint _width, GLint _height, short _colorSlots)
 {
+	// ************* Test code: ************
+
+	//PackageReaderWriter *pakRW = new PackageReaderWriter(compressionHandler); // compressionHandler);
+
+	// Test #1: Create a package:
+
+	//std::vector<std::string> filePaths;
+	//filePaths.push_back("../../../Content/diffuse.raw");
+	//filePaths.push_back("../../../Content/norm.raw");
+	//filePaths.push_back("../../../Content/height.raw");
+	//pakRW->createPackageFromFiles("../../../Content/texturePak_lz4.pak", filePaths);
+
+	// Test #2: Load files within package:
+
+	//char *loadedDiffuseData = new char[150000000]; //[145686528];
+	//pakRW->loadPackageData("../../../Content/texturePak_lz4.pak", loadedDiffuseData, 0, 0);
+
+	//char *loadedNormData = new char[150000000]; //[145686528];
+	//pakRW->loadPackageData("../../../Content/texturePak_lz4.pak", loadedNormData, 1, 1);
+
+	//char *loadedHeightData = new char[50000000]; //[145686528];
+	//pakRW->loadPackageData("../../../Content/texturePak_lz4.pak", loadedHeightData, 2, 2);
+
+	//delete pakRW;
+	
+	// *************************************
+
 	GLubyte * data;
 	FILE * textureFile;
 	FILE * pakFile;
@@ -451,14 +506,17 @@ void Graphics::GraphicsWrapper::ConvertToPAK(const char * _filename, GLint _widt
 		printf("unknown error converting file\n");
 		return;
 	}
-
-	data = (GLubyte*)malloc(m_level.ChunkSize * _colorSlots);
-
+	
 	unsigned int x = _width / m_level.ChunkSize;
 	unsigned int y = _height / m_level.ChunkSize;
 
+	data = (GLubyte*)malloc(m_level.ChunkSize * _colorSlots); // *x * y);
+
 	printf("Converting...\n");
 	//Attempts to read 1xChunksize at a time, and write to pak file
+	
+	unsigned long bytesHandled = 0;
+	unsigned long elementsRead = 0;
 	for (unsigned int k = 0; k < y;k++)
 	{
 		for (unsigned int i = 0; i < x; i++)
@@ -472,11 +530,15 @@ void Graphics::GraphicsWrapper::ConvertToPAK(const char * _filename, GLint _widt
 
 				fseek(textureFile, offset, SEEK_SET);
 				fread(data, m_level.ChunkSize * _colorSlots, 1, textureFile);
-				fwrite(data, 1, m_level.ChunkSize * _colorSlots, pakFile);
+				bytesHandled += elementsRead * m_level.ChunkSize * _colorSlots;
+				//compressionHandler->compress_memoryToFile(data,  m_level.ChunkSize * _colorSlots, pakFile);
+				fwrite(data, 1, m_level.ChunkSize * _colorSlots, pakFile);	//		bytesToCompress += m_level.ChunkSize * _colorSlots; //	
 			}
 		}
 		printf("%d / %d\r",k,y);
 	}
+
+	//compressionHandler->compress_memoryToFile(data, bytesHandled, pakFile);
 
 	fclose(textureFile);
 	fclose(pakFile);
@@ -677,7 +739,7 @@ GLuint LoadTextureRAW(const char * _filename, unsigned int _width, unsigned int 
 
 	fclose(file);
 
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	//glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);

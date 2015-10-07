@@ -24,6 +24,8 @@ bool ResourceManager::InitResourceManager(size_t _totalMemorySize)
 {
 	m_currentAllocatedMemory = _totalMemorySize;
 
+	compressionHandler = new Compression::CompressionHandler_zlib();
+
 	return false;
 }
 
