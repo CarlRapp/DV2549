@@ -47,7 +47,7 @@ void TextRenderer::LoadText(unsigned int _w, unsigned int _h)
  		}
 	}
 
-
+	glActiveTexture(GL_TEXTURE3);
 	glGenTextures(1, &m_TextInfo.TexHandle);
 	glBindTexture(GL_TEXTURE_2D, m_TextInfo.TexHandle);
 
@@ -113,7 +113,7 @@ void TextRenderer::LoadText(unsigned int _w, unsigned int _h)
 	
 
 	glBindVertexArray(0); // disable VAO
-	glUseProgram(0); // disable shader programme
+	glUseProgram(0); // disable shader program
 	glDeleteBuffers(2, m_2DVBO);
 
 	GLenum error = glGetError();
@@ -199,78 +199,78 @@ void TextRenderer::LoadLetters()
 	//    }
 
 
-	GLbyte temp;
-
-	GLbyte shade = 'm';
-
-	for (int i = 0; i < m_letters64.size(); i++)
-	{
-		for (int j = 0; j < 64; j++)
-		{
-			temp = (*m_letters64[i])[j];
-			if (temp == '~')
-			{
-				//                if(j-8 > 0)
-				//                {
-				//                    if((*m_letters[i])[j-8] != '~')
-				//                    (*m_letters[i])[j-8] += 40;  
-				//                }
-
-				if (j + 1 < 64)
-				{
-					if ((*m_letters64[i])[j + 1] == '~')
-					{
-						if (j + 8 < 64)
-							if ((*m_letters64[i])[j - 8] == '~' && !((*m_letters64[i])[j - 1] == '~'))
-								(*m_letters64[i])[j] -= 40;
-					}
-				}
-			}
-
-			if (temp == 0)
-			{
-				int a = 0;
-
-				if (j - 8 > 0)
-				{
-					if ((*m_letters64[i])[j - 8] == '~')
-						a++;
-				}
-
-				if (j + 8 < 64)
-				{
-					if ((*m_letters64[i])[j + 8] == '~')
-						a++;
-				}
-
-				if (j - 1 > 0)
-				{
-					if ((*m_letters64[i])[j - 1] == '~')
-						a++;
-				}
-
-				if (j + 1 < 64)
-				{
-					if ((*m_letters64[i])[j + 1] == '~')
-						a++;
-				}
-
-				if (a > 0)
-					(*m_letters64[i])[j] = ' '*a;
-			}
-		}
-	}
+// 	GLbyte temp;
+// 
+// 	GLbyte shade = 'm';
+// 
+// 	for (int i = 0; i < m_letters64.size(); i++)
+// 	{
+// 		for (int j = 0; j < 64; j++)
+// 		{
+// 			temp = (*m_letters64[i])[j];
+// 			if (temp == '~')
+// 			{
+// 				//                if(j-8 > 0)
+// 				//                {
+// 				//                    if((*m_letters[i])[j-8] != '~')
+// 				//                    (*m_letters[i])[j-8] += 40;  
+// 				//                }
+// 
+// 				if (j + 1 < 64)
+// 				{
+// 					if ((*m_letters64[i])[j + 1] == '~')
+// 					{
+// 						if (j + 8 < 64)
+// 							if ((*m_letters64[i])[j - 8] == '~' && !((*m_letters64[i])[j - 1] == '~'))
+// 								(*m_letters64[i])[j] -= 40;
+// 					}
+// 				}
+// 			}
+// 
+// 			if (temp == 0)
+// 			{
+// 				int a = 0;
+// 
+// 				if (j - 8 > 0)
+// 				{
+// 					if ((*m_letters64[i])[j - 8] == '~')
+// 						a++;
+// 				}
+// 
+// 				if (j + 8 < 64)
+// 				{
+// 					if ((*m_letters64[i])[j + 8] == '~')
+// 						a++;
+// 				}
+// 
+// 				if (j - 1 > 0)
+// 				{
+// 					if ((*m_letters64[i])[j - 1] == '~')
+// 						a++;
+// 				}
+// 
+// 				if (j + 1 < 64)
+// 				{
+// 					if ((*m_letters64[i])[j + 1] == '~')
+// 						a++;
+// 				}
+// 
+// 				if (a > 0)
+// 					(*m_letters64[i])[j] = ' '*a;
+// 			}
+// 		}
+// 	}
 
 }
 
 void TextRenderer::RenderText(unsigned int _w, unsigned int _h)
 {
-	
 	m_TextShader->UseProgram();
-
-	glActiveTexture(GL_TEXTURE0);
-	glEnable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
+
+	glActiveTexture(GL_TEXTURE3);
+	GLuint tex = glGetUniformLocation(m_TextShader->GetProgramHandle(), "m_texture");
+	glUniform1i(tex, 3);
 
 	glBindVertexArray(m_2DVAO);
 	glBindTexture(GL_TEXTURE_2D, m_TextInfo.TexHandle);
