@@ -103,6 +103,10 @@ void GraphicsWrapper::RenderTerrain()
 
 	m_terrainShader->SetUniformV("gEyePos", m_camera->GetPosition());
 
+	GLint availableMem;
+
+	//glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &availableMem);
+
 	for (int i = 0; i < m_terrainPatches.size(); i++)
 	{
 		GLuint tex = glGetUniformLocation(m_terrainShader->GetProgramHandle(), "gTexHeight");
@@ -140,16 +144,18 @@ void GraphicsWrapper::RenderTerrain()
 	glBindVertexArray(0);
 	glUseProgram(0);
 
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		printf("Error rendering terrain %d\n", error);
+		//system("pause");
+	}
+
 	TextRenderer::GetInstance().RenderText(m_width,m_height);
 
 	SDL_GL_SwapWindow(m_window);
 
-	GLenum error = glGetError();
-	if (error != GL_NO_ERROR)
-	{
-		printf("Error rendering %d\n", error);
-		system("pause");
-	}
+
 }
 
 void Graphics::GraphicsWrapper::InitializeSDL(unsigned int _width, unsigned int _height)
@@ -205,11 +211,16 @@ void Graphics::GraphicsWrapper::InitializeGLEW()
 	GLint major, minor;
 	glGetIntegerv(GL_MAJOR_VERSION, &major);
 	glGetIntegerv(GL_MINOR_VERSION, &minor);
-	printf("GL Vendor : %s\n", vendor);
+	printf("\nGL Vendor : %s\n", vendor);
 	printf("GL Renderer : %s\n", renderer);
 	printf("GL Version (string) : %s\n", version);
 	printf("GL Version (integer) : %d.%d\n", major, minor);
 	printf("GLSL Version : %s\n", glslVersion);
+
+	GLint textureUnits;
+
+	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &textureUnits);
+	printf("Max bound textures : %d\n\n", textureUnits);
 }
 
 //NOT USED ATM
@@ -347,7 +358,6 @@ void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(TerrainPatch* memLocati
 	glDeleteTextures(1, &memLocation->TextureNormal);
 	glDeleteTextures(1, &memLocation->TextureHeight);
 }
-
 
 void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(int tileX, int tileY)
 {
@@ -686,7 +696,7 @@ GLuint LoadTextureRAW(const char * _filename, unsigned int _width, unsigned int 
 
 	fclose(file);
 
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	//glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);

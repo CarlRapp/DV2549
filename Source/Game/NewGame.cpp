@@ -8,6 +8,10 @@
 #include "Memory/TestScenarios.h"
 #include "Memory/PoolTest.h"
 #include "GameManager.h"
+
+#include "windows.h"
+#include "psapi.h"
+
 #ifdef WIN32
 #ifdef _DEBUG
 #include <VLD/vld.h>
@@ -184,7 +188,7 @@ int main(int argc, char** argv)
 	std::string renderDistance = "RENDER DISTANCE 1";
 
 	graphics.AddString(&fpsString, glm::vec3(0, 1, 0), 2, 0, 0);
-	graphics.AddString(&renderDistance, glm::vec3(0, 1, 0), 2, 0, -50);
+	graphics.AddString(&renderDistance, glm::vec3(0, 1, 1), 2, 0, -250);
 	graphics.AddString(&infoString, glm::vec3(1, 1, 0), 2, 0, -150);
 	
 	ResourceManager::GetInstance().SetGraphicsWrapper(&graphics);
@@ -198,6 +202,10 @@ int main(int argc, char** argv)
 	double t = 0.0;
 	double dt = 1 / 60.0;
 
+	//MEMORY USAGE
+	PROCESS_MEMORY_COUNTERS memCounter;
+	
+
 	bool quit = false;
 	while (!quit)
 	{
@@ -205,12 +213,15 @@ int main(int argc, char** argv)
 		double frameTime = (beginFrame - endFrame)*0.001;
 		endFrame = beginFrame;
 
-		fpsString = "DT: " + std::to_string(frameTime);
+		bool result = GetProcessMemoryInfo(GetCurrentProcess(), &memCounter, sizeof(memCounter));
+
+		fpsString = "DTT: " + std::to_string(frameTime) + "MS";
 		fpsString += "\nFPS: " + std::to_string( int(1.0 / frameTime));
+		fpsString += "\nMEM: " + std::to_string(memCounter.PagefileUsage/1000000) + "MB";
 
 		while (frameTime > 0.0)
 		{
-			float deltaTime = (float)std::min(frameTime, dt);
+			float deltaTime = (float)(min(frameTime, dt));
 			frameTime -= deltaTime;
 			t += deltaTime;
 
@@ -329,3 +340,4 @@ int main(int argc, char** argv)
 	
 	return 0;
 }
+
