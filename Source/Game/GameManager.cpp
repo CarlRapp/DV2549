@@ -3,7 +3,7 @@
 #include "ResourceManager/ResourceManager.h"
 
 GameManager::GameManager() :
-	m_oldPosX(-999), m_oldPosY(0), m_oldPosZ(-999), m_tileRenderDistance(1)
+	m_oldPosX(0), m_oldPosY(0), m_oldPosZ(0), m_tileRenderDistance(0)
 {
 	
 }
@@ -33,43 +33,34 @@ void GameManager::Update(float dt)
 		LoadSurroundingChunks();
 	}
 
-/*
-int x =  m_level.X / 2;
-int y =  m_level.Y / 2;
-
-// 	//Add individual patch data, like different heightmap
-for (int i = -x; i < x; i++)
-{
-for (int j = -y; j < y; j++)
-{
-TerrainPatch* newItem = new TerrainPatch;
-
-//newItem->TextureDiffuse = LoadTextureRAW("../../../Content/test.raw", 512, 512, 3);
-newItem->TextureHeight = LoadTexturePatch("../../../Content/height.pak", j + m_level.Y/2, i+m_level.X/2, 1);
-newItem->TextureNormal = LoadTexturePatch("../../../Content/norm.pak", j + m_level.Y / 2, i + m_level.X / 2, 3);
-newItem->TextureDiffuse = LoadTexturePatch("../../../Content/diffuse.pak", j + m_level.Y / 2, i + m_level.X / 2, 3);
-newItem->ModelMatrix = glm::translate(glm::vec3(i*m_patchSize, 0, j*m_patchSize));
-
-m_terrainPatches.push_back(newItem);
-}
-}
-*/
-
-
 
 }
 
 void GameManager::SetRenderDistance(unsigned int _chunkDistance)
 {
+	int tempDistance = m_tileRenderDistance;
+
 	//	Divide the requested render distance
-	//	since we go from -m_tileRenderDistance to m_ti
-	m_tileRenderDistance	=	_chunkDistance/2;
+	//	since we go from -m_tileRenderDistance to m_tileRenderDistance
+	m_tileRenderDistance	= _chunkDistance <= 1 ? 1 : _chunkDistance;
+
+	if (m_tileRenderDistance == tempDistance)
+		return;
 
 	//	Delete the current pool from the resourcemanager
-	unsigned int numberOfChunks = (_chunkDistance*2+1) ^ 2;
+	unsigned int numberOfChunks = (m_tileRenderDistance*2+1)*(m_tileRenderDistance*2+1);
 
 
-	ResourceManager::GetInstance().CreateChunkPool(numberOfChunks, 6);
+	ResourceManager::GetInstance().CreateChunkPool(numberOfChunks);
+	glm::vec3	currentPos = m_graphicsWrapper->GetCamera()->GetPosition();
+	int currentX = (int)(currentPos.x / m_graphicsWrapper->GetLevel()->PatchSize);
+	int currentZ = (int)(currentPos.z / m_graphicsWrapper->GetLevel()->PatchSize);
+
+	if (currentX != m_oldPosX || currentZ != m_oldPosZ)
+	{
+		m_oldPosX = currentX;
+		m_oldPosZ = currentZ;
+	}
 
 	LoadSurroundingChunks();
 }
@@ -85,7 +76,10 @@ void GameManager::LoadSurroundingChunks()
 		for (int Z = -m_tileRenderDistance; Z <= m_tileRenderDistance; ++Z)
 		{
 			if (std::abs(m_oldPosX + X) < sizeX && std::abs(m_oldPosZ + Z) < sizeZ)
-				m_graphicsWrapper->LoadSingleTexturePatch(m_oldPosX + X, m_oldPosZ + Z);
+			{
+				ResourceManager::GetInstance().LoadChunk(m_oldPosX + X, m_oldPosZ + Z);
+				//m_graphicsWrapper->LoadSingleTexturePatch(m_oldPosX + X, m_oldPosZ + Z);
+			}
 		}
 	}
 

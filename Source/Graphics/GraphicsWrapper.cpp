@@ -1,6 +1,7 @@
 #include <GLEW/glew.h>
 #include "GraphicsWrapper.h"
 #include <Memory/MemoryWrapper.h>
+#include "TextRenderer.h"
 
 using namespace Graphics;
 
@@ -38,8 +39,9 @@ GraphicsWrapper::~GraphicsWrapper()
 		m_renderItems.pop_back();
 	}
 
-	delete m_shaderSTD;
+	delete m_terrainShader;
 	delete m_camera;
+
 
 	SDL_GL_DeleteContext(m_context);
 	SDL_Quit();
@@ -48,66 +50,67 @@ GraphicsWrapper::~GraphicsWrapper()
 //NOT USED ATM, FOR MODELS
 void GraphicsWrapper::Render()
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	m_shaderSTD->UseProgram();
-	
-	glm::mat4 vm = *m_camera->GetView();
-	glm::mat4 pvm = *m_camera->GetProjection();
-
-	m_shaderSTD->SetUniformV("gView", vm);
-	m_shaderSTD->SetUniformV("gProj", pvm);
-
-	GLint gSampler = glGetUniformLocation(m_shaderSTD->GetProgramHandle(), "gSampler");
-	glUniform1i(gSampler, 0);
-
-	for (int i = 0; i < m_renderItems.size();i++)
-	{
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, m_renderItems[i]->TextureDiffuse);
-
-		//Update matrix buffer//
-		glBindBuffer(GL_ARRAY_BUFFER, m_renderItems[i]->MatrixBuffer);
-		glm::mat4* matrices = (glm::mat4*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-		for (int j = 0; j < m_renderItems[i]->Instances.size(); j++)
-		{
-			matrices[j] = m_renderItems[i]->Instances[j]->ModelMatrix;
-		}
-
-		glUnmapBuffer(GL_ARRAY_BUFFER);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-		glBindVertexArray(m_renderItems[i]->VAO);
-
-		glDrawArraysInstanced(m_renderItems[i]->RenderParam,0, m_renderItems[i]->Vertices, (GLsizei)m_renderItems[i]->Instances.size());
-	}
-
-	SDL_GL_SwapWindow(m_window);
-
-	GLenum error = glGetError();
-	if (error != GL_NO_ERROR)
-	{
-		printf("Error rendering %d\n", error);
-		system("pause");
-	}
+// 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+// 	m_terrainShader->UseProgram();
+// 	
+// 	glm::mat4 vm = *m_camera->GetView();
+// 	glm::mat4 pvm = *m_camera->GetProjection();
+// 
+// 	m_terrainShader->SetUniformV("gView", vm);
+// 	m_terrainShader->SetUniformV("gProj", pvm);
+// 
+// 	GLint gSampler = glGetUniformLocation(m_terrainShader->GetProgramHandle(), "gSampler");
+// 	glUniform1i(gSampler, 0);
+// 
+// 	for (int i = 0; i < m_renderItems.size();i++)
+// 	{
+// 		glActiveTexture(GL_TEXTURE0);
+// 		glBindTexture(GL_TEXTURE_2D, m_renderItems[i]->TextureDiffuse);
+// 
+// 		//Update matrix buffer//
+// 		glBindBuffer(GL_ARRAY_BUFFER, m_renderItems[i]->MatrixBuffer);
+// 		glm::mat4* matrices = (glm::mat4*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+// 		for (int j = 0; j < m_renderItems[i]->Instances.size(); j++)
+// 		{
+// 			matrices[j] = m_renderItems[i]->Instances[j]->ModelMatrix;
+// 		}
+// 
+// 		glUnmapBuffer(GL_ARRAY_BUFFER);
+// 		glBindBuffer(GL_ARRAY_BUFFER, 0);
+// 
+// 		glBindVertexArray(m_renderItems[i]->VAO);
+// 
+// 		glDrawArraysInstanced(m_renderItems[i]->RenderParam,0, m_renderItems[i]->Vertices, (GLsizei)m_renderItems[i]->Instances.size());
+// 	}
+// 
+// 	SDL_GL_SwapWindow(m_window);
+// 
+// 	GLenum error = glGetError();
+// 	if (error != GL_NO_ERROR)
+// 	{
+// 		printf("Error rendering %d\n", error);
+// 		system("pause");
+// 	}
 }
-
 
 void GraphicsWrapper::RenderTerrain()
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	m_shaderSTD->UseProgram();
+ 	glViewport(0, 0, m_width, m_height);
+ 
+	m_terrainShader->UseProgram();
 
-	m_shaderSTD->SetUniformV("gEyePos", m_camera->GetPosition());
+	m_terrainShader->SetUniformV("gEyePos", m_camera->GetPosition());
 
 	for (int i = 0; i < m_terrainPatches.size(); i++)
 	{
-		GLuint tex = glGetUniformLocation(m_shaderSTD->GetProgramHandle(), "gTexHeight");
+		GLuint tex = glGetUniformLocation(m_terrainShader->GetProgramHandle(), "gTexHeight");
 		glUniform1i(tex, 0);
 
-		tex = glGetUniformLocation(m_shaderSTD->GetProgramHandle(), "gTexNormal");
+		tex = glGetUniformLocation(m_terrainShader->GetProgramHandle(), "gTexNormal");
 		glUniform1i(tex, 1);
 
-		tex = glGetUniformLocation(m_shaderSTD->GetProgramHandle(), "gTexDiffuse");
+		tex = glGetUniformLocation(m_terrainShader->GetProgramHandle(), "gTexDiffuse");
 		glUniform1i(tex, 2);
 
 		glActiveTexture(GL_TEXTURE0);
@@ -123,9 +126,11 @@ void GraphicsWrapper::RenderTerrain()
 		glm::mat4 vm = *m_camera->GetView() * m_terrainPatches[i]->ModelMatrix;
 		glm::mat4 pvm = *m_camera->GetProjection() * vm;
 
-		m_shaderSTD->SetUniformV("gM", m_terrainPatches[i]->ModelMatrix);
-		m_shaderSTD->SetUniformV("gPV", *m_camera->GetProjection() * *m_camera->GetView());
-		m_shaderSTD->SetUniformV("gPVM", pvm);
+		m_terrainShader->SetUniformV("gM", m_terrainPatches[i]->ModelMatrix);
+		m_terrainShader->SetUniformV("gPV", *m_camera->GetProjection() * *m_camera->GetView());
+		m_terrainShader->SetUniformV("gPVM", pvm);
+
+		m_terrainShader->SetUniformV("gFog", m_fog);
 
 		glBindVertexArray(m_terrainVAO);
 
@@ -134,6 +139,8 @@ void GraphicsWrapper::RenderTerrain()
 
 	glBindVertexArray(0);
 	glUseProgram(0);
+
+	TextRenderer::GetInstance().RenderText(m_width,m_height);
 
 	SDL_GL_SwapWindow(m_window);
 
@@ -159,6 +166,8 @@ void Graphics::GraphicsWrapper::InitializeSDL(unsigned int _width, unsigned int 
 	m_window = SDL_CreateWindow("OpenGL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, m_width, m_height, SDL_WINDOW_OPENGL);
 
 	m_context = SDL_GL_CreateContext(m_window);
+
+	SDL_GL_SetSwapInterval(0);
 
 }
 
@@ -285,15 +294,17 @@ void Graphics::GraphicsWrapper::LoadModel()
 
 void Graphics::GraphicsWrapper::InitializeShaders()
 {
-	m_shaderSTD = new ShaderHandler();
+	m_terrainShader = new ShaderHandler();
 
-	m_shaderSTD->CreateShaderProgram();
-	m_shaderSTD->AddShader("../../../Content/Shaders/tess/tess_vs.glsl", GL_VERTEX_SHADER);
-	m_shaderSTD->AddShader("../../../Content/Shaders/tess/tess_tri_tcs.glsl", GL_TESS_CONTROL_SHADER);
-	m_shaderSTD->AddShader("../../../Content/Shaders/tess/tess_tri_tes.glsl", GL_TESS_EVALUATION_SHADER);
-	m_shaderSTD->AddShader("../../../Content/Shaders/tess/tess_geo.glsl", GL_GEOMETRY_SHADER);
-	m_shaderSTD->AddShader("../../../Content/Shaders/tess/tess_frag.glsl", GL_FRAGMENT_SHADER);
-	m_shaderSTD->LinkShaderProgram();
+	m_terrainShader->CreateShaderProgram();
+	m_terrainShader->AddShader("../../../Content/Shaders/tess/tess_vs.glsl", GL_VERTEX_SHADER);
+	m_terrainShader->AddShader("../../../Content/Shaders/tess/tess_tri_tcs.glsl", GL_TESS_CONTROL_SHADER);
+	m_terrainShader->AddShader("../../../Content/Shaders/tess/tess_tri_tes.glsl", GL_TESS_EVALUATION_SHADER);
+	m_terrainShader->AddShader("../../../Content/Shaders/tess/tess_geo.glsl", GL_GEOMETRY_SHADER);
+	m_terrainShader->AddShader("../../../Content/Shaders/tess/tess_frag.glsl", GL_FRAGMENT_SHADER);
+	m_terrainShader->LinkShaderProgram();
+
+	TextRenderer::GetInstance().LoadText(m_width,m_height);
 
 	GLenum error = glGetError();
 	if (error != GL_NO_ERROR)
@@ -308,24 +319,33 @@ void Graphics::GraphicsWrapper::MoveCameraStrafe(float _val)	{m_camera->Strafe(_
 void Graphics::GraphicsWrapper::LookCameraX(float _val)			{m_camera->Yaw(_val);}
 void Graphics::GraphicsWrapper::LookCameraY(float _val)			{m_camera->Pitch(_val);}
 
-void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int tileX, int tileY)
+void Graphics::GraphicsWrapper::ReloadTerrainPatches(std::vector<TerrainPatch*> newPatches)
 {
-// 	unsigned int X = tileX + m_level.X / 2;
-// 	unsigned int Y = tileY + m_level.Y / 2;
-// 
-// 	if (m_mapStatus[Y][X] == 0)
-// 	{
-// 		Memory::MemoryWrapper* mem = Memory::MemoryWrapper::GetInstance();
-// 		TerrainPatch* newItem = static_cast<TerrainPatch*>(mem->GetPoolManager()->pnew(sizeof(TerrainPatch)));
-// 
-// 		newItem->TextureHeight = LoadTexturePatch("../../../Content/height.pak", Y, X, 1);
-// 		newItem->TextureNormal = LoadTexturePatch("../../../Content/norm.pak", Y, X, 3);
-// 		newItem->TextureDiffuse = LoadTexturePatch("../../../Content/diffuse.pak", Y, X, 3);
-// 		newItem->ModelMatrix = glm::translate(glm::vec3(tileX*m_level.PatchSize, 0, tileY*m_level.PatchSize));
-// 
-// 		m_terrainPatches.push_back(newItem);
-// 		m_mapStatus[Y][X] = newItem;
-// 	}
+	m_terrainPatches.clear();
+
+	for (int n = 0; n < newPatches.size(); ++n)
+		m_terrainPatches.push_back(newPatches[n]);
+}
+
+void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int tileX, int tileY, TerrainPatch* memLocation)
+{
+	unsigned int X = tileX + m_level.X / 2;
+	unsigned int Y = tileY + m_level.Y / 2;
+
+	//Memory::MemoryWrapper* mem = Memory::MemoryWrapper::GetInstance();
+	//TerrainPatch* newItem = static_cast<TerrainPatch*>(mem->GetPoolManager()->pnew(sizeof(TerrainPatch)));
+
+	memLocation->TextureHeight = LoadTexturePatch("../../../Content/height.pak", Y, X, 1);
+	memLocation->TextureNormal = LoadTexturePatch("../../../Content/norm.pak", Y, X, 3);
+	memLocation->TextureDiffuse = LoadTexturePatch("../../../Content/diffuse.pak", Y, X, 3);
+	memLocation->ModelMatrix = glm::translate(glm::vec3(tileX*m_level.PatchSize, 0, tileY*m_level.PatchSize));
+}
+
+void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(TerrainPatch* memLocation)
+{
+	glDeleteTextures(1, &memLocation->TextureDiffuse);
+	glDeleteTextures(1, &memLocation->TextureNormal);
+	glDeleteTextures(1, &memLocation->TextureHeight);
 }
 
 
@@ -385,44 +405,6 @@ GLuint Graphics::GraphicsWrapper::LoadTexturePatch(const char * _filename, unsig
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	free(data);
-
-	return texture;
-
-}
-
-GLuint Graphics::GraphicsWrapper::LoadTextureRAW(const char * _filename, unsigned int _width, unsigned int _height, short _colorSlots)
-{
-	GLuint texture;
-	GLubyte * data;
-	FILE * file;
-	// open texture data
-	fopen_s(&file, _filename, "rb");
-	if (file == NULL)
-	{
-		printf("error reading file\n");
-		return 0;
-	}
-
-	data = (GLubyte*)malloc(_width * _height * _colorSlots);
-
-	fread(data, _width * _height * _colorSlots, 1, file);
-
-	fclose(file);
-
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-
-	glTexImage2D(GL_TEXTURE_2D, 0, _colorSlots == 1 ? GL_RED : GL_RGB, _width, _height, 0, _colorSlots == 1 ? GL_RED : GL_RGB, GL_UNSIGNED_BYTE, data);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -500,6 +482,11 @@ void Graphics::GraphicsWrapper::ConvertToPAK(const char * _filename, GLint _widt
 	fclose(pakFile);
 
 	free(data);
+}
+
+unsigned int Graphics::GraphicsWrapper::AddString(std::string* _text, glm::vec3 _color, float _scale, float _x, float _y)
+{
+	return TextRenderer::GetInstance().AddString(_text, _color, _scale,  _x,  _y);
 }
 
 void Graphics::GraphicsWrapper::LoadTerrainPatch()
@@ -604,9 +591,9 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 		glGenVertexArrays(1, &m_terrainVAO);
 		glBindVertexArray(m_terrainVAO);
 
-		GLint pos = glGetAttribLocation(m_shaderSTD->GetProgramHandle(), "in_position");
-		GLint tex = glGetAttribLocation(m_shaderSTD->GetProgramHandle(), "in_tex");
-		GLint norm = glGetAttribLocation(m_shaderSTD->GetProgramHandle(), "in_normal");
+		GLint pos = glGetAttribLocation(m_terrainShader->GetProgramHandle(), "in_position");
+		GLint tex = glGetAttribLocation(m_terrainShader->GetProgramHandle(), "in_tex");
+		GLint norm = glGetAttribLocation(m_terrainShader->GetProgramHandle(), "in_normal");
 
 		glEnableVertexAttribArray(pos);
 		glEnableVertexAttribArray(tex);
@@ -632,7 +619,7 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 	
 	int x = m_level.X / 2;
 	int y = m_level.Y / 2;
-
+	/*
 	// 	//Add individual patch data, like different heightmap
 	for (int i = -x; i < x; i++)
 	{
@@ -650,7 +637,7 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 		}
 	}
 	
-
+*/
 	Memory::MemoryWrapper* mem = Memory::MemoryWrapper::GetInstance();
 	mem->GetPoolManager()->CreatePool(m_level.X*m_level.Y,sizeof(TerrainPatch));
 
@@ -670,3 +657,42 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 		printf("Error loading model %d\n", error);
 	}
 }
+
+GLuint LoadTextureRAW(const char * _filename, unsigned int _width, unsigned int _height, short _colorSlots)
+{
+	GLuint texture;
+	GLubyte * data;
+	FILE * file;
+	// open texture data
+	fopen_s(&file, _filename, "rb");
+	if (file == NULL)
+	{
+		printf("error reading file\n");
+		return 0;
+	}
+
+	data = (GLubyte*)malloc(_width * _height * _colorSlots);
+
+	fread(data, _width * _height * _colorSlots, 1, file);
+
+	fclose(file);
+
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+
+	glTexImage2D(GL_TEXTURE_2D, 0, _colorSlots == 1 ? GL_RED : GL_RGB, _width, _height, 0, _colorSlots == 1 ? GL_RED : GL_RGB, GL_UNSIGNED_BYTE, data);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	free(data);
+
+	return texture;
+
+}
+

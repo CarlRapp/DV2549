@@ -8,7 +8,7 @@
 #else
 #endif
 #include <SDL/SDL.h>
-#include "Graphics/GraphicsWrapper.h"
+#include "ResourceManager/ResourceManager.h"
 
 	class GameManager
 	{
@@ -20,6 +20,7 @@
 		void Update(float dt);
 
 		void SetRenderDistance(unsigned int _chunkDistance);
+		int GetRenderDistance() { return m_tileRenderDistance; }
 
 	private:
 		void LoadSurroundingChunks();

@@ -15,6 +15,12 @@
     <ClInclude Include="..\..\..\Source\Graphics\GLCamera.h">
       <Filter>Source</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\Source\Graphics\GLText.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\Graphics\TextRenderer.h">
+      <Filter>Source</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Source\Graphics\GraphicsWrapper.cpp">
@@ -24,6 +30,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\Source\Graphics\GLCamera.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Graphics\TextRenderer.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
