@@ -52,7 +52,20 @@ void MemoryWrapper::DeletePoolManager()
 
 void MemoryWrapper::CreateGlobalStack(size_t _size, size_t _alignment)
 {
-	m_oneFrameStacks.push_back(new Memory::StackAllocator_SingleBuffer(_size, _alignment));
+	if (m_globalFrameStack)
+	{
+		for (int n = 0; n < m_oneFrameStacks.size(); ++n)
+			if (m_oneFrameStacks[n] == m_globalFrameStack)
+			{
+				m_oneFrameStacks.erase(m_oneFrameStacks.begin() + n);
+				break;
+			}
+
+		delete m_globalFrameStack;
+		m_globalFrameStack = 0;
+	}
+	m_globalFrameStack = new Memory::StackAllocator_SingleBuffer(_size, _alignment);
+	m_oneFrameStacks.push_back(m_globalFrameStack);
 }
 
 IStackAllocator * Memory::MemoryWrapper::GetGlobalStack()

@@ -1,4 +1,4 @@
-#include "ResourceManager\Compression\CompressionHandler_zlib.h"
+#include "CompressionHandler_zlib.h"
 
 
 

@@ -75,6 +75,7 @@ namespace Memory
 		void	ResetStacks();
 
 	private:
+		IStackAllocator*				m_globalFrameStack;
 		std::vector<IStackAllocator*>	m_oneFrameStacks;
 	};
 }
