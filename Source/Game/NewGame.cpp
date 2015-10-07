@@ -221,7 +221,7 @@ int main(int argc, char** argv)
 
 		while (frameTime > 0.0)
 		{
-			float deltaTime = (float)(min(frameTime, dt));
+			float deltaTime = (float)(std::min)(frameTime, dt); // TODO I dunno for sure why having std::min without the parentheses stopped working...
 			frameTime -= deltaTime;
 			t += deltaTime;
 

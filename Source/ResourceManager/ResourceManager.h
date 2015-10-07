@@ -12,9 +12,9 @@
 #include <string>
 
 #include "Memory/PoolAllocator/PoolAllocator.h"
+#include "Compression\CompressionHandler_zlib.h"
 #include "Memory/StackAllocator/StackAllocator_SingleBuffer.h"
 #include "Graphics/GraphicsWrapper.h"
-
 
 class DECLSPEC ResourceManager
 {
@@ -36,7 +36,7 @@ public:
 	bool LoadAsset();
 	bool UnloadAsset();
 
-
+	Compression::ICompressionHandler *compressionHandler;
 	void CreateChunkPool(unsigned int _nChunks);
 	void LoadChunk(int tileX, int tileY);
 
@@ -45,6 +45,8 @@ public:
 
 private:
 	ResourceManager();
+
+
 
 private:
 	size_t	m_currentAllocatedMemory;
