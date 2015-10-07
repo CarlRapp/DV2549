@@ -1,6 +1,8 @@
 #include "ResourceManager.h"
 #include <assert.h>
 
+static ResourceManager* m_instance = nullptr;
+
 ResourceManager::ResourceManager()
 	: m_totalMemorySize(0), m_currentAllocatedMemory(0), m_loadedChunks(0), m_ticks(0)
 {
@@ -15,9 +17,9 @@ ResourceManager::~ResourceManager()
 
 ResourceManager& ResourceManager::GetInstance()
 {
-	static ResourceManager* rmInstance = new ResourceManager();
-
-	return *rmInstance;
+	if (m_instance == nullptr)
+		m_instance = new ResourceManager();
+	return *m_instance;
 }
 
 bool ResourceManager::InitResourceManager(size_t _totalMemorySize)

@@ -7,12 +7,13 @@
 #endif
 #else
 #endif
+#include <windows.h>
 #include "GLShaderHandler.h"
 #include "GLCamera.h"
 #include <SDL/SDL.h>
 
-#define FORMAT_RAW 0
-#define FORMAT_PAK 1
+#include <SDL/SDL_syswm.h>
+
 
 namespace Graphics
 {
@@ -69,6 +70,8 @@ namespace Graphics
 
 
 
+		bool SDLStarted() const { return m_SDLStarted; }
+
 	public:
 		~GraphicsWrapper();
 		static GraphicsWrapper& GetInstance();
@@ -77,6 +80,7 @@ namespace Graphics
 		void RenderTerrain();
 
 		void InitializeSDL(unsigned int _width, unsigned int _height);
+		
 		void InitializeGLEW();
 		void LoadTerrainPatch();
 		void LoadModel();
@@ -100,11 +104,13 @@ namespace Graphics
 
 		GLCamera*	GetCamera() { return m_camera; }
 
-
-
 		unsigned int AddString(std::string* _text, glm::vec3 _color, float _scale, float _x, float _y);
 
 		void FogToggle() { m_fog = !m_fog; }
+
+		HDC GetHDC();
+
+		HGLRC GetHGLRC() { return m_renderContext; }
 
 	private:
 		GraphicsWrapper();
@@ -133,6 +139,12 @@ namespace Graphics
 		std::vector<std::vector<TerrainPatch*>> m_mapStatus;
 
 		bool m_fog = true;
+
+		HGLRC m_renderContext;
+
+		bool m_SDLStarted = false;
+
+		HDC m_hDC;
 	};
 }
 

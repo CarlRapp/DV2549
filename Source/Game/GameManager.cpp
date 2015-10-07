@@ -2,6 +2,8 @@
 #include "Graphics/GraphicsWrapper.h"
 #include "ResourceManager/ResourceManager.h"
 
+static GameManager* m_instance = nullptr;
+
 GameManager::GameManager() :
 	m_oldPosX(0), m_oldPosY(0), m_oldPosZ(0), m_tileRenderDistance(0)
 {
@@ -13,7 +15,8 @@ GameManager::~GameManager()
 
 GameManager& GameManager::GetInstance()
 {
-	static GameManager* m_instance = new GameManager();
+	if (m_instance == nullptr)
+		m_instance = new GameManager();
 	return *m_instance;
 }
 

@@ -1,3 +1,4 @@
+#include "windows.h"
 #include <SDL/SDL.h>
 #include <GLEW/glew.h>
 #include "Input/InputWrapper.h"
@@ -9,7 +10,6 @@
 #include "Memory/PoolTest.h"
 #include "GameManager.h"
 
-#include "windows.h"
 #include "psapi.h"
 
 #ifdef WIN32
@@ -23,6 +23,8 @@
 
 #include <new>
 #include <iostream>
+
+#include "SDL/SDL_thread.h"
 
 static int TestThread(void* dataPtr)
 {
@@ -109,7 +111,7 @@ void TempTests()
 	system("pause");
 }
 
-int main(int argc, char** argv)
+void derpTests()
 {
 	//TEST STUFF
 	{
@@ -153,8 +155,51 @@ int main(int argc, char** argv)
 		//MeasureMTPool(4194304, 4, 4);
 		//MeasureMTPool(4194304, 4, 8);
 	}
-	GameManager	gameManager = GameManager::GetInstance();
-	Graphics::GraphicsWrapper graphics = Graphics::GraphicsWrapper::GetInstance();
+}
+
+GameManager*	gameManager;
+Graphics::GraphicsWrapper* graphics;
+ResourceManager* resource;
+
+float deltaTime = 0;
+bool quit = false;
+bool initializeOK = false;
+//thread_local
+int ResourceManaging(void* _ptr)
+{
+	while(!graphics->SDLStarted()){}
+
+	HDC hDC = graphics->GetHDC();
+
+	HGLRC resourceContext = wglCreateContext(hDC);
+
+	wglShareLists(resourceContext, graphics->GetHGLRC());
+
+	while (!initializeOK) {}
+
+	
+
+	while(!quit)
+	{
+		wglMakeCurrent(hDC, resourceContext);
+		gameManager->Update(deltaTime);
+		resource->Update(deltaTime);
+	}
+
+	return 0;
+}
+
+int main(int argc, char** argv)
+{
+	//derpTests();
+	gameManager = &GameManager::GetInstance();
+	graphics = &Graphics::GraphicsWrapper::GetInstance();
+	resource = &ResourceManager::GetInstance();
+
+	SDL_Thread *resourceThread = NULL;
+	resourceThread = SDL_CreateThread(ResourceManaging, "ResourceThread", (void *)NULL);
+	
+
 
 	//SETTINGS
 	int width = 1280;
@@ -167,26 +212,27 @@ int main(int argc, char** argv)
 	bool lockMouse = true;
 
 	//INIT GFX
-	graphics.InitializeSDL(width, height);
-	graphics.InitializeGLEW();
-	graphics.InitializeShaders();
-	graphics.LoadTerrainPatch();
-	gameManager.SetGraphicsWrapper(&graphics);
+	graphics->InitializeSDL(width, height);
 
-	graphics.GetCamera()->SetPosition(glm::vec3(graphics.GetLevel()->PatchSize*0.5f, 5, graphics.GetLevel()->PatchSize*0.5f));
-	graphics.GetCamera()->SetForward(glm::vec3(0, -0.9, -1));
+	graphics->InitializeGLEW();
+	graphics->InitializeShaders();
+	graphics->LoadTerrainPatch();
+	gameManager->SetGraphicsWrapper(graphics);
+
+	graphics->GetCamera()->SetPosition(glm::vec3(graphics->GetLevel()->PatchSize*0.5f, 5, graphics->GetLevel()->PatchSize*0.5f));
+	graphics->GetCamera()->SetForward(glm::vec3(0, -0.9, -1));
 
 	//std::string FPS;
 	std::string fpsString = "fps";
 	std::string infoString = "FOG (F)\nMOUSE LOCK (G)";
 	std::string renderDistance = "RENDER DISTANCE: 1";
 
-	graphics.AddString(&fpsString, glm::vec3(0, 1, 0), 2, 0, 0);
-	graphics.AddString(&renderDistance, glm::vec3(0, 1, 1), 2, 0, -250);
-	graphics.AddString(&infoString, glm::vec3(1, 1, 0), 2, 0, -150);
+	graphics->AddString(&fpsString, glm::vec3(0, 1, 0), 2, 0, 0);
+	graphics->AddString(&renderDistance, glm::vec3(0, 1, 1), 2, 0, -250);
+	graphics->AddString(&infoString, glm::vec3(1, 1, 0), 2, 0, -150);
 	
-	ResourceManager::GetInstance().SetGraphicsWrapper(&graphics);
-	gameManager.SetRenderDistance(1);
+	resource->SetGraphicsWrapper(graphics);
+	gameManager->SetRenderDistance(1);
 	//INIT INPUT
 	Input::InputWrapper input = Input::InputWrapper::GetInstance();
 	input.GetMouse()->SetCenter(centerX, centerY);
@@ -198,9 +244,9 @@ int main(int argc, char** argv)
 
 	//MEMORY USAGE
 	PROCESS_MEMORY_COUNTERS memCounter;
-	
 
-	bool quit = false;
+	initializeOK = true;
+
 	while (!quit)
 	{
 		beginFrame = SDL_GetTicks();
@@ -215,7 +261,7 @@ int main(int argc, char** argv)
 
 		while (frameTime > 0.0)
 		{
-			float deltaTime = (float)(min(frameTime, dt));
+			deltaTime = (float)(std::min(frameTime, dt));
 			frameTime -= deltaTime;
 			t += deltaTime;
 
@@ -260,20 +306,20 @@ int main(int argc, char** argv)
 
 				//WASD MOVEMENT
 				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_W))
-					graphics.MoveCameraForward(-cameraSpeed*deltaTime);
+					graphics->MoveCameraForward(-cameraSpeed*deltaTime);
 				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_S))
-					graphics.MoveCameraForward(cameraSpeed*deltaTime);
+					graphics->MoveCameraForward(cameraSpeed*deltaTime);
 				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_A))
-					graphics.MoveCameraStrafe(-cameraSpeed*deltaTime);
+					graphics->MoveCameraStrafe(-cameraSpeed*deltaTime);
 				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_D))
-					graphics.MoveCameraStrafe(cameraSpeed*deltaTime);
+					graphics->MoveCameraStrafe(cameraSpeed*deltaTime);
 
 				//CAMERA MAX HEIGHT
-				glm::vec3 camPos = graphics.GetCamera()->GetPosition();
+				glm::vec3 camPos = graphics->GetCamera()->GetPosition();
 				if (camPos.y < cameraMaxY)
 				{
 					camPos.y = cameraMaxY;
-					graphics.GetCamera()->SetPosition(camPos);
+					graphics->GetCamera()->SetPosition(camPos);
 				}
 
 				//MOUSELOOK
@@ -282,26 +328,26 @@ int main(int argc, char** argv)
 					int dx = input.GetMouse()->GetdX();
 					int dy = input.GetMouse()->GetdY();
 					if (abs(dx) > 0.0f)
-						graphics.LookCameraX(-dx*deltaTime*mouseSensitivity);
+						graphics->LookCameraX(-dx*deltaTime*mouseSensitivity);
 					if (abs(dy) > 0.0f)
-						graphics.LookCameraY(-dy*deltaTime*mouseSensitivity);
+						graphics->LookCameraY(-dy*deltaTime*mouseSensitivity);
 				}
 
 				//LOCK MOUSE IN CENTER
 				if(lockMouse)
-					SDL_WarpMouseInWindow(graphics.GetWindow(), centerX, centerY);
+					SDL_WarpMouseInWindow(graphics->GetWindow(), centerX, centerY);
 				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_G) == Input::PRESSED)
 					lockMouse = !lockMouse;
 
 				//TOGGLE FOG
 				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_F) == Input::PRESSED)
-					graphics.FogToggle();
+					graphics->FogToggle();
 
 				//CHANGE RENDER DISTANCE
 				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_RIGHT) == Input::PRESSED)
 				{
-					int currentDistance = gameManager.GetRenderDistance();
-					gameManager.SetRenderDistance(currentDistance + 1);
+					int currentDistance = gameManager->GetRenderDistance();
+					gameManager->SetRenderDistance(currentDistance + 1);
 
 					renderDistance = "RENDER DISTANCE ";
 					renderDistance.append(std::to_string(currentDistance));
@@ -309,8 +355,8 @@ int main(int argc, char** argv)
 				}
 				else if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_LEFT) == Input::PRESSED)
 				{
-					int currentDistance = gameManager.GetRenderDistance();
-					gameManager.SetRenderDistance(currentDistance - 1);
+					int currentDistance = gameManager->GetRenderDistance();
+					gameManager->SetRenderDistance(currentDistance - 1);
 
 					renderDistance = "RENDER DISTANCE ";
 					renderDistance.append(std::to_string(currentDistance));
@@ -319,13 +365,14 @@ int main(int argc, char** argv)
 					
 			}
 
-			gameManager.Update(deltaTime);
-			ResourceManager::GetInstance().Update(deltaTime);
+			
 		}
 
-		graphics.RenderTerrain();
+		graphics->RenderTerrain();
 	}
-	
+
+	SDL_WaitThread(resourceThread, NULL);
+
 	return 0;
 }
 

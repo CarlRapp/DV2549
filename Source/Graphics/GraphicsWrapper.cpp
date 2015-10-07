@@ -4,10 +4,13 @@
 #include "TextRenderer.h"
 
 using namespace Graphics;
+static GraphicsWrapper* m_instance = nullptr;
 
 GraphicsWrapper& GraphicsWrapper::GetInstance()
 {
-	static GraphicsWrapper* m_instance = new GraphicsWrapper();
+	if(m_instance == nullptr)
+		m_instance = new GraphicsWrapper();
+
 	return *m_instance;
 }
 
@@ -101,6 +104,8 @@ void GraphicsWrapper::Render()
 
 void GraphicsWrapper::RenderTerrain()
 {
+	wglMakeCurrent(m_hDC, m_renderContext);
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
  	glViewport(0, 0, m_width, m_height);
  
@@ -179,8 +184,26 @@ void Graphics::GraphicsWrapper::InitializeSDL(unsigned int _width, unsigned int 
 
 	m_context = SDL_GL_CreateContext(m_window);
 
+	m_renderContext = wglGetCurrentContext();
+
 	SDL_GL_SetSwapInterval(0);
 
+	m_SDLStarted = true;
+}
+
+HDC Graphics::GraphicsWrapper::GetHDC()
+{
+	SDL_SysWMinfo wmInfo;
+	SDL_VERSION(&wmInfo.version);
+	if (SDL_GetWindowWMInfo(m_window,&wmInfo) < 0)	//returns (-1) on error
+	{
+		std::cout << "error in SDL_GetWMInfo";
+	}
+	HWND hWnd = wmInfo.info.win.window;
+
+	m_hDC = GetDC(hWnd); 
+
+	return m_hDC;
 }
 
 void Graphics::GraphicsWrapper::InitializeGLEW()
