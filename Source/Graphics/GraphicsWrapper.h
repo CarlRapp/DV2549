@@ -18,9 +18,6 @@
 
 namespace Graphics
 {
-
-
-
 	class DECLSPEC GraphicsWrapper
 	{
 		struct RenderInstance
@@ -47,6 +44,8 @@ namespace Graphics
 			GLuint			TextureNormal;
 			GLuint			TextureDiffuse;
 		};
+
+		
 
 		struct Level
 		{
@@ -77,6 +76,10 @@ namespace Graphics
 		void LookCameraX(float _val);
 		void LookCameraY(float _val);
 
+		void LoadSingleTexturePatch(int tileX, int tileY);
+		void DeleteSingleTexturePatch(int tileX, int tileY);
+		Level* GetLevel() { return &m_level; }
+
 		GLuint LoadTexturePatch(const char * _filename, unsigned int _x, unsigned int _y, short _colorSlots);
 		GLuint LoadTextureRAW(const char * _filename, unsigned int _width, unsigned int _height, short _colorSlots);
 		void ConvertToPAK(const char * _filename, GLint _width, GLint _height, short colorSlots);
@@ -84,9 +87,10 @@ namespace Graphics
 			
 		Compression::ICompressionHandler *compressionHandler; // Temp. variable until integration with ResourceManager.
 
+		GLCamera*	GetCamera() { return m_camera; }
+
 	private:
 		GraphicsWrapper();
-		static	GraphicsWrapper*	m_instance;
 
 		unsigned int m_width = 0;
 		unsigned int m_height = 0;
@@ -107,6 +111,8 @@ namespace Graphics
 		GLuint m_terrainVBO[3];
 
 		Level m_level;
+
+		std::vector<std::vector<TerrainPatch*>> m_mapStatus;
 	};
 }
 

@@ -1,9 +1,8 @@
 #include "ResourceManager.h"
 
 ResourceManager::ResourceManager()
-	: m_totalMemorySize(0), m_currentAllocatedMemory(0)
+	: m_totalMemorySize(0), m_currentAllocatedMemory(0), m_loadedChunks(0)
 {
-
 
 }
 
@@ -58,4 +57,13 @@ bool ResourceManager::UnloadAsset()
 
 
 	return true;
+}
+
+void ResourceManager::CreateChunkPool(unsigned int _nChunks, unsigned int _chunkSize)
+{
+	//	If the current loaded chunks
+	if(m_loadedChunks)
+		delete m_loadedChunks;
+
+	m_loadedChunks = new PoolAllocator(_nChunks, _chunkSize);
 }

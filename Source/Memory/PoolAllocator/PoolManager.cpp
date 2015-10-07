@@ -33,13 +33,13 @@ void* PoolManager::pnew(size_t _size)
 
 		//m_mutex->lock_shared();
 #if MEMORY_DEBUG //&& !_DEBUG
-	if (m_poolMap->find(_size) == m_poolMap->end())
+	if (m_poolMap.find(_size) == m_poolMap.end())
 	{
 		printf("No pool created for size %d\n", (int)_size);
 		return nullptr;
 	}
 	//#elif //_DEBUG
-	assert(m_poolMap->find(size) != m_poolMap->end());
+	assert(m_poolMap.find(_size) != m_poolMap.end());
 #endif
 
 	PoolAllocator* pool = m_poolMap[_size];
@@ -65,13 +65,13 @@ void PoolManager::pdelete(void* _delete, size_t _size)
 
 	//m_mutex->lock_shared();
 #if MEMORY_DEBUG// && !_DEBUG
-	if (m_poolMap->find(_size) == m_poolMap->end())
+	if (m_poolMap.find(_size) == m_poolMap.end())
 	{
 		printf("No pool created for size %d\n", (int)_size);
 		return;
 	}
 	//#elif _DEBUG
-	assert(m_poolMap->find(size) != m_poolMap->end());
+	assert(m_poolMap.find(_size) != m_poolMap.end());
 #endif
 
 	PoolAllocator* pool = m_poolMap[_size];

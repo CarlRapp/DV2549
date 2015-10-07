@@ -101,15 +101,16 @@ void PoolAllocator::SetSize(unsigned int _items, size_t _size)
 	}
 #endif
 
-	void** start = static_cast<void**>(m_memory);
+	char* start = static_cast<char*>(m_memory);
 	for (unsigned int i = 0; i < _items - 1; i++)
 	{
-		start[i] = &start[i + 1];
+		char* a = (start + m_memSlotSize*(i + 1));
+		memcpy(start + m_memSlotSize*i, &a, sizeof(char*));
 	}
-	start[_items - 1] = nullptr;
+	memset(start + m_memSlotSize*(_items - 1), 0, sizeof(char*));
 
-	m_first = start;
-	m_last = &start[_items - 1];
+	m_first = reinterpret_cast<void**>(start);
+	m_last = reinterpret_cast<void**>(start + m_memSlotSize*(_items - 1));
 
 	m_freeslots = _items;
 
