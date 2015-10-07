@@ -1,18 +1,3 @@
-//#version 410 core
-
-//layout(vertices = 3) out;
-
-//void main(void)
-//{
-//	gl_TessLevelOuter[0] = 2.0;
-//	gl_TessLevelOuter[1] = 4.0;
-//	gl_TessLevelOuter[2] = 6.0;
-
-//	gl_TessLevelInner[0] = 8.0;
-
-//	gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
-//}
-
 #version 450
 
 layout(vertices = 3) out;
@@ -38,23 +23,23 @@ float GetTessLevel(float Distance0, float Distance1)
 
     if (AvgDistance <= 10.0) 
 	{
-        return 64.0;
-    }
-    else if (AvgDistance <= 20.0) 
-	{
         return 32.0;
     }
-	else if (AvgDistance <= 40.0) 
+    else if (AvgDistance <= 50.0) 
 	{
         return 16.0;
     }
-	else if (AvgDistance <= 60.0) 
+	else if (AvgDistance <= 80.0) 
 	{
         return 8.0;
     }
-    else 
+	else if (AvgDistance <= 110.0) 
 	{
         return 4.0;
+    }
+    else 
+	{
+        return 1.0;
     }
 }
 

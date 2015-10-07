@@ -15,7 +15,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Input", "Input\Input.vcxpro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Graphics", "Graphics\Graphics.vcxproj", "{3085A924-6090-4B51-AA10-1B9C1F523C48}"
 	ProjectSection(ProjectDependencies) = postProject
-		{A462FC23-77AE-40F7-B9B5-161A317A6B32} = {A462FC23-77AE-40F7-B9B5-161A317A6B32}
+		{65AC8BCF-B67B-43E5-B01D-A1D462E629CA} = {65AC8BCF-B67B-43E5-B01D-A1D462E629CA}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Memory", "Memory\Memory.vcxproj", "{65AC8BCF-B67B-43E5-B01D-A1D462E629CA}"
@@ -23,6 +23,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shaders", "Shaders", "{0A67CA97-C991-4E39-960B-BD0EE952D655}"
 	ProjectSection(SolutionItems) = preProject
 		..\..\Content\Shaders\fsStandard.glsl = ..\..\Content\Shaders\fsStandard.glsl
+		..\..\Content\Shaders\text_fragment.glsl = ..\..\Content\Shaders\text_fragment.glsl
+		..\..\Content\Shaders\text_vertex.glsl = ..\..\Content\Shaders\text_vertex.glsl
 		..\..\Content\Shaders\vsStandard.glsl = ..\..\Content\Shaders\vsStandard.glsl
 	EndProjectSection
 EndProject
@@ -37,6 +39,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tess", "tess", "{A0ED3F85-F
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ResourceManager", "ResourceManager\ResourceManager.vcxproj", "{A462FC23-77AE-40F7-B9B5-161A317A6B32}"
 	ProjectSection(ProjectDependencies) = postProject
+		{3085A924-6090-4B51-AA10-1B9C1F523C48} = {3085A924-6090-4B51-AA10-1B9C1F523C48}
 		{65AC8BCF-B67B-43E5-B01D-A1D462E629CA} = {65AC8BCF-B67B-43E5-B01D-A1D462E629CA}
 	EndProjectSection
 EndProject

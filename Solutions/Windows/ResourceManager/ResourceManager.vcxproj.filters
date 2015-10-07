@@ -1,15 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source">
-      <UniqueIdentifier>{95820a5b-9b3b-4949-90c4-dc7fdfae87e3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Stack Allocator">
-      <UniqueIdentifier>{09b611ab-b9bc-45a4-a9ac-62cbbed082bd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source\Pool Allocator">
-      <UniqueIdentifier>{425e7922-fa07-47f5-ab25-b384e6a0cb7b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\Compression">
       <UniqueIdentifier>{31768b6f-b312-4abc-88d1-12d56a5ffc80}</UniqueIdentifier>
     </Filter>
@@ -19,8 +10,6 @@
     <Filter Include="Source\Compression\lz4\programs">
       <UniqueIdentifier>{5aa4481a-c30e-4f92-8900-d2f7271ed23b}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="..\..\..\Source\ResourceManager\ResourceManager.cpp" />
     <ClCompile Include="..\..\..\Source\ResourceManager\Compression\CompressionHandler_zlib.cpp">
       <Filter>Source\Compression</Filter>
