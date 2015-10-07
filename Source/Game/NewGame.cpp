@@ -160,6 +160,7 @@ void derpTests()
 GameManager*	gameManager;
 Graphics::GraphicsWrapper* graphics;
 ResourceManager* resource;
+//Memory::MemoryWrapper* memory;
 
 float deltaTime = 0;
 bool quit = false;
@@ -177,8 +178,6 @@ int ResourceManaging(void* _ptr)
 
 	while (!initializeOK) {}
 
-	
-
 	while(!quit)
 	{
 		wglMakeCurrent(hDC, resourceContext);
@@ -195,6 +194,7 @@ int main(int argc, char** argv)
 	gameManager = &GameManager::GetInstance();
 	graphics = &Graphics::GraphicsWrapper::GetInstance();
 	resource = &ResourceManager::GetInstance();
+	Memory::MemoryWrapper::GetInstance()->CreateGlobalStack(graphics->GetLevel()->ChunkSize*graphics->GetLevel()->ChunkSize * 3, 8);
 
 	SDL_Thread *resourceThread = NULL;
 	resourceThread = SDL_CreateThread(ResourceManaging, "ResourceThread", (void *)NULL);

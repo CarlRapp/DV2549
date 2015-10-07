@@ -68,6 +68,9 @@ void* StackAllocator_SingleBuffer::Reserve(size_t _nBytes)
 	if (preIncrementIndex + bytesToReserve <= m_totalByteSize)
 		returnPtr = &m_stackStartPtr[preIncrementIndex];
 
+	//	Debug check to see if memory is full
+	assert(returnPtr);
+
 	return returnPtr;
 }
 

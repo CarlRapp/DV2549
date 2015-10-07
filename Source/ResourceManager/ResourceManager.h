@@ -15,7 +15,6 @@
 #include "Memory/StackAllocator/StackAllocator_SingleBuffer.h"
 #include "Graphics/GraphicsWrapper.h"
 
-
 class DECLSPEC ResourceManager
 {
 public:
@@ -36,7 +35,6 @@ public:
 	bool LoadAsset();
 	bool UnloadAsset();
 
-
 	void CreateChunkPool(unsigned int _nChunks);
 	void LoadChunk(int tileX, int tileY);
 
@@ -45,6 +43,8 @@ public:
 
 private:
 	ResourceManager();
+
+
 
 private:
 	size_t	m_currentAllocatedMemory;

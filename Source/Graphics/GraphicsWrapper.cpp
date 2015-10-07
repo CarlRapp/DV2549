@@ -1,5 +1,6 @@
 #include <GLEW/glew.h>
 #include "GraphicsWrapper.h"
+#include <Memory/StackAllocator/StackAllocator_SingleBuffer.h>
 #include <Memory/MemoryWrapper.h>
 #include "TextRenderer.h"
 
@@ -18,6 +19,8 @@ GraphicsWrapper::GraphicsWrapper()
 {
 	m_level.X = m_level.Width / m_level.ChunkSize;
 	m_level.Y = m_level.Height / m_level.ChunkSize;
+		
+	//compressionHandler = new Compression::CompressionHandler_zlib(); // Temp. instantiation until integration with ResourceManager.
 
 	unsigned int width = m_level.PatchSize / m_level.TileSize;
 
@@ -29,6 +32,7 @@ GraphicsWrapper::GraphicsWrapper()
 	m_level.TerrainTex = (float*)malloc(m_level.TexCoords*sizeof(float));
 	m_level.TerrainNormals = (float*)malloc(m_level.Normals*sizeof(float));
 }
+
 GraphicsWrapper::~GraphicsWrapper()
 {
 	for (size_t i = m_renderItems.size() -1 ; i > -1 ; i--)
@@ -119,37 +123,39 @@ void GraphicsWrapper::RenderTerrain()
 
 	for (int i = 0; i < m_terrainPatches.size(); i++)
 	{
-		GLuint tex = glGetUniformLocation(m_terrainShader->GetProgramHandle(), "gTexHeight");
-		glUniform1i(tex, 0);
+		if (m_terrainPatches[i]->IsActive)
+		{
+			GLuint tex = glGetUniformLocation(m_terrainShader->GetProgramHandle(), "gTexHeight");
+			glUniform1i(tex, 0);
 
-		tex = glGetUniformLocation(m_terrainShader->GetProgramHandle(), "gTexNormal");
-		glUniform1i(tex, 1);
+			tex = glGetUniformLocation(m_terrainShader->GetProgramHandle(), "gTexNormal");
+			glUniform1i(tex, 1);
 
-		tex = glGetUniformLocation(m_terrainShader->GetProgramHandle(), "gTexDiffuse");
-		glUniform1i(tex, 2);
+			tex = glGetUniformLocation(m_terrainShader->GetProgramHandle(), "gTexDiffuse");
+			glUniform1i(tex, 2);
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, m_terrainPatches[i]->TextureHeight);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, m_terrainPatches[i]->TextureHeight);
 
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, m_terrainPatches[i]->TextureNormal);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, m_terrainPatches[i]->TextureNormal);
 
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, m_terrainPatches[i]->TextureDiffuse);
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, m_terrainPatches[i]->TextureDiffuse);
 
+			glm::mat4 vm = *m_camera->GetView() * m_terrainPatches[i]->ModelMatrix;
+			glm::mat4 pvm = *m_camera->GetProjection() * vm;
 
-		glm::mat4 vm = *m_camera->GetView() * m_terrainPatches[i]->ModelMatrix;
-		glm::mat4 pvm = *m_camera->GetProjection() * vm;
+			m_terrainShader->SetUniformV("gM", m_terrainPatches[i]->ModelMatrix);
+			m_terrainShader->SetUniformV("gPV", *m_camera->GetProjection() * *m_camera->GetView());
+			m_terrainShader->SetUniformV("gPVM", pvm);
 
-		m_terrainShader->SetUniformV("gM", m_terrainPatches[i]->ModelMatrix);
-		m_terrainShader->SetUniformV("gPV", *m_camera->GetProjection() * *m_camera->GetView());
-		m_terrainShader->SetUniformV("gPVM", pvm);
+			m_terrainShader->SetUniformV("gFog", m_fog);
 
-		m_terrainShader->SetUniformV("gFog", m_fog);
+			glBindVertexArray(m_terrainVAO);
 
-		glBindVertexArray(m_terrainVAO);
-
-		glDrawArrays(GL_PATCHES, 0, m_level.Vertices);
+			glDrawArrays(GL_PATCHES, 0, m_level.Vertices);
+		}
 	}
 
 	glBindVertexArray(0);
@@ -381,6 +387,7 @@ void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int tileX, int tileY, Ter
 	memLocation->TextureNormal = LoadTexturePatch("../../../Content/norm.pak", Y, X, 3);
 	memLocation->TextureDiffuse = LoadTexturePatch("../../../Content/diffuse.pak", Y, X, 3);
 	memLocation->ModelMatrix = glm::translate(glm::vec3(tileX*m_level.PatchSize, 0, tileY*m_level.PatchSize));
+	memLocation->IsActive = true;
 }
 
 void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(TerrainPatch* memLocation)
@@ -388,6 +395,7 @@ void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(TerrainPatch* memLocati
 	glDeleteTextures(1, &memLocation->TextureDiffuse);
 	glDeleteTextures(1, &memLocation->TextureNormal);
 	glDeleteTextures(1, &memLocation->TextureHeight);
+	memLocation->IsActive = false;
 }
 
 void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(int tileX, int tileY)
@@ -399,7 +407,7 @@ void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(int tileX, int tileY)
 	glDeleteTextures(1, &m_mapStatus[Y][X]->TextureNormal);
 	glDeleteTextures(1, &m_mapStatus[Y][X]->TextureHeight);
 
-	Memory::MemoryWrapper* mem = Memory::MemoryWrapper::GetInstance();
+	/*Memory::MemoryWrapper* mem = Memory::MemoryWrapper::GetInstance();
 	
 
 	for (int i = 0; i < m_terrainPatches.size(); i++)
@@ -411,11 +419,13 @@ void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(int tileX, int tileY)
 			m_mapStatus[Y][X] = 0;
 			break;
 		}
-	}
+	}*/
 }
 
 GLuint Graphics::GraphicsWrapper::LoadTexturePatch(const char * _filename, unsigned int _x, unsigned int _y, short _colorSlots)
 {
+	Memory::StackAllocator_SingleBuffer* tempStack = (Memory::StackAllocator_SingleBuffer*)Memory::MemoryWrapper::GetInstance()->GetGlobalStack();
+
 	GLuint texture;
 	GLubyte * data;
 	FILE * file;
@@ -426,8 +436,9 @@ GLuint Graphics::GraphicsWrapper::LoadTexturePatch(const char * _filename, unsig
 		printf("missing file %s\n", _filename);
 		return 0;
 	}
-
-	data = (GLubyte*)malloc(m_level.ChunkSize * m_level.ChunkSize * _colorSlots);
+	//data = (GLubyte*)malloc(m_level.ChunkSize * m_level.ChunkSize * _colorSlots);
+	size_t memoryTop = tempStack->GetTop();
+	data = (GLubyte*)tempStack->Reserve(m_level.ChunkSize * m_level.ChunkSize * _colorSlots);
 
 	//long location = ((m_level.ChunkSize*m_level.ChunkSize*m_level.X*_y) + m_level.ChunkSize*m_level.ChunkSize*_x) * _colorSlots;
 	long location = (m_level.ChunkSize*m_level.ChunkSize)*(m_level.X*_x + _y) * _colorSlots;
@@ -449,7 +460,8 @@ GLuint Graphics::GraphicsWrapper::LoadTexturePatch(const char * _filename, unsig
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-	free(data);
+	//free(data);
+	tempStack->FreeTo(memoryTop);
 
 	GLenum error = glGetError();
 	if (error != GL_NO_ERROR)
@@ -461,8 +473,36 @@ GLuint Graphics::GraphicsWrapper::LoadTexturePatch(const char * _filename, unsig
 
 }
 
+
 void Graphics::GraphicsWrapper::ConvertToPAK(const char * _filename, GLint _width, GLint _height, short _colorSlots)
 {
+	Memory::StackAllocator_SingleBuffer* tempStack = (Memory::StackAllocator_SingleBuffer*)Memory::MemoryWrapper::GetInstance()->GetGlobalStack();
+
+	//PackageReaderWriter *pakRW = new PackageReaderWriter(compressionHandler); // compressionHandler);
+
+	// Test #1: Create a package:
+
+	//std::vector<std::string> filePaths;
+	//filePaths.push_back("../../../Content/diffuse.raw");
+	//filePaths.push_back("../../../Content/norm.raw");
+	//filePaths.push_back("../../../Content/height.raw");
+	//pakRW->createPackageFromFiles("../../../Content/texturePak_lz4.pak", filePaths);
+
+	// Test #2: Load files within package:
+
+	//char *loadedDiffuseData = new char[150000000]; //[145686528];
+	//pakRW->loadPackageData("../../../Content/texturePak_lz4.pak", loadedDiffuseData, 0, 0);
+
+	//char *loadedNormData = new char[150000000]; //[145686528];
+	//pakRW->loadPackageData("../../../Content/texturePak_lz4.pak", loadedNormData, 1, 1);
+
+	//char *loadedHeightData = new char[50000000]; //[145686528];
+	//pakRW->loadPackageData("../../../Content/texturePak_lz4.pak", loadedHeightData, 2, 2);
+
+	//delete pakRW;
+	
+	// *************************************
+
 	GLubyte * data;
 	FILE * textureFile;
 	FILE * pakFile;
@@ -498,14 +538,20 @@ void Graphics::GraphicsWrapper::ConvertToPAK(const char * _filename, GLint _widt
 		printf("unknown error converting file\n");
 		return;
 	}
-
-	data = (GLubyte*)malloc(m_level.ChunkSize * _colorSlots);
-
+	
+	//data = (GLubyte*)malloc(m_level.ChunkSize * _colorSlots);
+	size_t tempTop = tempStack->GetTop();
+	data = (GLubyte*)tempStack->Reserve(m_level.ChunkSize * _colorSlots);//(GLubyte*)malloc(m_level.ChunkSize * m_level.ChunkSize * _colorSlots);
 	unsigned int x = _width / m_level.ChunkSize;
 	unsigned int y = _height / m_level.ChunkSize;
 
+	data = (GLubyte*)malloc(m_level.ChunkSize * _colorSlots); // *x * y);
+
 	printf("Converting...\n");
 	//Attempts to read 1xChunksize at a time, and write to pak file
+	
+	unsigned long bytesHandled = 0;
+	unsigned long elementsRead = 0;
 	for (unsigned int k = 0; k < y;k++)
 	{
 		for (unsigned int i = 0; i < x; i++)
@@ -519,16 +565,21 @@ void Graphics::GraphicsWrapper::ConvertToPAK(const char * _filename, GLint _widt
 
 				fseek(textureFile, offset, SEEK_SET);
 				fread(data, m_level.ChunkSize * _colorSlots, 1, textureFile);
-				fwrite(data, 1, m_level.ChunkSize * _colorSlots, pakFile);
+				bytesHandled += elementsRead * m_level.ChunkSize * _colorSlots;
+				//compressionHandler->compress_memoryToFile(data,  m_level.ChunkSize * _colorSlots, pakFile);
+				fwrite(data, 1, m_level.ChunkSize * _colorSlots, pakFile);	//		bytesToCompress += m_level.ChunkSize * _colorSlots; //	
 			}
 		}
 		printf("%d / %d\r",k,y);
 	}
 
+	//compressionHandler->compress_memoryToFile(data, bytesHandled, pakFile);
+
 	fclose(textureFile);
 	fclose(pakFile);
 
-	free(data);
+	//free(data);
+	tempStack->FreeTo(tempTop);
 }
 
 unsigned int Graphics::GraphicsWrapper::AddString(std::string* _text, glm::vec3 _color, float _scale, float _x, float _y)
@@ -684,8 +735,8 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 		}
 	}
 	
-*/
-	Memory::MemoryWrapper* mem = Memory::MemoryWrapper::GetInstance();
+
+	Memory::MemoryWrapper mem = Memory::MemoryWrapper::GetInstance();
 	mem->GetPoolManager()->CreatePool(m_level.X*m_level.Y,sizeof(TerrainPatch));
 
 	m_mapStatus.resize(m_level.Y);
@@ -697,7 +748,7 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 			m_mapStatus[i][j] = 0;
 		}
 	}
-
+	*/
 	GLenum error = glGetError();
 	if (error != GL_NO_ERROR)
 	{
