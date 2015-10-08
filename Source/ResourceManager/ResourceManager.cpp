@@ -104,6 +104,14 @@ void ResourceManager::LoadChunk(int tileX, int tileZ)
 {
 	//Graphics::GraphicsWrapper::TerrainPatch* tileMemLoc = 0;// (Graphics::GraphicsWrapper::TerrainPatch*)
 
+	for (int n = 0; n < m_loadedChunksN; ++n)
+		if (m_loadedChunks[n].X == tileX && m_loadedChunks[n].Z == tileZ)
+		{
+			m_loadedChunks[n].Popularity = SDL_GetTicks();
+			return;
+		}
+			
+
 	LoadedChunk*	chunkToOverwrite = &m_loadedChunks[GetLeastPopularChunkIndex()];
 	if (chunkToOverwrite)
 	{
