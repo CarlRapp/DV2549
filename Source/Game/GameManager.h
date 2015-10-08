@@ -19,7 +19,8 @@
 
 		void Update(float dt);
 
-		void SetRenderDistance(unsigned int _chunkDistance);
+		void RequestRenderDistance(unsigned int _chunkDistance);
+		void ChangeRenderDistance();
 		int GetRenderDistance() { return m_tileRenderDistance; }
 
 	private:
@@ -31,6 +32,7 @@
 
 		int m_oldPosX, m_oldPosY, m_oldPosZ;
 		int m_tileRenderDistance;
+		int m_oldTileRenderDistance;
 	};
 
 #endif

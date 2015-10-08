@@ -136,7 +136,6 @@ namespace Graphics
 
 		GLCamera* m_camera;
 
-		std::vector<RenderItem*> m_renderItems;
 		std::vector<TerrainPatch*> m_terrainPatches;
 		
 		GLuint m_terrainVAO;
@@ -153,6 +152,8 @@ namespace Graphics
 		bool m_SDLStarted = false;
 
 		HDC m_hDC;
+
+		SDL_mutex* m_mutex;
 	};
 }
 

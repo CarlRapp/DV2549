@@ -165,19 +165,35 @@ ResourceManager* resource;
 float deltaTime = 0;
 bool quit = false;
 bool initializeOK = false;
+bool initializeOK1 = false;
+SDL_mutex *mutexLock;
+SDL_cond *condition;
+
 //thread_local
 int ResourceManaging(void* _ptr)
 {
-	while(!graphics->SDLStarted()){}
+	SDL_LockMutex(mutexLock);
+	printf("	R Thread: WAIT SDL...\n");
+	SDL_CondWait(condition, mutexLock);
+	printf("	R Thread: SDL OK\n");
+	//SDL_UnlockMutex(mutexLock);
 
 	HDC hDC = graphics->GetHDC();
 
 	HGLRC resourceContext = wglCreateContext(hDC);
 
-	wglShareLists(resourceContext, graphics->GetHGLRC());
+	wglMakeCurrent(hDC, resourceContext);
 
-	while (!initializeOK) {}
+	if (wglShareLists(resourceContext, graphics->GetHGLRC()) == FALSE)
+		printf("ShareLists error: %i", GetLastError());
 
+	SDL_CondSignal(condition);
+	printf("	R Thread: SHARE LIST OK\n");
+
+	printf("	R Thread: WAIT BIG INIT...\n");
+	SDL_CondWait(condition, mutexLock);
+	printf("	R Thread: BIG INIT OK\n");
+	printf("	R Thread: RUNNING\n");
 	while(!quit)
 	{
 		wglMakeCurrent(hDC, resourceContext);
@@ -190,6 +206,10 @@ int ResourceManaging(void* _ptr)
 
 int main(int argc, char** argv)
 {
+	printf("	M Thread: STARTUP\n");
+	mutexLock = SDL_CreateMutex();
+	condition = SDL_CreateCond();
+	//SDL_LockMutex(mutexLock);
 	//derpTests();
 	gameManager = &GameManager::GetInstance();
 	graphics = &Graphics::GraphicsWrapper::GetInstance();
@@ -198,8 +218,6 @@ int main(int argc, char** argv)
 
 	SDL_Thread *resourceThread = NULL;
 	resourceThread = SDL_CreateThread(ResourceManaging, "ResourceThread", (void *)NULL);
-	
-
 
 	//SETTINGS
 	int width = 1280;
@@ -212,7 +230,17 @@ int main(int argc, char** argv)
 	bool lockMouse = true;
 
 	//INIT GFX
+	
 	graphics->InitializeSDL(width, height);
+
+	wglMakeCurrent(NULL, NULL);
+	
+	SDL_CondSignal(condition);
+	printf("	M Thread: SDL OK\n");
+
+	printf("	M Thread: WAIT SHARE LIST...\n");
+	SDL_CondWait(condition, mutexLock);
+	printf("	M Thread: SHARE LIST OK\n");
 
 	graphics->InitializeGLEW();
 	graphics->InitializeShaders();
@@ -232,7 +260,7 @@ int main(int argc, char** argv)
 	graphics->AddString(&infoString, glm::vec3(1, 1, 0), 2, 0, -150);
 	
 	resource->SetGraphicsWrapper(graphics);
-	gameManager->SetRenderDistance(1);
+	gameManager->RequestRenderDistance(1);
 	//INIT INPUT
 	Input::InputWrapper input = Input::InputWrapper::GetInstance();
 	input.GetMouse()->SetCenter(centerX, centerY);
@@ -245,7 +273,11 @@ int main(int argc, char** argv)
 	//MEMORY USAGE
 	PROCESS_MEMORY_COUNTERS memCounter;
 
-	initializeOK = true;
+	printf("	M Thread: BIG INIT OK\n");
+	SDL_CondSignal(condition);
+	//SDL_UnlockMutex(mutexLock);
+
+	printf("	M Thread: RUNNING\n");
 
 	while (!quit)
 	{
@@ -294,8 +326,6 @@ int main(int argc, char** argv)
 				quit = true;
 				break;
 			}
-
-			
 
 			//In game commands
 			//Move to some nice place
@@ -347,7 +377,7 @@ int main(int argc, char** argv)
 				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_RIGHT) == Input::PRESSED)
 				{
 					int currentDistance = gameManager->GetRenderDistance();
-					gameManager->SetRenderDistance(currentDistance + 1);
+					gameManager->RequestRenderDistance(currentDistance + 1);
 
 					renderDistance = "RENDER DISTANCE ";
 					renderDistance.append(std::to_string(currentDistance));
@@ -356,7 +386,7 @@ int main(int argc, char** argv)
 				else if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_LEFT) == Input::PRESSED)
 				{
 					int currentDistance = gameManager->GetRenderDistance();
-					gameManager->SetRenderDistance(currentDistance - 1);
+					gameManager->RequestRenderDistance(currentDistance - 1);
 
 					renderDistance = "RENDER DISTANCE ";
 					renderDistance.append(std::to_string(currentDistance));

@@ -31,20 +31,22 @@ GraphicsWrapper::GraphicsWrapper()
 	m_level.TerrainVertices = (float*)malloc(m_level.Vertices*sizeof(float));
 	m_level.TerrainTex = (float*)malloc(m_level.TexCoords*sizeof(float));
 	m_level.TerrainNormals = (float*)malloc(m_level.Normals*sizeof(float));
+
+	m_mutex = SDL_CreateMutex();
 }
 
 GraphicsWrapper::~GraphicsWrapper()
 {
-	for (size_t i = m_renderItems.size() -1 ; i > -1 ; i--)
-	{
-		for (size_t j = m_renderItems[i]->Instances.size()-1; j > -1; j--)
-		{
-			delete m_renderItems[i]->Instances[j];
-		}
-
-		delete m_renderItems[i];
-		m_renderItems.pop_back();
-	}
+// 	for (size_t i = m_renderItems.size() -1 ; i > -1 ; i--)
+// 	{
+// 		for (size_t j = m_renderItems[i]->Instances.size()-1; j > -1; j--)
+// 		{
+// 			delete m_renderItems[i]->Instances[j];
+// 		}
+// 
+// 		delete m_renderItems[i];
+// 		m_renderItems.pop_back();
+// 	}
 
 	delete m_terrainShader;
 	delete m_camera;
@@ -120,7 +122,7 @@ void GraphicsWrapper::RenderTerrain()
 	GLint availableMem;
 
 	//glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &availableMem);
-
+	SDL_LockMutex(m_mutex);
 	for (int i = 0; i < m_terrainPatches.size(); i++)
 	{
 		if (m_terrainPatches[i]->IsActive)
@@ -157,7 +159,7 @@ void GraphicsWrapper::RenderTerrain()
 			glDrawArrays(GL_PATCHES, 0, m_level.Vertices);
 		}
 	}
-
+	SDL_UnlockMutex(m_mutex);
 	glBindVertexArray(0);
 	glUseProgram(0);
 
@@ -214,6 +216,8 @@ HDC Graphics::GraphicsWrapper::GetHDC()
 
 void Graphics::GraphicsWrapper::InitializeGLEW()
 {
+	wglMakeCurrent(m_hDC, m_renderContext);
+
 	//GLEW
 	glewExperimental = GL_TRUE;
 	glewInit();
@@ -367,12 +371,14 @@ void Graphics::GraphicsWrapper::LookCameraY(float _val)			{m_camera->Pitch(_val)
 
 void Graphics::GraphicsWrapper::ReloadTerrainPatches(std::vector<TerrainPatch*> newPatches)
 {
+	SDL_LockMutex(m_mutex);
 	m_terrainPatches.clear();
 
 	for (int n = 0; n < newPatches.size(); ++n)
 	{
 		m_terrainPatches.push_back(newPatches[n]);
 	}	
+	SDL_UnlockMutex(m_mutex);
 }
 
 void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int tileX, int tileY, TerrainPatch* memLocation)
@@ -447,12 +453,12 @@ GLuint Graphics::GraphicsWrapper::LoadTexturePatch(const char * _filename, unsig
 	fread(data, m_level.ChunkSize * m_level.ChunkSize * _colorSlots, 1, file);
 
  	fclose(file);
-	
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
+	
 	glTexImage2D(GL_TEXTURE_2D, 0, _colorSlots == 1 ? GL_RED : GL_RGB, m_level.ChunkSize, m_level.ChunkSize, 0, _colorSlots == 1 ? GL_RED : GL_RGB, GL_UNSIGNED_BYTE,data);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -749,6 +755,8 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 		}
 	}
 	*/
+	wglMakeCurrent(m_hDC, m_renderContext);
+
 	GLenum error = glGetError();
 	if (error != GL_NO_ERROR)
 	{
