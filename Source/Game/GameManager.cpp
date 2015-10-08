@@ -33,6 +33,7 @@ void GameManager::Update(float dt)
 		m_oldPosX	=	currentX;
 		m_oldPosZ	=	currentZ;
 
+		//ChangeRenderDistance();
 		LoadSurroundingChunks();
 	}
 
@@ -48,11 +49,12 @@ void GameManager::RequestRenderDistance(unsigned int _chunkDistance)
 
 	//	Divide the requested render distance
 	//	since we go from -m_tileRenderDistance to m_tileRenderDistance
-	m_tileRenderDistance	= _chunkDistance <= 1 ? 1 : _chunkDistance;
+	m_tileRenderDistance = _chunkDistance <= 1 ? 1 : _chunkDistance;
 }
 
 void GameManager::ChangeRenderDistance()
 {
+
 	//	Delete the current pool from the resourcemanager
 	unsigned int numberOfChunks = (m_tileRenderDistance * 2 + 1)*(m_tileRenderDistance * 2 + 1);
 
@@ -82,5 +84,5 @@ void GameManager::LoadSurroundingChunks()
 		for (int Z = -m_tileRenderDistance; Z <= m_tileRenderDistance; ++Z)
 			if (std::abs(m_oldPosX + X) < sizeX && std::abs(m_oldPosZ + Z) < sizeZ)
 				ResourceManager::GetInstance().LoadChunk(m_oldPosX + X, m_oldPosZ + Z);
-
+	//glFlush();
 }

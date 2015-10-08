@@ -22,7 +22,8 @@ public:
 	{
 		Graphics::GraphicsWrapper::TerrainPatch GraphicsPatch;
 		size_t Popularity;
-		int X, Z;
+		int X;
+		int Z;
 	};
 
 public:

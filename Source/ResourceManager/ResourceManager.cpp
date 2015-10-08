@@ -71,7 +71,7 @@ void ResourceManager::CreateChunkPool(unsigned int _nChunks)
 		for (int n = 0; n < m_loadedChunksN; ++n)
 			m_graphicsWrapper->DeleteSingleTexturePatch(&m_loadedChunks[n].GraphicsPatch);
 
-		glFlush();
+		//glFlush();
 		delete m_loadedChunks;
 		m_loadedChunks = 0;
 	}
@@ -112,7 +112,7 @@ void ResourceManager::LoadChunk(int tileX, int tileZ)
 		chunkToOverwrite->X = tileX;
 		chunkToOverwrite->Z = tileZ;
 		chunkToOverwrite->Popularity = SDL_GetTicks();
-		glFlush();
+		
 	}
 
 }

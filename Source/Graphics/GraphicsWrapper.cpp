@@ -223,14 +223,14 @@ void Graphics::GraphicsWrapper::InitializeGLEW()
 	glewInit();
 	glClearColor(0.0f, 0.0f, 0.1f, 0.0f);
 	glViewport(0, 0, m_width, m_height);
-	glDepthRange(0.0, 100.0);
+	glDepthRange(0.0, 500.0);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_TEXTURE_2D);
 
 	//CAMERA
-	m_camera = new GLCamera(45.0f, m_width, m_height, 0.1f, 100.0f);
+	m_camera = new GLCamera(45.0f, m_width, m_height, 0.1f, 500.0f);
 	m_camera->SetPosition(glm::vec3(0, 3, 0));
 	m_camera->SetLookAt(glm::vec3(0, 0, 0));
 	m_camera->SetViewPort(0, 0, m_width, m_height);
