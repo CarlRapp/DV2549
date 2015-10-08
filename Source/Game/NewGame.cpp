@@ -224,7 +224,7 @@ int main(int argc, char** argv)
 	int height = 720;
 	int centerX = width/2;
 	int centerY = height/2;
-	const float cameraSpeed = 14.0f;
+	const float cameraSpeed = 32.0f;
 	int cameraMaxY = 20;
 	const float mouseSensitivity = 3.0f;
 	bool lockMouse = true;
