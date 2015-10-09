@@ -216,9 +216,6 @@ int main(int argc, char** argv)
 	resource = &ResourceManager::GetInstance();
 	Memory::MemoryWrapper::GetInstance()->CreateGlobalStack(graphics->GetLevel()->ChunkSize*graphics->GetLevel()->ChunkSize * 3, 8);
 
-	SDL_Thread *resourceThread = NULL;
-	resourceThread = SDL_CreateThread(ResourceManaging, "ResourceThread", (void *)NULL);
-
 	//SETTINGS
 	int width = 1280;
 	int height = 720;
@@ -233,14 +230,14 @@ int main(int argc, char** argv)
 	
 	graphics->InitializeSDL(width, height);
 
-	wglMakeCurrent(NULL, NULL);
+	//wglMakeCurrent(NULL, NULL);
 	
-	SDL_CondSignal(condition);
+	/*SDL_CondSignal(condition);
 	printf("	M Thread: SDL OK\n");
 
 	printf("	M Thread: WAIT SHARE LIST...\n");
 	SDL_CondWait(condition, mutexLock);
-	printf("	M Thread: SHARE LIST OK\n");
+	printf("	M Thread: SHARE LIST OK\n");*/
 
 	graphics->InitializeGLEW();
 	graphics->InitializeShaders();
@@ -397,11 +394,11 @@ int main(int argc, char** argv)
 
 			
 		}
-
+		gameManager->Update(deltaTime);
+		resource->Update(deltaTime);
 		graphics->RenderTerrain();
 	}
 
-	SDL_WaitThread(resourceThread, NULL);
 
 	return 0;
 }

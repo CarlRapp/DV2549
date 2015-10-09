@@ -83,6 +83,6 @@ void GameManager::LoadSurroundingChunks()
 	for (int X = -m_tileRenderDistance; X <= m_tileRenderDistance; ++X)
 		for (int Z = -m_tileRenderDistance; Z <= m_tileRenderDistance; ++Z)
 			if (std::abs(m_oldPosX + X) < sizeX && std::abs(m_oldPosZ + Z) < sizeZ)
-				ResourceManager::GetInstance().LoadChunk(m_oldPosX + X, m_oldPosZ + Z);
+				ResourceManager::GetInstance().LoadChunk_Threaded(m_oldPosX + X, m_oldPosZ + Z);
 	//glFlush();
 }
