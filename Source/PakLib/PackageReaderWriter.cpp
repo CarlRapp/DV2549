@@ -57,9 +57,6 @@ void PackageReaderWriter::createPackageFromFiles(std::string PAKFilePath, std::v
 			nBytesAdded = compressionHandler->compress_fileToFile(fileToAdd, package.m_fileHandle);
 		}
 
-		char *fileName = new char[30];
-		_splitpath_s(filePaths[i].c_str(), NULL, NULL, NULL, NULL, fileName, NULL, NULL, NULL);
-
 		PackageFileTableEntry fileTableEntry;
 		strncpy_s(fileTableEntry.fileName, filePaths[i].c_str(), sizeof(fileTableEntry.fileName));
 		fileTableEntry.fileName[sizeof(fileTableEntry.fileName) - 1] = 0;
