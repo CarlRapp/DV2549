@@ -64,7 +64,7 @@ public:
 	//PackageHeader loadPackageHeader(std::string packageFileName);
 	std::vector<PackageFileTableEntry> loadPackageFileTable(std::string packageFileName);
 	void loadPackageData(std::string packageFileName, void *dest, int _loadStartIndex = -1, int _loadEndIndex = -1);
-	void getIndexOfResourceByName(std::string resourceName);
+	int getIndexOfResourceByName(std::string packageFileName, std::string resourceName);
 };
 #endif
 
