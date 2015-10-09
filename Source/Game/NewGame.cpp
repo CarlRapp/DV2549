@@ -168,39 +168,39 @@ bool quit = false;
 // SDL_cond *Graphics::GraphicsWrapper::gCond;
 
 //thread_local
-int ResourceManaging(void* _ptr)
-{
-	SDL_LockMutex(graphics->gMutex);
-	printf("	R Thread: WAIT SDL...\n");
-	SDL_CondWait(graphics->gCond, graphics->gMutex);
-	printf("	R Thread: SDL OK\n");
-	//SDL_UnlockMutex(Global::gMutex);
-
-	HDC hDC = graphics->GetHDC();
-
-	HGLRC resourceContext = wglCreateContext(hDC);
-
-	wglMakeCurrent(hDC, resourceContext);
-
-	if (wglShareLists(resourceContext, graphics->GetHGLRC()) == FALSE)
-		printf("ShareLists error: %i", GetLastError());
-
-	SDL_CondSignal(graphics->gCond);
-	printf("	R Thread: SHARE LIST OK\n");
-
-	printf("	R Thread: WAIT BIG INIT...\n");
-	SDL_CondWait(graphics->gCond, graphics->gMutex);
-	printf("	R Thread: BIG INIT OK\n");
-	printf("	R Thread: RUNNING\n");
-	while(!quit)
-	{
-		wglMakeCurrent(hDC, resourceContext);
-		gameManager->Update(deltaTime);
-		resource->Update(deltaTime);
-	}
-
-	return 0;
-}
+// int ResourceManaging(void* _ptr)
+// {
+// 	SDL_LockMutex(graphics->gMutex);
+// 	printf("	R Thread: WAIT SDL...\n");
+// 	SDL_CondWait(graphics->gCond, graphics->gMutex);
+// 	printf("	R Thread: SDL OK\n");
+// 	//SDL_UnlockMutex(Global::gMutex);
+// 
+// 	HDC hDC = graphics->GetHDC();
+// 
+// 	HGLRC resourceContext = wglCreateContext(hDC);
+// 
+// 	wglMakeCurrent(hDC, resourceContext);
+// 
+// 	if (wglShareLists(resourceContext, graphics->GetHGLRC()) == FALSE)
+// 		printf("ShareLists error: %i", GetLastError());
+// 
+// 	SDL_CondSignal(graphics->gCond);
+// 	printf("	R Thread: SHARE LIST OK\n");
+// 
+// 	printf("	R Thread: WAIT BIG INIT...\n");
+// 	SDL_CondWait(graphics->gCond, graphics->gMutex);
+// 	printf("	R Thread: BIG INIT OK\n");
+// 	printf("	R Thread: RUNNING\n");
+// 	while(!quit)
+// 	{
+// 		wglMakeCurrent(hDC, resourceContext);
+// 		gameManager->Update(deltaTime);
+// 		resource->Update(deltaTime);
+// 	}
+// 
+// 	return 0;
+// }
 
 int main(int argc, char** argv)
 {
@@ -262,7 +262,7 @@ int main(int argc, char** argv)
 	graphics->AddString(&infoString, glm::vec3(1, 1, 0), 2, 0, -150);
 	
 	resource->SetGraphicsWrapper(graphics);
-	gameManager->RequestRenderDistance(1);
+	gameManager->RequestRenderDistance(3);
 	//INIT INPUT
 	Input::InputWrapper input = Input::InputWrapper::GetInstance();
 	input.GetMouse()->SetCenter(centerX, centerY);

@@ -5,7 +5,7 @@
 static GameManager* m_instance = nullptr;
 
 GameManager::GameManager() :
-	m_oldPosX(0), m_oldPosY(0), m_oldPosZ(0), m_tileRenderDistance(0), m_oldTileRenderDistance(0)
+	m_oldPosX(0), m_oldPosY(0), m_oldPosZ(0), m_tileRenderDistance(2), m_oldTileRenderDistance(2)
 {
 	
 }

@@ -78,7 +78,7 @@ bool ResourceManager::UnloadAsset()
 
 void ResourceManager::CreateChunkPool(unsigned int _nChunks)
 {
-	
+	SDL_LockMutex(m_graphicsWrapper->gMutex);
 	//	If the current loaded chunks
 	if(m_loadedChunks)
 	{
@@ -86,7 +86,7 @@ void ResourceManager::CreateChunkPool(unsigned int _nChunks)
 		for (int n = 0; n < m_loadedChunksN; ++n)
 			m_graphicsWrapper->DeleteSingleTexturePatch(&m_loadedChunks[n].GraphicsPatch);
 
-		//glFlush();
+		//
 		
 		delete m_loadedChunks;
 		m_loadedChunks = 0;
@@ -114,6 +114,8 @@ void ResourceManager::CreateChunkPool(unsigned int _nChunks)
 	
 	//	No more memory...
 	assert(m_currentAllocatedMemory > m_totalMemorySize);
+	glFlush();
+	SDL_UnlockMutex(m_graphicsWrapper->gMutex);
 }
 
 void ResourceManager::LoadChunk(int tileX, int tileZ)
@@ -227,10 +229,11 @@ void ResourceManager::LoadChunks_Thread()
 	printf("	R Thread: RUNNING\n");
 
 	
-
+	SDL_UnlockMutex(m_graphicsWrapper->gMutex);
 	LoadedChunk* chunk = new LoadedChunk();
 	while (true)
 	{
+		
 		SDL_LockMutex(m_mutex);
 		if (!m_chunksToPreload.empty())
 		{
@@ -239,7 +242,6 @@ void ResourceManager::LoadChunks_Thread()
 			m_chunksToPreload.pop();
 			SDL_UnlockMutex(m_mutex);
 			
-
 			//Ladda chunk
 			//LoadChunk(chunkToLoad.x, chunkToLoad.y);
 			wglMakeCurrent(m_hDC, m_resourceContext);
@@ -251,6 +253,8 @@ void ResourceManager::LoadChunks_Thread()
 
 			SDL_LockMutex(m_mutex);
 			m_preloadedChunks.push_back(*chunk);
+			
+			//SDL_UnlockMutex(m_graphicsWrapper->gMutex);
 		}
 
 		if (stop)
@@ -261,6 +265,7 @@ void ResourceManager::LoadChunks_Thread()
 		}
 
 		SDL_UnlockMutex(m_mutex);
+		
 	}
 	delete chunk;
 	return;
