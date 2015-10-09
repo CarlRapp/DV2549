@@ -5,10 +5,13 @@
 #include "TextRenderer.h"
 
 using namespace Graphics;
+static GraphicsWrapper* m_instance = nullptr;
 
 GraphicsWrapper& GraphicsWrapper::GetInstance()
 {
-	static GraphicsWrapper* m_instance = new GraphicsWrapper();
+	if(m_instance == nullptr)
+		m_instance = new GraphicsWrapper();
+
 	return *m_instance;
 }
 
@@ -28,20 +31,22 @@ GraphicsWrapper::GraphicsWrapper()
 	m_level.TerrainVertices = (float*)malloc(m_level.Vertices*sizeof(float));
 	m_level.TerrainTex = (float*)malloc(m_level.TexCoords*sizeof(float));
 	m_level.TerrainNormals = (float*)malloc(m_level.Normals*sizeof(float));
+
+	m_mutex = SDL_CreateMutex();
 }
 
 GraphicsWrapper::~GraphicsWrapper()
 {
-	for (size_t i = m_renderItems.size() -1 ; i > -1 ; i--)
-	{
-		for (size_t j = m_renderItems[i]->Instances.size()-1; j > -1; j--)
-		{
-			delete m_renderItems[i]->Instances[j];
-		}
-
-		delete m_renderItems[i];
-		m_renderItems.pop_back();
-	}
+// 	for (size_t i = m_renderItems.size() -1 ; i > -1 ; i--)
+// 	{
+// 		for (size_t j = m_renderItems[i]->Instances.size()-1; j > -1; j--)
+// 		{
+// 			delete m_renderItems[i]->Instances[j];
+// 		}
+// 
+// 		delete m_renderItems[i];
+// 		m_renderItems.pop_back();
+// 	}
 
 	delete m_terrainShader;
 	delete m_camera;
@@ -105,6 +110,8 @@ void GraphicsWrapper::Render()
 
 void GraphicsWrapper::RenderTerrain()
 {
+	wglMakeCurrent(m_hDC, m_renderContext);
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
  	glViewport(0, 0, m_width, m_height);
  
@@ -115,7 +122,7 @@ void GraphicsWrapper::RenderTerrain()
 	GLint availableMem;
 
 	//glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &availableMem);
-
+	SDL_LockMutex(m_mutex);
 	for (int i = 0; i < m_terrainPatches.size(); i++)
 	{
 		if (m_terrainPatches[i]->IsActive)
@@ -152,7 +159,7 @@ void GraphicsWrapper::RenderTerrain()
 			glDrawArrays(GL_PATCHES, 0, m_level.Vertices);
 		}
 	}
-
+	SDL_UnlockMutex(m_mutex);
 	glBindVertexArray(0);
 	glUseProgram(0);
 
@@ -185,25 +192,45 @@ void Graphics::GraphicsWrapper::InitializeSDL(unsigned int _width, unsigned int 
 
 	m_context = SDL_GL_CreateContext(m_window);
 
+	m_renderContext = wglGetCurrentContext();
+
 	SDL_GL_SetSwapInterval(0);
 
+	m_SDLStarted = true;
+}
+
+HDC Graphics::GraphicsWrapper::GetHDC()
+{
+	SDL_SysWMinfo wmInfo;
+	SDL_VERSION(&wmInfo.version);
+	if (SDL_GetWindowWMInfo(m_window,&wmInfo) < 0)	//returns (-1) on error
+	{
+		std::cout << "error in SDL_GetWMInfo";
+	}
+	HWND hWnd = wmInfo.info.win.window;
+
+	m_hDC = GetDC(hWnd); 
+
+	return m_hDC;
 }
 
 void Graphics::GraphicsWrapper::InitializeGLEW()
 {
+	wglMakeCurrent(m_hDC, m_renderContext);
+
 	//GLEW
 	glewExperimental = GL_TRUE;
 	glewInit();
 	glClearColor(0.0f, 0.0f, 0.1f, 0.0f);
 	glViewport(0, 0, m_width, m_height);
-	glDepthRange(0.0, 100.0);
+	glDepthRange(0.0, 500.0);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_TEXTURE_2D);
 
 	//CAMERA
-	m_camera = new GLCamera(45.0f, m_width, m_height, 0.1f, 100.0f);
+	m_camera = new GLCamera(45.0f, m_width, m_height, 0.1f, 500.0f);
 	m_camera->SetPosition(glm::vec3(0, 3, 0));
 	m_camera->SetLookAt(glm::vec3(0, 0, 0));
 	m_camera->SetViewPort(0, 0, m_width, m_height);
@@ -344,12 +371,14 @@ void Graphics::GraphicsWrapper::LookCameraY(float _val)			{m_camera->Pitch(_val)
 
 void Graphics::GraphicsWrapper::ReloadTerrainPatches(std::vector<TerrainPatch*> newPatches)
 {
+	SDL_LockMutex(m_mutex);
 	m_terrainPatches.clear();
 
 	for (int n = 0; n < newPatches.size(); ++n)
 	{
 		m_terrainPatches.push_back(newPatches[n]);
 	}	
+	SDL_UnlockMutex(m_mutex);
 }
 
 void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int tileX, int tileY, TerrainPatch* memLocation)
@@ -424,12 +453,12 @@ GLuint Graphics::GraphicsWrapper::LoadTexturePatch(const char * _filename, unsig
 	fread(data, m_level.ChunkSize * m_level.ChunkSize * _colorSlots, 1, file);
 
  	fclose(file);
-	
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
+	
 	glTexImage2D(GL_TEXTURE_2D, 0, _colorSlots == 1 ? GL_RED : GL_RGB, m_level.ChunkSize, m_level.ChunkSize, 0, _colorSlots == 1 ? GL_RED : GL_RGB, GL_UNSIGNED_BYTE,data);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -726,6 +755,8 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 		}
 	}
 	*/
+	wglMakeCurrent(m_hDC, m_renderContext);
+
 	GLenum error = glGetError();
 	if (error != GL_NO_ERROR)
 	{

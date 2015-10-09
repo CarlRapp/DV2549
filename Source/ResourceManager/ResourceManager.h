@@ -22,7 +22,8 @@ public:
 	{
 		Graphics::GraphicsWrapper::TerrainPatch GraphicsPatch;
 		size_t Popularity;
-		int X, Z;
+		int X;
+		int Z;
 	};
 
 public:
@@ -37,6 +38,12 @@ public:
 
 	void CreateChunkPool(unsigned int _nChunks);
 	void LoadChunk(int tileX, int tileY);
+
+
+	void LoadChunks_Thread();
+	void LoadChunk_Threaded(int x, int y);
+	std::vector<LoadedChunk> GetLoadedTextures();
+
 
 	void Update(float _dt);
 	
@@ -58,6 +65,14 @@ private:
 	LoadedChunk*	m_loadedChunks;
 	
 	int	GetLeastPopularChunkIndex();
+
+
+	SDL_Thread* m_thread;
+	SDL_mutex* m_mutex;
+
+	bool stop;
+	std::vector<LoadedChunk> m_preloadedChunks;
+	std::queue<SDL_Point> m_chunksToPreload;
 
 	size_t m_ticks;
 };
