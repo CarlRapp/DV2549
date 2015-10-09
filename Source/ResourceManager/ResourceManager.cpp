@@ -40,6 +40,11 @@ bool ResourceManager::InitResourceManager(size_t _totalMemorySize)
 	return false;
 }
 
+void ResourceManager::SetGraphicsWrapper(Graphics::GraphicsWrapper* instance)
+{
+	m_graphicsWrapper = instance; 
+}
+
 bool ResourceManager::LoadAsset()
 {
 	//	Check if the asset already exists?
@@ -73,6 +78,7 @@ bool ResourceManager::UnloadAsset()
 
 void ResourceManager::CreateChunkPool(unsigned int _nChunks)
 {
+	
 	//	If the current loaded chunks
 	if(m_loadedChunks)
 	{
@@ -81,6 +87,7 @@ void ResourceManager::CreateChunkPool(unsigned int _nChunks)
 			m_graphicsWrapper->DeleteSingleTexturePatch(&m_loadedChunks[n].GraphicsPatch);
 
 		//glFlush();
+		
 		delete m_loadedChunks;
 		m_loadedChunks = 0;
 	}
@@ -200,16 +207,26 @@ std::vector<ResourceManager::LoadedChunk> ResourceManager::GetLoadedTextures()
 
 void ResourceManager::LoadChunks_Thread()
 {
-	while (!m_graphicsWrapper) {}
-	while (!m_graphicsWrapper->SDLStarted()) {}
+	m_graphicsWrapper = &Graphics::GraphicsWrapper::GetInstance();
 
-	HDC hDC = m_graphicsWrapper->GetHDC();
+	m_hDC = m_graphicsWrapper->GetHDC();
 
-	HGLRC resourceContext = wglCreateContext(hDC);
+	m_resourceContext = wglCreateContext(m_hDC);
 
-	wglShareLists(resourceContext, m_graphicsWrapper->GetHGLRC());
+	wglMakeCurrent(m_hDC, m_resourceContext);
 
-	wglMakeCurrent(hDC, resourceContext);
+	if (wglShareLists(m_resourceContext, m_graphicsWrapper->GetHGLRC()) == FALSE)
+		printf("ShareLists error: %i", GetLastError());
+
+	SDL_CondSignal(m_graphicsWrapper->gCond);
+	printf("	R Thread: SHARE LIST OK\n");
+
+	printf("	R Thread: WAIT BIG INIT...\n");
+	SDL_CondWait(m_graphicsWrapper->gCond, m_graphicsWrapper->gMutex);
+	printf("	R Thread: BIG INIT OK\n");
+	printf("	R Thread: RUNNING\n");
+
+	
 
 	LoadedChunk* chunk = new LoadedChunk();
 	while (true)
@@ -217,13 +234,17 @@ void ResourceManager::LoadChunks_Thread()
 		SDL_LockMutex(m_mutex);
 		if (!m_chunksToPreload.empty())
 		{
+			//SDL_LockMutex(m_graphicsWrapper->gMutex);
 			SDL_Point chunkToLoad = m_chunksToPreload.front();
 			m_chunksToPreload.pop();
 			SDL_UnlockMutex(m_mutex);
+			
 
 			//Ladda chunk
 			//LoadChunk(chunkToLoad.x, chunkToLoad.y);
+			wglMakeCurrent(m_hDC, m_resourceContext);
 			m_graphicsWrapper->LoadSingleTexturePatch(chunkToLoad.x, chunkToLoad.y, &chunk->GraphicsPatch);
+			//SDL_UnlockMutex(m_graphicsWrapper->gMutex);
 			chunk->X = chunkToLoad.x;
 			chunk->Z = chunkToLoad.y;
 			chunk->Popularity = SDL_GetTicks();

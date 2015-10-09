@@ -122,7 +122,7 @@ void GraphicsWrapper::RenderTerrain()
 	GLint availableMem;
 
 	//glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &availableMem);
-	SDL_LockMutex(m_mutex);
+	//SDL_LockMutex(gMutex);
 	for (int i = 0; i < m_terrainPatches.size(); i++)
 	{
 		if (m_terrainPatches[i]->IsActive)
@@ -159,7 +159,7 @@ void GraphicsWrapper::RenderTerrain()
 			glDrawArrays(GL_PATCHES, 0, m_level.Vertices);
 		}
 	}
-	SDL_UnlockMutex(m_mutex);
+	SDL_UnlockMutex(gMutex);
 	glBindVertexArray(0);
 	glUseProgram(0);
 
@@ -371,18 +371,19 @@ void Graphics::GraphicsWrapper::LookCameraY(float _val)			{m_camera->Pitch(_val)
 
 void Graphics::GraphicsWrapper::ReloadTerrainPatches(std::vector<TerrainPatch*> newPatches)
 {
-	SDL_LockMutex(m_mutex);
+	//SDL_LockMutex(gMutex);
 	m_terrainPatches.clear();
 
 	for (int n = 0; n < newPatches.size(); ++n)
 	{
 		m_terrainPatches.push_back(newPatches[n]);
 	}	
-	SDL_UnlockMutex(m_mutex);
+	//SDL_UnlockMutex(gMutex);
 }
 
 void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int tileX, int tileY, TerrainPatch* memLocation)
 {
+	//SDL_LockMutex(gMutex);
 	unsigned int X = tileX + m_level.X / 2;
 	unsigned int Y = tileY + m_level.Y / 2;
 
@@ -394,14 +395,17 @@ void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int tileX, int tileY, Ter
 	memLocation->TextureDiffuse = LoadTexturePatch("../../../Content/diffuse.pak", Y, X, 3);
 	memLocation->ModelMatrix = glm::translate(glm::vec3(tileX*m_level.PatchSize, 0, tileY*m_level.PatchSize));
 	memLocation->IsActive = true;
+	//SDL_UnlockMutex(gMutex);
 }
 
 void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(TerrainPatch* memLocation)
 {
+	//SDL_LockMutex(gMutex);
 	glDeleteTextures(1, &memLocation->TextureDiffuse);
 	glDeleteTextures(1, &memLocation->TextureNormal);
 	glDeleteTextures(1, &memLocation->TextureHeight);
 	memLocation->IsActive = false;
+	//SDL_UnlockMutex(gMutex);
 }
 
 void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(int tileX, int tileY)
@@ -453,6 +457,7 @@ GLuint Graphics::GraphicsWrapper::LoadTexturePatch(const char * _filename, unsig
 	fread(data, m_level.ChunkSize * m_level.ChunkSize * _colorSlots, 1, file);
 
  	fclose(file);
+
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	glGenTextures(1, &texture);

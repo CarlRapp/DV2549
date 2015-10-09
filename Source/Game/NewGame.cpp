@@ -24,8 +24,6 @@
 #include <new>
 #include <iostream>
 
-#include "SDL/SDL_thread.h"
-
 static int TestThread(void* dataPtr)
 {
 	int tCounter = 0;
@@ -164,19 +162,19 @@ ResourceManager* resource;
 
 float deltaTime = 0;
 bool quit = false;
-bool initializeOK = false;
-bool initializeOK1 = false;
-SDL_mutex *mutexLock;
-SDL_cond *condition;
+// bool initializeOK = false;
+// bool initializeOK1 = false;
+// SDL_mutex *Global::gMutex;
+// SDL_cond *Graphics::GraphicsWrapper::gCond;
 
 //thread_local
 int ResourceManaging(void* _ptr)
 {
-	SDL_LockMutex(mutexLock);
+	SDL_LockMutex(graphics->gMutex);
 	printf("	R Thread: WAIT SDL...\n");
-	SDL_CondWait(condition, mutexLock);
+	SDL_CondWait(graphics->gCond, graphics->gMutex);
 	printf("	R Thread: SDL OK\n");
-	//SDL_UnlockMutex(mutexLock);
+	//SDL_UnlockMutex(Global::gMutex);
 
 	HDC hDC = graphics->GetHDC();
 
@@ -187,11 +185,11 @@ int ResourceManaging(void* _ptr)
 	if (wglShareLists(resourceContext, graphics->GetHGLRC()) == FALSE)
 		printf("ShareLists error: %i", GetLastError());
 
-	SDL_CondSignal(condition);
+	SDL_CondSignal(graphics->gCond);
 	printf("	R Thread: SHARE LIST OK\n");
 
 	printf("	R Thread: WAIT BIG INIT...\n");
-	SDL_CondWait(condition, mutexLock);
+	SDL_CondWait(graphics->gCond, graphics->gMutex);
 	printf("	R Thread: BIG INIT OK\n");
 	printf("	R Thread: RUNNING\n");
 	while(!quit)
@@ -207,14 +205,18 @@ int ResourceManaging(void* _ptr)
 int main(int argc, char** argv)
 {
 	printf("	M Thread: STARTUP\n");
-	mutexLock = SDL_CreateMutex();
-	condition = SDL_CreateCond();
-	//SDL_LockMutex(mutexLock);
+
+	//SDL_LockMutex(Global::gMutex);
 	//derpTests();
 	gameManager = &GameManager::GetInstance();
 	graphics = &Graphics::GraphicsWrapper::GetInstance();
-	resource = &ResourceManager::GetInstance();
+	
 	Memory::MemoryWrapper::GetInstance()->CreateGlobalStack(graphics->GetLevel()->ChunkSize*graphics->GetLevel()->ChunkSize * 3, 8);
+
+	graphics->gMutex = SDL_CreateMutex();
+	graphics->gCond = SDL_CreateCond();
+	gameManager->SetGraphicsWrapper(graphics);
+	
 
 	//SETTINGS
 	int width = 1280;
@@ -230,19 +232,22 @@ int main(int argc, char** argv)
 	
 	graphics->InitializeSDL(width, height);
 
-	//wglMakeCurrent(NULL, NULL);
-	
-	/*SDL_CondSignal(condition);
+	wglMakeCurrent(NULL, NULL);
+	resource = &ResourceManager::GetInstance();
+	//resource->SetGraphicsWrapper(graphics);
+
+
+	//SDL_CondSignal(graphics->gCond);
 	printf("	M Thread: SDL OK\n");
 
 	printf("	M Thread: WAIT SHARE LIST...\n");
-	SDL_CondWait(condition, mutexLock);
-	printf("	M Thread: SHARE LIST OK\n");*/
+	SDL_CondWait(graphics->gCond, graphics->gMutex);
+	printf("	M Thread: SHARE LIST OK\n");
 
 	graphics->InitializeGLEW();
 	graphics->InitializeShaders();
 	graphics->LoadTerrainPatch();
-	gameManager->SetGraphicsWrapper(graphics);
+	
 
 	graphics->GetCamera()->SetPosition(glm::vec3(graphics->GetLevel()->PatchSize*0.5f, 5, graphics->GetLevel()->PatchSize*0.5f));
 	graphics->GetCamera()->SetForward(glm::vec3(0, -0.9, -1));
@@ -271,8 +276,8 @@ int main(int argc, char** argv)
 	PROCESS_MEMORY_COUNTERS memCounter;
 
 	printf("	M Thread: BIG INIT OK\n");
-	SDL_CondSignal(condition);
-	//SDL_UnlockMutex(mutexLock);
+	SDL_CondSignal(graphics->gCond);
+	//SDL_UnlockMutex(Global::gMutex);
 
 	printf("	M Thread: RUNNING\n");
 

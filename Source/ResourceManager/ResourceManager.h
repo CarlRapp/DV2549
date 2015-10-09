@@ -31,7 +31,7 @@ public:
 	static ResourceManager& GetInstance();
 
 	bool InitResourceManager(size_t _totalMemorySize);
-	void SetGraphicsWrapper(Graphics::GraphicsWrapper* instance) { m_graphicsWrapper = instance; }
+	void SetGraphicsWrapper(Graphics::GraphicsWrapper* instance);
 
 	bool LoadAsset();
 	bool UnloadAsset();
@@ -75,6 +75,9 @@ private:
 	std::queue<SDL_Point> m_chunksToPreload;
 
 	size_t m_ticks;
+
+	HDC m_hDC;
+	HGLRC m_resourceContext;
 };
 
 

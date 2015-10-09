@@ -120,6 +120,9 @@ namespace Graphics
 
 		HGLRC GetHGLRC() { return m_renderContext; }
 
+		SDL_mutex* gMutex;
+		SDL_cond* gCond;
+
 	private:
 		GraphicsWrapper();
 
