@@ -9,6 +9,7 @@
 #include "Memory/TestScenarios.h"
 #include "Memory/PoolTest.h"
 #include "GameManager.h"
+#include "Timer/Timer.h"
 
 #include "psapi.h"
 
@@ -24,137 +25,6 @@
 #include <new>
 #include <iostream>
 
-static int TestThread(void* dataPtr)
-{
-	int tCounter = 0;
-	SDL_threadID tId = SDL_ThreadID();
-	while (true)
-	{
-		SDL_Delay(std::rand() % 3);
-		Memory::StackAllocator_SingleBuffer* _stackBuffer = (Memory::StackAllocator_SingleBuffer*)dataPtr;
-		int* threadData = (int*)_stackBuffer->Reserve(sizeof(int));
-
-		if (*threadData != 0)
-		{
-			int value = *threadData;
-
-			int a = 2;
-		}
-			
-
-		*threadData = tId;
-		++tCounter;
-
-		if (tCounter == 20)
-			break;
-	}
-	std::printf("%i | ", tId);
-
-	return 0;
-}
-
-static int TestDoubleEnded(void* ptr)
-{
-	SDL_threadID tId = SDL_ThreadID();
-	Memory::StackAllocator_SingleBuffer* _stackBuffer = (Memory::StackAllocator_SingleBuffer*)ptr;
-	SDL_Delay(std::rand() % 3);
-	_stackBuffer->Push<int>(tId);
-
-
-	return 0;
-}
-
-void TempTests()
-{
-	int stackSize = 1024;
-	int alignment = 4;
-	//Memory::StackAllocator_DoubleEnded* stack = new Memory::StackAllocator_DoubleEnded(stackSize, alignment);
-	Memory::MemoryWrapper::GetInstance()->CreateGlobalStack(stackSize, alignment);
-	Memory::MemoryWrapper::GetInstance()->CreateStack(stackSize, alignment);
-	Memory::IStackAllocator* stack = Memory::MemoryWrapper::GetInstance()->GetGlobalStack();// (stackSize, alignment);
-	int* start = (int*)stack->Reserve(0);
-	for (int n = 0; n < (int)stackSize / alignment; ++n)
-		start[n] = 0;
-
-
-	printf("Before:\n");
-	for (int n = 0; n < (int)stackSize / alignment; ++n)
-		if ((n + 1) % 10 == 0)
-			printf("\n");
-	printf("\n");
-
-	int nThreads = 100;
-	std::vector<SDL_Thread*> threads;
-	for (int n = 0; n < nThreads; ++n)
-	{
-		threads.push_back(SDL_CreateThread(TestDoubleEnded, "THREAD", stack));
-	}
-
-	for (int n = 0; n < nThreads; ++n)
-	{
-		int a;
-		SDL_WaitThread(threads[n], &a);
-	}
-
-	printf("After:\n");
-	for (int n = 0; n < (int)stackSize / alignment; ++n)
-	{
-		printf("%i ", start[n]);
-
-		if ((n + 1) % 10 == 0)
-			printf("\n");
-	}
-	printf("\n");
-
-	system("pause");
-}
-
-void derpTests()
-{
-	//TEST STUFF
-	{
-		//TempTests();
-
-		/* Stack Alignment Test */
-		//MeasureSQStack(4194304, 4, 4);
-		//MeasureSQStack(4194304, 4, 8);
-		//MeasureSQStack(4194304, 4, 16);
-		//MeasureSQStack(4194304, 4, 32);
-		//MeasureSQStack(4194304, 4, 64);
-		//MeasureSQStack(4194304, 4, 128);
-		//MeasureSQStack(4194304, 4, 256);
-		//MeasureSQStack(4194304, 4, 512);
-		//MeasureSQStack(4194304, 4, 1024);
-		//MeasureMTStack(4194304, 4, 4, 4);
-		//MeasureMTStack(4194304, 4, 4, 8);
-		//MeasureMTStack(4194304, 4, 4, 16);
-		//MeasureMTStack(4194304, 4, 4, 32);
-		//MeasureMTStack(4194304, 4, 4, 64);
-		//MeasureMTStack(4194304, 4, 4, 128);
-		//MeasureMTStack(4194304, 4, 4, 256);
-		//MeasureMTStack(4194304, 4, 4, 512);
-		//MeasureMTStack(4194304, 4, 4, 1024);
-
-		/* Stack Multi-Threading Test */
-		//MeasureMTStack(4194304, 4, 1, 4);
-		//MeasureMTStack(4194304, 4, 2, 4);
-		//MeasureMTStack(4194304, 4, 3, 4);
-		//MeasureMTStack(4194304, 4, 4, 4);
-		//MeasureMTStack(4194304, 4, 8, 4);
-
-		/* Pool Alignment Test (Change alignment in MemorySettings.h) */
-		//MeasureSQPool(4194304, 4);
-		//MeasureMTPool(4194304, 4, 4);
-
-		/* Pool Multi-Threading Test */
-		//MeasureMTPool(4194304, 4, 1);
-		//MeasureMTPool(4194304, 4, 2);
-		//MeasureMTPool(4194304, 4, 3);
-		//MeasureMTPool(4194304, 4, 4);
-		//MeasureMTPool(4194304, 4, 8);
-	}
-}
-
 GameManager*	gameManager;
 Graphics::GraphicsWrapper* graphics;
 ResourceManager* resource;
@@ -162,45 +32,6 @@ ResourceManager* resource;
 
 float deltaTime = 0;
 bool quit = false;
-// bool initializeOK = false;
-// bool initializeOK1 = false;
-// SDL_mutex *Global::gMutex;
-// SDL_cond *Graphics::GraphicsWrapper::gCond;
-
-//thread_local
-// int ResourceManaging(void* _ptr)
-// {
-// 	SDL_LockMutex(graphics->gMutex);
-// 	printf("	R Thread: WAIT SDL...\n");
-// 	SDL_CondWait(graphics->gCond, graphics->gMutex);
-// 	printf("	R Thread: SDL OK\n");
-// 	//SDL_UnlockMutex(Global::gMutex);
-// 
-// 	HDC hDC = graphics->GetHDC();
-// 
-// 	HGLRC resourceContext = wglCreateContext(hDC);
-// 
-// 	wglMakeCurrent(hDC, resourceContext);
-// 
-// 	if (wglShareLists(resourceContext, graphics->GetHGLRC()) == FALSE)
-// 		printf("ShareLists error: %i", GetLastError());
-// 
-// 	SDL_CondSignal(graphics->gCond);
-// 	printf("	R Thread: SHARE LIST OK\n");
-// 
-// 	printf("	R Thread: WAIT BIG INIT...\n");
-// 	SDL_CondWait(graphics->gCond, graphics->gMutex);
-// 	printf("	R Thread: BIG INIT OK\n");
-// 	printf("	R Thread: RUNNING\n");
-// 	while(!quit)
-// 	{
-// 		wglMakeCurrent(hDC, resourceContext);
-// 		gameManager->Update(deltaTime);
-// 		resource->Update(deltaTime);
-// 	}
-// 
-// 	return 0;
-// }
 
 int main(int argc, char** argv)
 {
@@ -225,7 +56,7 @@ int main(int argc, char** argv)
 	int centerY = height/2;
 	const float cameraSpeed = 32.0f;
 	int cameraMaxY = 20;
-	const float mouseSensitivity = 3.0f;
+	const float mouseSensitivity = 9.0f;
 	bool lockMouse = true;
 
 	//INIT GFX
@@ -249,8 +80,9 @@ int main(int argc, char** argv)
 	graphics->LoadTerrainPatch();
 	
 
-	graphics->GetCamera()->SetPosition(glm::vec3(graphics->GetLevel()->PatchSize*0.5f, 5, graphics->GetLevel()->PatchSize*0.5f));
-	graphics->GetCamera()->SetForward(glm::vec3(0, -0.9, -1));
+	graphics->GetCamera()->SetPosition(glm::vec3(graphics->GetLevel()->PatchSize*0.5f, 3*cameraMaxY, graphics->GetLevel()->PatchSize*0.5f));
+	graphics->GetCamera()->SetForward(glm::vec3(0, -1, 0));
+	
 
 	//std::string FPS;
 	std::string fpsString = "fps";
@@ -271,6 +103,8 @@ int main(int argc, char** argv)
 	Uint32 beginFrame = 0, endFrame = 0;
 	double t = 0.0;
 	double dt = 1 / 60.0;
+	Utility::Timer fTimer = Utility::Timer();
+	
 
 	//MEMORY USAGE
 	PROCESS_MEMORY_COUNTERS memCounter;
@@ -283,8 +117,9 @@ int main(int argc, char** argv)
 
 	while (!quit)
 	{
+		fTimer.Tick();
 		beginFrame = SDL_GetTicks();
-		double frameTime = (beginFrame - endFrame)*0.001;
+		double frameTime = fTimer.GetDeltaTime(); // (beginFrame - endFrame)*0.001;
 		endFrame = beginFrame;
 
 		bool result = GetProcessMemoryInfo(GetCurrentProcess(), &memCounter, sizeof(memCounter));
@@ -363,6 +198,7 @@ int main(int argc, char** argv)
 						graphics->LookCameraX(-dx*deltaTime*mouseSensitivity);
 					if (abs(dy) > 0.0f)
 						graphics->LookCameraY(-dy*deltaTime*mouseSensitivity);
+
 				}
 
 				//LOCK MOUSE IN CENTER
@@ -382,7 +218,7 @@ int main(int argc, char** argv)
 					gameManager->RequestRenderDistance(currentDistance + 1);
 
 					renderDistance = "RENDER DISTANCE ";
-					renderDistance.append(std::to_string(currentDistance));
+					renderDistance.append(std::to_string(gameManager->GetRenderDistance()));
 
 				}
 				else if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_LEFT) == Input::PRESSED)
@@ -391,7 +227,7 @@ int main(int argc, char** argv)
 					gameManager->RequestRenderDistance(currentDistance - 1);
 
 					renderDistance = "RENDER DISTANCE ";
-					renderDistance.append(std::to_string(currentDistance));
+					renderDistance.append(std::to_string(gameManager->GetRenderDistance()));
 				}
 					
 					
