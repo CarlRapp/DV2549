@@ -190,6 +190,13 @@ int ResourceManager::GetLeastPopularChunkIndex()
 
 void ResourceManager::LoadChunk_Threaded(int x, int y)
 {
+	for (int n = 0; n < m_loadedChunksN; ++n)
+		if (m_loadedChunks[n].X == x && m_loadedChunks[n].Z == y)
+		{
+			m_loadedChunks[n].Popularity = SDL_GetTicks();
+			return;
+		}
+
 	SDL_Point point;
 	point.x = x;
 	point.y = y;

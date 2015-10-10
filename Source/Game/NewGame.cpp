@@ -9,6 +9,7 @@
 #include "Memory/TestScenarios.h"
 #include "Memory/PoolTest.h"
 #include "GameManager.h"
+#include "Timer/Timer.h"
 
 #include "psapi.h"
 
@@ -31,45 +32,6 @@ ResourceManager* resource;
 
 float deltaTime = 0;
 bool quit = false;
-// bool initializeOK = false;
-// bool initializeOK1 = false;
-// SDL_mutex *Global::gMutex;
-// SDL_cond *Graphics::GraphicsWrapper::gCond;
-
-//thread_local
-// int ResourceManaging(void* _ptr)
-// {
-// 	SDL_LockMutex(graphics->gMutex);
-// 	printf("	R Thread: WAIT SDL...\n");
-// 	SDL_CondWait(graphics->gCond, graphics->gMutex);
-// 	printf("	R Thread: SDL OK\n");
-// 	//SDL_UnlockMutex(Global::gMutex);
-// 
-// 	HDC hDC = graphics->GetHDC();
-// 
-// 	HGLRC resourceContext = wglCreateContext(hDC);
-// 
-// 	wglMakeCurrent(hDC, resourceContext);
-// 
-// 	if (wglShareLists(resourceContext, graphics->GetHGLRC()) == FALSE)
-// 		printf("ShareLists error: %i", GetLastError());
-// 
-// 	SDL_CondSignal(graphics->gCond);
-// 	printf("	R Thread: SHARE LIST OK\n");
-// 
-// 	printf("	R Thread: WAIT BIG INIT...\n");
-// 	SDL_CondWait(graphics->gCond, graphics->gMutex);
-// 	printf("	R Thread: BIG INIT OK\n");
-// 	printf("	R Thread: RUNNING\n");
-// 	while(!quit)
-// 	{
-// 		wglMakeCurrent(hDC, resourceContext);
-// 		gameManager->Update(deltaTime);
-// 		resource->Update(deltaTime);
-// 	}
-// 
-// 	return 0;
-// }
 
 int main(int argc, char** argv)
 {
@@ -100,7 +62,7 @@ int main(int argc, char** argv)
 	int centerY = height/2;
 	const float cameraSpeed = 32.0f;
 	int cameraMaxY = 20;
-	const float mouseSensitivity = 3.0f;
+	const float mouseSensitivity = 9.0f;
 	bool lockMouse = true;
 
 	//INIT GFX
@@ -124,8 +86,9 @@ int main(int argc, char** argv)
 	graphics->LoadTerrainPatch();
 	
 
-	graphics->GetCamera()->SetPosition(glm::vec3(graphics->GetLevel()->PatchSize*0.5f, 5, graphics->GetLevel()->PatchSize*0.5f));
-	graphics->GetCamera()->SetForward(glm::vec3(0, -0.9, -1));
+	graphics->GetCamera()->SetPosition(glm::vec3(graphics->GetLevel()->PatchSize*0.5f, 3*cameraMaxY, graphics->GetLevel()->PatchSize*0.5f));
+	graphics->GetCamera()->SetForward(glm::vec3(0, -1, 0));
+	
 
 	//std::string FPS;
 	std::string fpsString = "fps";
@@ -146,6 +109,8 @@ int main(int argc, char** argv)
 	Uint32 beginFrame = 0, endFrame = 0;
 	double t = 0.0;
 	double dt = 1 / 60.0;
+	Utility::Timer fTimer = Utility::Timer();
+	
 
 	//MEMORY USAGE
 	PROCESS_MEMORY_COUNTERS memCounter;
@@ -158,8 +123,9 @@ int main(int argc, char** argv)
 
 	while (!quit)
 	{
+		fTimer.Tick();
 		beginFrame = SDL_GetTicks();
-		double frameTime = (beginFrame - endFrame)*0.001;
+		double frameTime = fTimer.GetDeltaTime(); // (beginFrame - endFrame)*0.001;
 		endFrame = beginFrame;
 
 		bool result = GetProcessMemoryInfo(GetCurrentProcess(), &memCounter, sizeof(memCounter));
@@ -238,6 +204,7 @@ int main(int argc, char** argv)
 						graphics->LookCameraX(-dx*deltaTime*mouseSensitivity);
 					if (abs(dy) > 0.0f)
 						graphics->LookCameraY(-dy*deltaTime*mouseSensitivity);
+
 				}
 
 				//LOCK MOUSE IN CENTER
@@ -257,7 +224,7 @@ int main(int argc, char** argv)
 					gameManager->RequestRenderDistance(currentDistance + 1);
 
 					renderDistance = "RENDER DISTANCE ";
-					renderDistance.append(std::to_string(currentDistance));
+					renderDistance.append(std::to_string(gameManager->GetRenderDistance()));
 
 				}
 				else if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_LEFT) == Input::PRESSED)
@@ -266,7 +233,7 @@ int main(int argc, char** argv)
 					gameManager->RequestRenderDistance(currentDistance - 1);
 
 					renderDistance = "RENDER DISTANCE ";
-					renderDistance.append(std::to_string(currentDistance));
+					renderDistance.append(std::to_string(gameManager->GetRenderDistance()));
 				}
 					
 					

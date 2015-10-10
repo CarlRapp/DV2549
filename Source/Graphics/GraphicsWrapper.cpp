@@ -303,6 +303,7 @@ Graphics::TextureRAM Graphics::GraphicsWrapper::PushTextureToRAM(const char * _f
  	if (file == NULL) 
 	{
 		printf("missing file %s\n", _filename);
+		texRAM.Data = nullptr;
 		return texRAM;
 	}
 
