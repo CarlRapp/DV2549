@@ -442,7 +442,7 @@ void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(TerrainPatch* memLocati
 Graphics::TextureRAM Graphics::GraphicsWrapper::PushTextureToRAM(const char * _filename, unsigned int _x, unsigned int _y, short _colorSlots)
 {
 	//Memory::StackAllocator_SingleBuffer* tempStack = (Memory::StackAllocator_SingleBuffer*)Memory::MemoryWrapper::GetInstance()->GetGlobalStack();
-	TextureRAM texRAM;
+	TextureRAM texRAM = TextureRAM();
 	GLubyte * data;
 	FILE * file;
 	// open texture data
