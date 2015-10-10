@@ -37,7 +37,7 @@ public:
 	bool UnloadAsset();
 
 	void CreateChunkPool(unsigned int _nChunks);
-	void LoadChunk(int tileX, int tileY);
+	//void LoadChunk(int tileX, int tileY);
 
 
 	void LoadChunks_Thread();
