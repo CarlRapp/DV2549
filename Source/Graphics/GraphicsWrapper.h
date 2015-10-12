@@ -17,9 +17,9 @@
 
 /*
 #include "ResourceManager\Compression\CompressionHandler_lz4.h" // Temp. include until integration with ResourceManager.
-#include "ResourceManager\Compression\CompressionHandler_zlib.h" // Temp. include until integration with ResourceManager.
-#include "ResourceManager\PackageReaderWriter.h"
-*/
+#include "ResourceManager\Compression\CompressionHandler_zlib.h" // Temp. include until integration with ResourceManager.*/
+#include "PakLib/PackageReaderWriter.h"
+
 namespace Graphics
 {
 	struct TextureRAM
