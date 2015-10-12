@@ -28,6 +28,10 @@ void PackageReaderWriter::createPackageFromFiles(std::string PAKFilePath, std::v
 
 	unsigned int sizeOfHeaderAndFileTable = sizeof(PackageHeader) + filePaths.size() * sizeof(PackageFileTableEntry);
 
+	/* Destroy old file if it exists and create new */
+	fopen_s(&package.m_fileHandle, package.m_filePath.c_str(), "wb");
+	fclose(package.m_fileHandle);
+
 	if (package.m_header.numFileTableEntries == 0)
 	{
 		package.m_nextFileOffset = sizeOfHeaderAndFileTable;
@@ -57,7 +61,8 @@ void PackageReaderWriter::createPackageFromFiles(std::string PAKFilePath, std::v
 		}
 		
 		PackageFileTableEntry fileTableEntry;
-		strncpy_s(fileTableEntry.fileName, filePaths[i].c_str(), sizeof(fileTableEntry.fileName));
+		int startIndex = filePaths[i].find_last_of('/') + 1;
+		strncpy_s(fileTableEntry.fileName, filePaths[i].c_str() + startIndex, filePaths[i].size() - startIndex - 1);
 		fileTableEntry.fileName[sizeof(fileTableEntry.fileName) - 1] = 0;
 		fileTableEntry.fileOffset = package.m_nextFileOffset; // Add the offset to the start of the added file.
 		fileTableEntry.fileSize_compressed = nBytesAdded;
