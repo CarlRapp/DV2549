@@ -7,6 +7,7 @@ PackageReaderWriter::PackageReaderWriter(Compression::ICompressionHandler *_comp
 
 PackageReaderWriter::PackageReaderWriter()
 {
+	compressionHandler = new Compression::CompressionHandler_zlib();
 }
 
 PackageReaderWriter::~PackageReaderWriter()
@@ -52,14 +53,14 @@ void PackageReaderWriter::createPackageFromFiles(std::string PAKFilePath, std::v
 		fseek(fileToAdd, 0, SEEK_END);
 		int fileSize_unCompressed = ftell(fileToAdd);
 		rewind(fileToAdd);
-				
+
 		// Append the file contents to the contents of the Package.
 		if (compressFiles == true)
 		{
 			// Compress and append the file contents.
 			nBytesAdded = compressionHandler->compress_fileToFile(fileToAdd, package.m_fileHandle);
 		}
-		
+
 		PackageFileTableEntry fileTableEntry;
 		int startIndex = filePaths[i].find_last_of('/') + 1;
 		strncpy_s(fileTableEntry.fileName, filePaths[i].c_str() + startIndex, filePaths[i].size() - startIndex - 1);
@@ -168,7 +169,19 @@ void PackageReaderWriter::loadPackageData(std::string packageFileName, void *des
 	fclose(packageFileHandle);
 }
 
-void PackageReaderWriter::getIndexOfResourceByName(std::string resourceName)
+int PackageReaderWriter::getIndexOfResourceByName(std::string packageFileName, std::string resourceName)
 {
+	std::vector<PackageFileTableEntry> fileTableEntries = loadPackageFileTable(packageFileName);
 
+	int indexOfResource = -1;
+
+	for (unsigned int i = 0; i << fileTableEntries.size(); ++i)
+	{
+		if (strcmp(fileTableEntries[i].fileName, resourceName.c_str()) == 0)
+		{
+			indexOfResource = i;
+		}
+	}
+
+	return indexOfResource;
 }

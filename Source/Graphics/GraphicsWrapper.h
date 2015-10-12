@@ -17,11 +17,17 @@
 
 /*
 #include "ResourceManager\Compression\CompressionHandler_lz4.h" // Temp. include until integration with ResourceManager.
-#include "ResourceManager\Compression\CompressionHandler_zlib.h" // Temp. include until integration with ResourceManager.
-#include "ResourceManager\PackageReaderWriter.h"
-*/
+#include "ResourceManager\Compression\CompressionHandler_zlib.h" // Temp. include until integration with ResourceManager.*/
+#include "PakLib/PackageReaderWriter.h"
+
 namespace Graphics
 {
+	struct TextureRAM
+	{
+		short ColorSlots;
+		GLubyte* Data;
+	};
+
 	class DECLSPEC GraphicsWrapper
 	{
 		struct RenderInstance
@@ -76,6 +82,8 @@ namespace Graphics
 
 
 
+
+
 		bool SDLStarted() const { return m_SDLStarted; }
 
 	public:
@@ -99,12 +107,16 @@ namespace Graphics
 
 		void ReloadTerrainPatches(std::vector<TerrainPatch*> newPatches);
 		void LoadSingleTexturePatch(int tileX, int tileY, TerrainPatch* memLocation);
-		void DeleteSingleTexturePatch(int tileX, int tileY);
+		//void DeleteSingleTexturePatch(int tileX, int tileY);
 		void DeleteSingleTexturePatch(TerrainPatch* memLocation);
 		Level* GetLevel() { return &m_level; }
 
-		GLuint LoadTextureRAW(const char * _filename, unsigned int _width, unsigned int _height, short _colorSlots);
-		GLuint LoadTexturePatch(const char * _filename, unsigned int _x, unsigned int _y, short _colorSlots);
+		//GLuint LoadTextureRAW(const char * _filename, unsigned int _width, unsigned int _height, short _colorSlots);
+		Graphics::TextureRAM PushTextureToRAM(const char * _filename, unsigned int _x, unsigned int _y, short _colorSlots);
+
+
+		GLuint PushTextureToGL(short _colorSlots, GLubyte * data);
+
 		void ConvertToPAK(const char * _filename, GLint _width, GLint _height, short colorSlots);
 		SDL_Window* GetWindow() { return m_window; };
 			
@@ -119,6 +131,9 @@ namespace Graphics
 		HDC GetHDC();
 
 		HGLRC GetHGLRC() { return m_renderContext; }
+
+		SDL_mutex* gMutex;
+		SDL_cond* gCond;
 
 	private:
 		GraphicsWrapper();
@@ -153,7 +168,7 @@ namespace Graphics
 
 		HDC m_hDC;
 
-		SDL_mutex* m_mutex;
+		//SDL_mutex* m_mutex;
 	};
 }
 

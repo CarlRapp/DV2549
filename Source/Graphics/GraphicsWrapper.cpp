@@ -31,8 +31,6 @@ GraphicsWrapper::GraphicsWrapper()
 	m_level.TerrainVertices = (float*)malloc(m_level.Vertices*sizeof(float));
 	m_level.TerrainTex = (float*)malloc(m_level.TexCoords*sizeof(float));
 	m_level.TerrainNormals = (float*)malloc(m_level.Normals*sizeof(float));
-
-	m_mutex = SDL_CreateMutex();
 }
 
 GraphicsWrapper::~GraphicsWrapper()
@@ -62,54 +60,10 @@ GraphicsWrapper::~GraphicsWrapper()
 	SDL_Quit();
 }
 
-//NOT USED ATM, FOR MODELS
-void GraphicsWrapper::Render()
-{
-// 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-// 	m_terrainShader->UseProgram();
-// 	
-// 	glm::mat4 vm = *m_camera->GetView();
-// 	glm::mat4 pvm = *m_camera->GetProjection();
-// 
-// 	m_terrainShader->SetUniformV("gView", vm);
-// 	m_terrainShader->SetUniformV("gProj", pvm);
-// 
-// 	GLint gSampler = glGetUniformLocation(m_terrainShader->GetProgramHandle(), "gSampler");
-// 	glUniform1i(gSampler, 0);
-// 
-// 	for (int i = 0; i < m_renderItems.size();i++)
-// 	{
-// 		glActiveTexture(GL_TEXTURE0);
-// 		glBindTexture(GL_TEXTURE_2D, m_renderItems[i]->TextureDiffuse);
-// 
-// 		//Update matrix buffer//
-// 		glBindBuffer(GL_ARRAY_BUFFER, m_renderItems[i]->MatrixBuffer);
-// 		glm::mat4* matrices = (glm::mat4*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-// 		for (int j = 0; j < m_renderItems[i]->Instances.size(); j++)
-// 		{
-// 			matrices[j] = m_renderItems[i]->Instances[j]->ModelMatrix;
-// 		}
-// 
-// 		glUnmapBuffer(GL_ARRAY_BUFFER);
-// 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-// 
-// 		glBindVertexArray(m_renderItems[i]->VAO);
-// 
-// 		glDrawArraysInstanced(m_renderItems[i]->RenderParam,0, m_renderItems[i]->Vertices, (GLsizei)m_renderItems[i]->Instances.size());
-// 	}
-// 
-// 	SDL_GL_SwapWindow(m_window);
-// 
-// 	GLenum error = glGetError();
-// 	if (error != GL_NO_ERROR)
-// 	{
-// 		printf("Error rendering %d\n", error);
-// 		system("pause");
-// 	}
-}
 
 void GraphicsWrapper::RenderTerrain()
 {
+	SDL_LockMutex(gMutex);
 	wglMakeCurrent(m_hDC, m_renderContext);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -122,7 +76,7 @@ void GraphicsWrapper::RenderTerrain()
 	GLint availableMem;
 
 	//glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &availableMem);
-	SDL_LockMutex(m_mutex);
+	
 	for (int i = 0; i < m_terrainPatches.size(); i++)
 	{
 		if (m_terrainPatches[i]->IsActive)
@@ -159,7 +113,7 @@ void GraphicsWrapper::RenderTerrain()
 			glDrawArrays(GL_PATCHES, 0, m_level.Vertices);
 		}
 	}
-	SDL_UnlockMutex(m_mutex);
+	
 	glBindVertexArray(0);
 	glUseProgram(0);
 
@@ -173,7 +127,7 @@ void GraphicsWrapper::RenderTerrain()
 	TextRenderer::GetInstance().RenderText(m_width,m_height);
 
 	SDL_GL_SwapWindow(m_window);
-
+	SDL_UnlockMutex(gMutex);
 
 }
 
@@ -262,85 +216,7 @@ void Graphics::GraphicsWrapper::InitializeGLEW()
 	printf("Max bound textures : %d\n\n", textureUnits);
 }
 
-//NOT USED ATM
-void Graphics::GraphicsWrapper::LoadModel()
-{
-// 	RenderItem* newItem = new RenderItem;
-// 
-// 	GLuint vbo[4];
-// 	glGenBuffers(4, vbo);
-// 
-// 	//vertices
-// 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-// 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-// 
-// 	//texcoords
-// 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-// 	glBufferData(GL_ARRAY_BUFFER, sizeof(texCoords), texCoords, GL_STATIC_DRAW);
-// 
-// 	//normals
-// 	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
-// 	glBufferData(GL_ARRAY_BUFFER, sizeof(normals), normals, GL_STATIC_DRAW);
-// 
-// 	//model matrix
-// 	glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
-// 	glBufferData(GL_ARRAY_BUFFER, 4 * 4 * sizeof(float), NULL, GL_DYNAMIC_DRAW);
-// 
-// 	glGenVertexArrays(1, &newItem->VAO);
-// 	glBindVertexArray(newItem->VAO);
-// 
-// 	GLint pos = glGetAttribLocation(m_shaderSTD->GetProgramHandle(), "in_position");
-// 	GLint tex = glGetAttribLocation(m_shaderSTD->GetProgramHandle(), "in_tex");
-// 	GLint norm = glGetAttribLocation(m_shaderSTD->GetProgramHandle(), "in_normal");
-// 	GLint matrix = glGetAttribLocation(m_shaderSTD->GetProgramHandle(), "in_modelM");
-// 
-// 	glEnableVertexAttribArray(pos);
-// 	glEnableVertexAttribArray(tex);
-// 	glEnableVertexAttribArray(norm);
-// 	glEnableVertexAttribArray(matrix);      
-// 	glEnableVertexAttribArray(matrix + 1);    
-// 	glEnableVertexAttribArray(matrix + 2);    
-// 	glEnableVertexAttribArray(matrix + 3);    
-// 
-// 	//vertices
-// 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-// 	glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, 0, 0);
-// 
-// 	//texcoords
-// 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-// 	glVertexAttribPointer(tex, 2, GL_FLOAT, GL_FALSE, 0, 0);
-// 
-// 	//normals
-// 	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
-// 	glVertexAttribPointer(norm, 3, GL_FLOAT, GL_FALSE, 0, 0);
-// 
-// 	//model matrix
-// 	glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
-// 	glVertexAttribPointer(matrix, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void *)(sizeof(glm::vec4) * 0));
-// 	glVertexAttribDivisor(matrix, 1);
-// 	glVertexAttribPointer(matrix + 1, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void *)(sizeof(glm::vec4) * 1));
-// 	glVertexAttribDivisor(matrix + 1, 1);
-// 	glVertexAttribPointer(matrix + 2, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void *)(sizeof(glm::vec4) * 2));
-// 	glVertexAttribDivisor(matrix + 2, 1);
-// 	glVertexAttribPointer(matrix + 3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void *)(sizeof(glm::vec4) * 3));
-// 	glVertexAttribDivisor(matrix + 3, 1);
-// 
-// 	//newItem->TextureDiffuse = LoadTextureRAW("../../../Content/height.raw");
-// 	newItem->RenderParam = GL_PATCHES;
-// 	newItem->MatrixBuffer = vbo[3];
-// 	newItem->Vertices = sizeof(vertices) / sizeof(float);
-// 
-// 	m_renderItems.push_back(newItem);
-// 	RenderInstance* ins = new RenderInstance;
-// 	ins->ModelMatrix = glm::mat4(1.0f);
-// 	m_renderItems.back()->Instances.push_back(ins);
-// 
-// 	GLenum error = glGetError();
-// 	if (error != GL_NO_ERROR)
-// 	{
-// 		printf("Error loading model %d\n", error);
-// 	}
-}
+
 
 void Graphics::GraphicsWrapper::InitializeShaders()
 {
@@ -371,14 +247,14 @@ void Graphics::GraphicsWrapper::LookCameraY(float _val)			{m_camera->Pitch(_val)
 
 void Graphics::GraphicsWrapper::ReloadTerrainPatches(std::vector<TerrainPatch*> newPatches)
 {
-	SDL_LockMutex(m_mutex);
+	SDL_LockMutex(gMutex);
 	m_terrainPatches.clear();
 
 	for (int n = 0; n < newPatches.size(); ++n)
 	{
 		m_terrainPatches.push_back(newPatches[n]);
 	}	
-	SDL_UnlockMutex(m_mutex);
+	SDL_UnlockMutex(gMutex);
 }
 
 void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int tileX, int tileY, TerrainPatch* memLocation)
@@ -386,88 +262,78 @@ void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int tileX, int tileY, Ter
 	unsigned int X = tileX + m_level.X / 2;
 	unsigned int Y = tileY + m_level.Y / 2;
 
-	//Memory::MemoryWrapper* mem = Memory::MemoryWrapper::GetInstance();
-	//TerrainPatch* newItem = static_cast<TerrainPatch*>(mem->GetPoolManager()->pnew(sizeof(TerrainPatch)));
+	Memory::StackAllocator_SingleBuffer* tempStack = (Memory::StackAllocator_SingleBuffer*)Memory::MemoryWrapper::GetInstance()->GetGlobalStack();
+	size_t memoryTop = tempStack->GetTop();
 
-	memLocation->TextureHeight = LoadTexturePatch("../../../Content/height.pak", Y, X, 1);
-	memLocation->TextureNormal = LoadTexturePatch("../../../Content/norm.pak", Y, X, 3);
-	memLocation->TextureDiffuse = LoadTexturePatch("../../../Content/diffuse.pak", Y, X, 3);
+	TextureRAM texHeight = PushTextureToRAM("../../../Content/height.pak", Y, X, 1);
+	TextureRAM texNormal = PushTextureToRAM("../../../Content/norm.pak", Y, X, 3);
+	TextureRAM texDiffuse = PushTextureToRAM("../../../Content/diffuse.pak", Y, X, 3);
+
+	SDL_LockMutex(gMutex);
+	memLocation->TextureHeight = PushTextureToGL(texHeight.ColorSlots, texHeight.Data);
+ 	memLocation->TextureNormal = PushTextureToGL(texNormal.ColorSlots, texNormal.Data);
+ 	memLocation->TextureDiffuse = PushTextureToGL(texDiffuse.ColorSlots, texDiffuse.Data);
+
 	memLocation->ModelMatrix = glm::translate(glm::vec3(tileX*m_level.PatchSize, 0, tileY*m_level.PatchSize));
 	memLocation->IsActive = true;
+
+	glFlush();
+	SDL_UnlockMutex(gMutex);
+
+	tempStack->FreeTo(memoryTop);
 }
 
 void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(TerrainPatch* memLocation)
 {
+	SDL_LockMutex(gMutex);
 	glDeleteTextures(1, &memLocation->TextureDiffuse);
 	glDeleteTextures(1, &memLocation->TextureNormal);
 	glDeleteTextures(1, &memLocation->TextureHeight);
 	memLocation->IsActive = false;
+	SDL_UnlockMutex(gMutex);
 }
 
-void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(int tileX, int tileY)
+Graphics::TextureRAM Graphics::GraphicsWrapper::PushTextureToRAM(const char * _filename, unsigned int _x, unsigned int _y, short _colorSlots)
 {
-	unsigned int X = tileX + m_level.X / 2;
-	unsigned int Y = tileY + m_level.Y / 2;
+	TextureRAM texRAM;
+	texRAM.ColorSlots = _colorSlots;
 
-	glDeleteTextures(1, &m_mapStatus[Y][X]->TextureDiffuse);
-	glDeleteTextures(1, &m_mapStatus[Y][X]->TextureNormal);
-	glDeleteTextures(1, &m_mapStatus[Y][X]->TextureHeight);
-
-	/*Memory::MemoryWrapper* mem = Memory::MemoryWrapper::GetInstance();
-	
-
-	for (int i = 0; i < m_terrainPatches.size(); i++)
-	{
-		if (m_terrainPatches[i] == m_mapStatus[Y][X])
-		{
-			m_terrainPatches.erase(m_terrainPatches.begin() + i);
-			mem->GetPoolManager()->pdelete(m_mapStatus[Y][X], sizeof(TerrainPatch));
-			m_mapStatus[Y][X] = 0;
-			break;
-		}
-	}*/
-}
-
-GLuint Graphics::GraphicsWrapper::LoadTexturePatch(const char * _filename, unsigned int _x, unsigned int _y, short _colorSlots)
-{
-	Memory::StackAllocator_SingleBuffer* tempStack = (Memory::StackAllocator_SingleBuffer*)Memory::MemoryWrapper::GetInstance()->GetGlobalStack();
-
-	GLuint texture;
-	GLubyte * data;
 	FILE * file;
-	// open texture data
  	fopen_s(&file,_filename, "rb");
  	if (file == NULL) 
 	{
 		printf("missing file %s\n", _filename);
-		return 0;
+		texRAM.Data = nullptr;
+		return texRAM;
 	}
-	//data = (GLubyte*)malloc(m_level.ChunkSize * m_level.ChunkSize * _colorSlots);
-	size_t memoryTop = tempStack->GetTop();
-	data = (GLubyte*)tempStack->Reserve(m_level.ChunkSize * m_level.ChunkSize * _colorSlots);
 
-	//long location = ((m_level.ChunkSize*m_level.ChunkSize*m_level.X*_y) + m_level.ChunkSize*m_level.ChunkSize*_x) * _colorSlots;
+	texRAM.Data = (GLubyte*)(Memory::StackAllocator_SingleBuffer*)Memory::MemoryWrapper::GetInstance()->GetGlobalStack()->Reserve(m_level.ChunkSize * m_level.ChunkSize * _colorSlots);
+
 	long location = (m_level.ChunkSize*m_level.ChunkSize)*(m_level.X*_x + _y) * _colorSlots;
 
 	fseek(file, location, SEEK_SET);
-	fread(data, m_level.ChunkSize * m_level.ChunkSize * _colorSlots, 1, file);
-
+	fread(texRAM.Data, m_level.ChunkSize * m_level.ChunkSize * _colorSlots, 1, file);
  	fclose(file);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+	return texRAM;
+}
+
+
+GLuint Graphics::GraphicsWrapper::PushTextureToGL(short _colorSlots, GLubyte * data)
+{
+	GLuint texture;
+
+	//glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
-	
-	glTexImage2D(GL_TEXTURE_2D, 0, _colorSlots == 1 ? GL_RED : GL_RGB, m_level.ChunkSize, m_level.ChunkSize, 0, _colorSlots == 1 ? GL_RED : GL_RGB, GL_UNSIGNED_BYTE,data);
+	glTexImage2D(GL_TEXTURE_2D, 0, _colorSlots == 1 ? GL_RED : GL_RGB, m_level.ChunkSize, m_level.ChunkSize, 0, _colorSlots == 1 ? GL_RED : GL_RGB, GL_UNSIGNED_BYTE, data);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	//free(data);
-	tempStack->FreeTo(memoryTop);
 
 	GLenum error = glGetError();
 	if (error != GL_NO_ERROR)
@@ -476,9 +342,7 @@ GLuint Graphics::GraphicsWrapper::LoadTexturePatch(const char * _filename, unsig
 	}
 
 	return texture;
-
 }
-
 
 void Graphics::GraphicsWrapper::ConvertToPAK(const char * _filename, GLint _width, GLint _height, short _colorSlots)
 {
@@ -764,41 +628,165 @@ void Graphics::GraphicsWrapper::LoadTerrainPatch()
 	}
 }
 
-GLuint LoadTextureRAW(const char * _filename, unsigned int _width, unsigned int _height, short _colorSlots)
+// GLuint LoadTextureRAW(const char * _filename, unsigned int _width, unsigned int _height, short _colorSlots)
+// {
+// 	GLuint texture;
+// 	GLubyte * data;
+// 	FILE * file;
+// 	// open texture data
+// 	fopen_s(&file, _filename, "rb");
+// 	if (file == NULL)
+// 	{
+// 		printf("error reading file\n");
+// 		return 0;
+// 	}
+// 
+// 	data = (GLubyte*)malloc(_width * _height * _colorSlots);
+// 
+// 	fread(data, _width * _height * _colorSlots, 1, file);
+// 
+// 	fclose(file);
+// 
+// 	//glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+// 
+// 	glGenTextures(1, &texture);
+// 	glBindTexture(GL_TEXTURE_2D, texture);
+// 
+// 
+// 	glTexImage2D(GL_TEXTURE_2D, 0, _colorSlots == 1 ? GL_RED : GL_RGB, _width, _height, 0, _colorSlots == 1 ? GL_RED : GL_RGB, GL_UNSIGNED_BYTE, data);
+// 
+// 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+// 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+// 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+// 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+// 
+// 	free(data);
+// 
+// 	return texture;
+// 
+// }
+
+//NOT USED ATM, FOR MODELS
+void GraphicsWrapper::Render()
 {
-	GLuint texture;
-	GLubyte * data;
-	FILE * file;
-	// open texture data
-	fopen_s(&file, _filename, "rb");
-	if (file == NULL)
-	{
-		printf("error reading file\n");
-		return 0;
-	}
-
-	data = (GLubyte*)malloc(_width * _height * _colorSlots);
-
-	fread(data, _width * _height * _colorSlots, 1, file);
-
-	fclose(file);
-
-	//glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-
-	glTexImage2D(GL_TEXTURE_2D, 0, _colorSlots == 1 ? GL_RED : GL_RGB, _width, _height, 0, _colorSlots == 1 ? GL_RED : GL_RGB, GL_UNSIGNED_BYTE, data);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	free(data);
-
-	return texture;
-
+	// 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// 	m_terrainShader->UseProgram();
+	// 	
+	// 	glm::mat4 vm = *m_camera->GetView();
+	// 	glm::mat4 pvm = *m_camera->GetProjection();
+	// 
+	// 	m_terrainShader->SetUniformV("gView", vm);
+	// 	m_terrainShader->SetUniformV("gProj", pvm);
+	// 
+	// 	GLint gSampler = glGetUniformLocation(m_terrainShader->GetProgramHandle(), "gSampler");
+	// 	glUniform1i(gSampler, 0);
+	// 
+	// 	for (int i = 0; i < m_renderItems.size();i++)
+	// 	{
+	// 		glActiveTexture(GL_TEXTURE0);
+	// 		glBindTexture(GL_TEXTURE_2D, m_renderItems[i]->TextureDiffuse);
+	// 
+	// 		//Update matrix buffer//
+	// 		glBindBuffer(GL_ARRAY_BUFFER, m_renderItems[i]->MatrixBuffer);
+	// 		glm::mat4* matrices = (glm::mat4*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+	// 		for (int j = 0; j < m_renderItems[i]->Instances.size(); j++)
+	// 		{
+	// 			matrices[j] = m_renderItems[i]->Instances[j]->ModelMatrix;
+	// 		}
+	// 
+	// 		glUnmapBuffer(GL_ARRAY_BUFFER);
+	// 		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	// 
+	// 		glBindVertexArray(m_renderItems[i]->VAO);
+	// 
+	// 		glDrawArraysInstanced(m_renderItems[i]->RenderParam,0, m_renderItems[i]->Vertices, (GLsizei)m_renderItems[i]->Instances.size());
+	// 	}
+	// 
+	// 	SDL_GL_SwapWindow(m_window);
+	// 
+	// 	GLenum error = glGetError();
+	// 	if (error != GL_NO_ERROR)
+	// 	{
+	// 		printf("Error rendering %d\n", error);
+	// 		system("pause");
+	// 	}
 }
-
+//NOT USED ATM
+void Graphics::GraphicsWrapper::LoadModel()
+{
+	// 	RenderItem* newItem = new RenderItem;
+	// 
+	// 	GLuint vbo[4];
+	// 	glGenBuffers(4, vbo);
+	// 
+	// 	//vertices
+	// 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+	// 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	// 
+	// 	//texcoords
+	// 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	// 	glBufferData(GL_ARRAY_BUFFER, sizeof(texCoords), texCoords, GL_STATIC_DRAW);
+	// 
+	// 	//normals
+	// 	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+	// 	glBufferData(GL_ARRAY_BUFFER, sizeof(normals), normals, GL_STATIC_DRAW);
+	// 
+	// 	//model matrix
+	// 	glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
+	// 	glBufferData(GL_ARRAY_BUFFER, 4 * 4 * sizeof(float), NULL, GL_DYNAMIC_DRAW);
+	// 
+	// 	glGenVertexArrays(1, &newItem->VAO);
+	// 	glBindVertexArray(newItem->VAO);
+	// 
+	// 	GLint pos = glGetAttribLocation(m_shaderSTD->GetProgramHandle(), "in_position");
+	// 	GLint tex = glGetAttribLocation(m_shaderSTD->GetProgramHandle(), "in_tex");
+	// 	GLint norm = glGetAttribLocation(m_shaderSTD->GetProgramHandle(), "in_normal");
+	// 	GLint matrix = glGetAttribLocation(m_shaderSTD->GetProgramHandle(), "in_modelM");
+	// 
+	// 	glEnableVertexAttribArray(pos);
+	// 	glEnableVertexAttribArray(tex);
+	// 	glEnableVertexAttribArray(norm);
+	// 	glEnableVertexAttribArray(matrix);      
+	// 	glEnableVertexAttribArray(matrix + 1);    
+	// 	glEnableVertexAttribArray(matrix + 2);    
+	// 	glEnableVertexAttribArray(matrix + 3);    
+	// 
+	// 	//vertices
+	// 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
+	// 	glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	// 
+	// 	//texcoords
+	// 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	// 	glVertexAttribPointer(tex, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	// 
+	// 	//normals
+	// 	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+	// 	glVertexAttribPointer(norm, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	// 
+	// 	//model matrix
+	// 	glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
+	// 	glVertexAttribPointer(matrix, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void *)(sizeof(glm::vec4) * 0));
+	// 	glVertexAttribDivisor(matrix, 1);
+	// 	glVertexAttribPointer(matrix + 1, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void *)(sizeof(glm::vec4) * 1));
+	// 	glVertexAttribDivisor(matrix + 1, 1);
+	// 	glVertexAttribPointer(matrix + 2, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void *)(sizeof(glm::vec4) * 2));
+	// 	glVertexAttribDivisor(matrix + 2, 1);
+	// 	glVertexAttribPointer(matrix + 3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void *)(sizeof(glm::vec4) * 3));
+	// 	glVertexAttribDivisor(matrix + 3, 1);
+	// 
+	// 	//newItem->TextureDiffuse = LoadTextureRAW("../../../Content/height.raw");
+	// 	newItem->RenderParam = GL_PATCHES;
+	// 	newItem->MatrixBuffer = vbo[3];
+	// 	newItem->Vertices = sizeof(vertices) / sizeof(float);
+	// 
+	// 	m_renderItems.push_back(newItem);
+	// 	RenderInstance* ins = new RenderInstance;
+	// 	ins->ModelMatrix = glm::mat4(1.0f);
+	// 	m_renderItems.back()->Instances.push_back(ins);
+	// 
+	// 	GLenum error = glGetError();
+	// 	if (error != GL_NO_ERROR)
+	// 	{
+	// 		printf("Error loading model %d\n", error);
+	// 	}
+}

@@ -31,13 +31,13 @@ public:
 	static ResourceManager& GetInstance();
 
 	bool InitResourceManager(size_t _totalMemorySize);
-	void SetGraphicsWrapper(Graphics::GraphicsWrapper* instance) { m_graphicsWrapper = instance; }
+	void SetGraphicsWrapper(Graphics::GraphicsWrapper* instance);
 
 	bool LoadAsset();
 	bool UnloadAsset();
 
 	void CreateChunkPool(unsigned int _nChunks);
-	void LoadChunk(int tileX, int tileY);
+	//void LoadChunk(int tileX, int tileY);
 
 
 	void LoadChunks_Thread();
@@ -75,6 +75,9 @@ private:
 	std::queue<SDL_Point> m_chunksToPreload;
 
 	size_t m_ticks;
+
+	HDC m_hDC;
+	HGLRC m_resourceContext;
 };
 
 

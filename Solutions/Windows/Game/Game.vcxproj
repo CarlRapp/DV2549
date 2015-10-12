@@ -110,7 +110,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProfileGuidedDatabase>$(OutDir)$(TargetName).pgd</ProfileGuidedDatabase>
       <ProgramDatabaseFile>$(IntDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;OpenGL32.lib;glew32.lib;glew32s.lib;Input_$(PlatformTarget)d.lib;Graphics_$(PlatformTarget)d.lib;Memory_$(PlatformTarget)d.lib;ResourceManager_$(PlatformTarget)d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;OpenGL32.lib;glew32.lib;glew32s.lib;Input_$(PlatformTarget)d.lib;Graphics_$(PlatformTarget)d.lib;Memory_$(PlatformTarget)d.lib;ResourceManager_$(PlatformTarget)d.lib;PakLib_$(PlatformTarget)d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /d /y "$(SolutionDir)..\..\Externals\binaries\Windows\$(PlatformTarget)\*.dll" "$(OutDir)"
@@ -136,7 +136,7 @@ call "$(OutDir)PakTool.exe" "$(SolutionDir)..\..\Content" "$(OutDir)content\Data
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProfileGuidedDatabase>$(OutDir)$(TargetName).pgd</ProfileGuidedDatabase>
       <ProgramDatabaseFile>$(IntDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;OpenGL32.lib;glew32.lib;glew32s.lib;Input_$(PlatformTarget)d.lib;Graphics_$(PlatformTarget)d.lib;Memory_$(PlatformTarget)d.lib;ResourceManager_$(PlatformTarget)d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;OpenGL32.lib;glew32.lib;glew32s.lib;Input_$(PlatformTarget)d.lib;Graphics_$(PlatformTarget)d.lib;Memory_$(PlatformTarget)d.lib;ResourceManager_$(PlatformTarget)d.lib;PakLib_$(PlatformTarget)d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /d /y "$(SolutionDir)..\..\Externals\binaries\Windows\$(PlatformTarget)\*.dll" "$(OutDir)"
@@ -164,7 +164,7 @@ call "$(OutDir)PakTool.exe" "$(SolutionDir)..\..\Content" "$(OutDir)content\Data
       <OptimizeReferences>true</OptimizeReferences>
       <ProfileGuidedDatabase>$(OutDir)$(TargetName).pgd</ProfileGuidedDatabase>
       <ProgramDatabaseFile>$(IntDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;OpenGL32.lib;glew32.lib;glew32s.lib;Input_$(PlatformTarget).lib;Graphics_$(PlatformTarget).lib;Memory_$(PlatformTarget).lib;ResourceManager_$(PlatformTarget).lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;OpenGL32.lib;glew32.lib;glew32s.lib;Input_$(PlatformTarget).lib;Graphics_$(PlatformTarget).lib;Memory_$(PlatformTarget).lib;ResourceManager_$(PlatformTarget).lib;PakLib_$(PlatformTarget).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /d /y "$(SolutionDir)..\..\Externals\binaries\Windows\$(PlatformTarget)\*.dll" "$(OutDir)"
@@ -192,7 +192,7 @@ call "$(OutDir)PakTool.exe" "$(SolutionDir)..\..\Content" "$(OutDir)content\Data
       <OptimizeReferences>true</OptimizeReferences>
       <ProfileGuidedDatabase>$(OutDir)$(TargetName).pgd</ProfileGuidedDatabase>
       <ProgramDatabaseFile>$(IntDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;OpenGL32.lib;glew32.lib;glew32s.lib;Input_$(PlatformTarget).lib;Graphics_$(PlatformTarget).lib;Memory_$(PlatformTarget).lib;ResourceManager_$(PlatformTarget).lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;OpenGL32.lib;glew32.lib;glew32s.lib;Input_$(PlatformTarget).lib;Graphics_$(PlatformTarget).lib;Memory_$(PlatformTarget).lib;ResourceManager_$(PlatformTarget).lib;PakLib_$(PlatformTarget).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /d /y "$(SolutionDir)..\..\Externals\binaries\Windows\$(PlatformTarget)\*.dll" "$(OutDir)"
@@ -208,6 +208,7 @@ call "$(OutDir)PakTool.exe" "$(SolutionDir)..\..\Content" "$(OutDir)content\Data
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Source\Game\GameManager.h" />
+    <ClInclude Include="..\..\..\Source\Game\GameTests.h" />
     <ClInclude Include="..\..\..\Source\Game\Timer\Timer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
