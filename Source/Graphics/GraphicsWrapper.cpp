@@ -73,7 +73,7 @@ void GraphicsWrapper::RenderTerrain()
 
 	m_terrainShader->SetUniformV("gEyePos", m_camera->GetPosition());
 
-	GLint availableMem;
+	//GLint availableMem;
 
 	//glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &availableMem);
 	
