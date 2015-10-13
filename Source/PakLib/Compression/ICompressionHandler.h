@@ -7,7 +7,7 @@ enum CompressionSetting {NO_COMPRESSION = 0, FASTEST_COMPRESSION, MEDIUM_COMPRES
 
 namespace Compression
 {
-	class ICompressionHandler
+	class DECLSPEC ICompressionHandler
 	{
 	public:
 		virtual ~ICompressionHandler() {};

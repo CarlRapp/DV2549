@@ -110,12 +110,13 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProfileGuidedDatabase>$(OutDir)$(TargetName).pgd</ProfileGuidedDatabase>
       <ProgramDatabaseFile>$(IntDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;OpenGL32.lib;glew32.lib;glew32s.lib;Input_$(PlatformTarget)d.lib;Graphics_$(PlatformTarget)d.lib;Memory_$(PlatformTarget)d.lib;ResourceManager_$(PlatformTarget)d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;OpenGL32.lib;glew32.lib;glew32s.lib;Input_$(PlatformTarget)d.lib;Graphics_$(PlatformTarget)d.lib;Memory_$(PlatformTarget)d.lib;ResourceManager_$(PlatformTarget)d.lib;PakLib_$(PlatformTarget)d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /d /y "$(SolutionDir)..\..\Externals\binaries\Windows\$(PlatformTarget)\*.dll" "$(OutDir)"
 if not exist "$(OutDir)content" mkdir "$(OutDir)content"
-xcopy "$(SolutionDir)..\..\Externals\Content" "$(OutDir)content" /d /y /s /e </Command>
+xcopy "$(SolutionDir)..\..\Externals\Content" "$(OutDir)content" /d /y /s /e
+call "$(OutDir)PakTool.exe" "$(SolutionDir)..\..\Content" "$(OutDir)content\Data.PAK"</Command>
       <Message>
       </Message>
     </PostBuildEvent>
@@ -135,12 +136,13 @@ xcopy "$(SolutionDir)..\..\Externals\Content" "$(OutDir)content" /d /y /s /e </C
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProfileGuidedDatabase>$(OutDir)$(TargetName).pgd</ProfileGuidedDatabase>
       <ProgramDatabaseFile>$(IntDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;OpenGL32.lib;glew32.lib;glew32s.lib;Input_$(PlatformTarget)d.lib;Graphics_$(PlatformTarget)d.lib;Memory_$(PlatformTarget)d.lib;ResourceManager_$(PlatformTarget)d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;OpenGL32.lib;glew32.lib;glew32s.lib;Input_$(PlatformTarget)d.lib;Graphics_$(PlatformTarget)d.lib;Memory_$(PlatformTarget)d.lib;ResourceManager_$(PlatformTarget)d.lib;PakLib_$(PlatformTarget)d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /d /y "$(SolutionDir)..\..\Externals\binaries\Windows\$(PlatformTarget)\*.dll" "$(OutDir)"
 if not exist "$(OutDir)content" mkdir "$(OutDir)content"
-xcopy "$(SolutionDir)..\..\Externals\Content" "$(OutDir)content" /d /y /s /e </Command>
+xcopy "$(SolutionDir)..\..\Externals\Content" "$(OutDir)content" /d /y /s /e
+call "$(OutDir)PakTool.exe" "$(SolutionDir)..\..\Content" "$(OutDir)content\Data.PAK"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -162,12 +164,13 @@ xcopy "$(SolutionDir)..\..\Externals\Content" "$(OutDir)content" /d /y /s /e </C
       <OptimizeReferences>true</OptimizeReferences>
       <ProfileGuidedDatabase>$(OutDir)$(TargetName).pgd</ProfileGuidedDatabase>
       <ProgramDatabaseFile>$(IntDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;OpenGL32.lib;glew32.lib;glew32s.lib;Input_$(PlatformTarget).lib;Graphics_$(PlatformTarget).lib;Memory_$(PlatformTarget).lib;ResourceManager_$(PlatformTarget).lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;OpenGL32.lib;glew32.lib;glew32s.lib;Input_$(PlatformTarget).lib;Graphics_$(PlatformTarget).lib;Memory_$(PlatformTarget).lib;ResourceManager_$(PlatformTarget).lib;PakLib_$(PlatformTarget).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /d /y "$(SolutionDir)..\..\Externals\binaries\Windows\$(PlatformTarget)\*.dll" "$(OutDir)"
 if not exist "$(OutDir)content" mkdir "$(OutDir)content"
-xcopy "$(SolutionDir)..\..\Externals\Content" "$(OutDir)content" /d /y /s /e </Command>
+xcopy "$(SolutionDir)..\..\Externals\Content" "$(OutDir)content" /d /y /s /e
+call "$(OutDir)PakTool.exe" "$(SolutionDir)..\..\Content" "$(OutDir)content\Data.PAK"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -189,12 +192,13 @@ xcopy "$(SolutionDir)..\..\Externals\Content" "$(OutDir)content" /d /y /s /e </C
       <OptimizeReferences>true</OptimizeReferences>
       <ProfileGuidedDatabase>$(OutDir)$(TargetName).pgd</ProfileGuidedDatabase>
       <ProgramDatabaseFile>$(IntDir)$(TargetName).pdb</ProgramDatabaseFile>
-      <AdditionalDependencies>SDL2.lib;SDL2main.lib;OpenGL32.lib;glew32.lib;glew32s.lib;Input_$(PlatformTarget).lib;Graphics_$(PlatformTarget).lib;Memory_$(PlatformTarget).lib;ResourceManager_$(PlatformTarget).lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;OpenGL32.lib;glew32.lib;glew32s.lib;Input_$(PlatformTarget).lib;Graphics_$(PlatformTarget).lib;Memory_$(PlatformTarget).lib;ResourceManager_$(PlatformTarget).lib;PakLib_$(PlatformTarget).lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>xcopy /d /y "$(SolutionDir)..\..\Externals\binaries\Windows\$(PlatformTarget)\*.dll" "$(OutDir)"
 if not exist "$(OutDir)content" mkdir "$(OutDir)content"
-xcopy "$(SolutionDir)..\..\Externals\Content" "$(OutDir)content" /d /y /s /e </Command>
+xcopy "$(SolutionDir)..\..\Externals\Content" "$(OutDir)content" /d /y /s /e
+call "$(OutDir)PakTool.exe" "$(SolutionDir)..\..\Content" "$(OutDir)content\Data.PAK"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

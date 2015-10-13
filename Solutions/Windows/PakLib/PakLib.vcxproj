@@ -26,6 +26,7 @@
     <ClCompile Include="..\..\..\Source\PakLib\Compression\lz4\programs\bench.c" />
     <ClCompile Include="..\..\..\Source\PakLib\Compression\lz4\programs\lz4io.c" />
     <ClCompile Include="..\..\..\Source\PakLib\Compression\lz4\programs\xxhash.c" />
+    <ClCompile Include="..\..\..\Source\PakLib\Hash\MD5.cpp" />
     <ClCompile Include="..\..\..\Source\PakLib\PackageReaderWriter.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -37,6 +38,7 @@
     <ClInclude Include="..\..\..\Source\PakLib\Compression\lz4\programs\bench.h" />
     <ClInclude Include="..\..\..\Source\PakLib\Compression\lz4\programs\lz4io.h" />
     <ClInclude Include="..\..\..\Source\PakLib\Compression\lz4\programs\xxhash.h" />
+    <ClInclude Include="..\..\..\Source\PakLib\Hash\MD5.h" />
     <ClInclude Include="..\..\..\Source\PakLib\PackageReaderWriter.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -10,6 +10,9 @@
     <Filter Include="Source\Compression\lz4">
       <UniqueIdentifier>{16f1d652-c61a-4f34-a323-1a3d38a779a6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source\Hash">
+      <UniqueIdentifier>{3afcd6f1-e60b-4307-9fe5-c890426c47c8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Source\PakLib\Compression\CompressionHandler_lz4.cpp">
@@ -35,6 +38,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\Source\PakLib\PackageReaderWriter.cpp">
       <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\PakLib\Hash\MD5.cpp">
+      <Filter>Source\Hash</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -64,6 +70,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\Source\PakLib\PackageReaderWriter.h">
       <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Source\PakLib\Hash\MD5.h">
+      <Filter>Source\Hash</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
