@@ -60,8 +60,8 @@ int main(int argc, char** argv)
 	int height = 720;
 	int centerX = width/2;
 	int centerY = height/2;
-	const float cameraSpeed = 32.0f;
-	int cameraMaxY = 20;
+	const float cameraSpeed = 100.0f;
+	int cameraMaxY = 40;
 	const float mouseSensitivity = 9.0f;
 	bool lockMouse = true;
 
@@ -86,7 +86,7 @@ int main(int argc, char** argv)
 	graphics->LoadTerrainPatch();
 	
 
-	graphics->GetCamera()->SetPosition(glm::vec3(graphics->GetLevel()->PatchSize*0.5f, 3*cameraMaxY, graphics->GetLevel()->PatchSize*0.5f));
+	graphics->GetCamera()->SetPosition(glm::vec3(graphics->GetLevel()->PatchSize*0.5f, cameraMaxY, graphics->GetLevel()->PatchSize*0.5f));
 	graphics->GetCamera()->SetForward(glm::vec3(0, -1, 0));
 	
 
@@ -115,6 +115,8 @@ int main(int argc, char** argv)
 	//MEMORY USAGE
 	PROCESS_MEMORY_COUNTERS memCounter;
 
+	gameManager->Update(deltaTime);
+
 	printf("	M Thread: BIG INIT OK\n");
 	SDL_CondSignal(graphics->gCond);
 	//SDL_UnlockMutex(Global::gMutex);
@@ -128,7 +130,7 @@ int main(int argc, char** argv)
 		double frameTime = fTimer.GetDeltaTime(); // (beginFrame - endFrame)*0.001;
 		endFrame = beginFrame;
 
-		bool result = GetProcessMemoryInfo(GetCurrentProcess(), &memCounter, sizeof(memCounter));
+		GetProcessMemoryInfo(GetCurrentProcess(), &memCounter, sizeof(memCounter));
 
 		fpsString = "DTT: " + std::to_string(frameTime) + "MS";
 		fpsString += "\nFPS: " + std::to_string( int(1.0 / frameTime));
@@ -191,7 +193,7 @@ int main(int argc, char** argv)
 				glm::vec3 camPos = graphics->GetCamera()->GetPosition();
 				if (camPos.y < cameraMaxY)
 				{
-					camPos.y = cameraMaxY;
+					camPos.y = (float)cameraMaxY;
 					graphics->GetCamera()->SetPosition(camPos);
 				}
 

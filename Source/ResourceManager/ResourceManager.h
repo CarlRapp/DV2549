@@ -21,9 +21,9 @@ public:
 	struct LoadedChunk
 	{
 		Graphics::GraphicsWrapper::TerrainPatch GraphicsPatch;
-		size_t Popularity;
-		int X;
-		int Z;
+		size_t Popularity= INT32_MAX;
+		int X= INT32_MAX;
+		int Z= INT32_MAX;
 	};
 
 public:

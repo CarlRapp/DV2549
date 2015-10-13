@@ -39,13 +39,13 @@ void main()
 	float height = texture(gTexHeight, teTex).x;
 
 	//rounding hack to not crack tessellation
-	if(teTex.x == 0 || teTex.x == 1 || teTex.y == 0 || teTex.y == 1)
-	{
-		int rounded = int(height * 2);
-		height = (float(rounded)/2);
-	}
+	//if(teTex.x == 0 || teTex.x == 1 || teTex.y == 0 || teTex.y == 1)
+	//{
+	//	int rounded = int(height * 10);
+	//	height = (float(rounded)/10);
+	//}
 	
-	pos.y += (height);
+	pos.y += (height)*4;
 
     gl_Position = gPV * vec4(pos, 1);
 

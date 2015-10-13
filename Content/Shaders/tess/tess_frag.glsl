@@ -11,9 +11,9 @@ uniform vec3 gEyePos;
 
 uniform bool gFog;
 
-vec3 LightDirection = vec3(1,-1.5,0.0);
+vec3 LightDirection = normalize(vec3(1,-5.0,0.3));
 vec3 LightDiffuse = vec3(0.9,0.9,0.9);
-vec3 Lightspecular = vec3(0.2,0.2,0.2);
+vec3 Lightspecular = vec3(0.1,0.1,0.1);
 float Shininess = 2;
 
 void main()
@@ -26,22 +26,27 @@ void main()
 	vec3 spec = vec3(0,0,0);
 	vec3 texColor = texture(gTexDiffuse, tex).xyz;
 
-	//if(diffF > 0.0f)
-	//{
+	if(diffF > 0.0f)
+	{
 		vec3 v = reflect(LightDirection,facetNormal);
 		float specF = pow(max(dot(v, toEye),0.0),Shininess);
 
 		diff = diffF*LightDiffuse;
-		spec = specF*Lightspecular*texColor.z;
+		spec = specF*Lightspecular;//*texColor.z;
 
-	//}
+	}
 
 	float d = distance(facetPosition,gEyePos);
 
 
 	outColor.xyz = texColor * diff + spec;
+	outColor.w = 1.0;
+
 	if(gFog)
-		outColor.w = max(1-pow(d,3)*0.000001,0);
-	else
-		outColor.w = 1.0;
+	{
+		int fogStart = 80;
+
+		if(d > fogStart)
+			outColor.w = max(1-(d-fogStart)*0.01,0);
+	}
 }

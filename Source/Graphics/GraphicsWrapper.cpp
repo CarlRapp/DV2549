@@ -31,6 +31,8 @@ GraphicsWrapper::GraphicsWrapper()
 	m_level.TerrainVertices = (float*)malloc(m_level.Vertices*sizeof(float));
 	m_level.TerrainTex = (float*)malloc(m_level.TexCoords*sizeof(float));
 	m_level.TerrainNormals = (float*)malloc(m_level.Normals*sizeof(float));
+	debugString = "DEBUG";
+	TextRenderer::GetInstance().AddString(&debugString, glm::vec3(1, 1, 1), 2, 0, -400);
 }
 
 GraphicsWrapper::~GraphicsWrapper()
@@ -76,7 +78,11 @@ void GraphicsWrapper::RenderTerrain()
 	//GLint availableMem;
 
 	//glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &availableMem);
-	
+
+	int active = 0;
+
+	std::vector<int> faultySlots;
+
 	for (int i = 0; i < m_terrainPatches.size(); i++)
 	{
 		if (m_terrainPatches[i]->IsActive)
@@ -111,8 +117,25 @@ void GraphicsWrapper::RenderTerrain()
 			glBindVertexArray(m_terrainVAO);
 
 			glDrawArrays(GL_PATCHES, 0, m_level.Vertices);
+
+			active++;
 		}
+		else
+			faultySlots.push_back(i);
 	}
+
+	if (active == m_terrainPatches.size())
+	{
+		debugString = "ALL " + std::to_string(active) + " PATCHES RENDERED";
+	}
+	else
+	{
+		debugString = "FAULTY PATCH ID: ";
+		for (int i = 0; i < faultySlots.size(); i++)
+			debugString += std::to_string(faultySlots[i]) + ",";
+	}
+
+	
 	
 	glBindVertexArray(0);
 	glUseProgram(0);
@@ -127,6 +150,7 @@ void GraphicsWrapper::RenderTerrain()
 	TextRenderer::GetInstance().RenderText(m_width,m_height);
 
 	SDL_GL_SwapWindow(m_window);
+	wglMakeCurrent(NULL, NULL);
 	SDL_UnlockMutex(gMutex);
 
 }
@@ -177,14 +201,14 @@ void Graphics::GraphicsWrapper::InitializeGLEW()
 	glewInit();
 	glClearColor(0.0f, 0.0f, 0.1f, 0.0f);
 	glViewport(0, 0, m_width, m_height);
-	glDepthRange(0.0, 500.0);
+	glDepthRange(0.0, 900.0);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_TEXTURE_2D);
 
 	//CAMERA
-	m_camera = new GLCamera(45.0f, m_width, m_height, 0.1f, 500.0f);
+	m_camera = new GLCamera(45.0f, m_width, m_height, 0.1f, 900.0f);
 	m_camera->SetPosition(glm::vec3(0, 3, 0));
 	m_camera->SetLookAt(glm::vec3(0, 0, 0));
 	m_camera->SetViewPort(0, 0, m_width, m_height);
@@ -257,10 +281,10 @@ void Graphics::GraphicsWrapper::ReloadTerrainPatches(std::vector<TerrainPatch*> 
 	SDL_UnlockMutex(gMutex);
 }
 
-void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int tileX, int tileY, TerrainPatch* memLocation)
+void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int _tileX, int _tileY, TerrainPatch* _memLocation, HDC* _hdc, HGLRC* _hglrc)
 {
-	unsigned int X = tileX + m_level.X / 2;
-	unsigned int Y = tileY + m_level.Y / 2;
+	unsigned int X = _tileX + m_level.X / 2;
+	unsigned int Y = _tileY + m_level.Y / 2;
 
 	Memory::StackAllocator_SingleBuffer* tempStack = (Memory::StackAllocator_SingleBuffer*)Memory::MemoryWrapper::GetInstance()->GetGlobalStack();
 	size_t memoryTop = tempStack->GetTop();
@@ -270,14 +294,16 @@ void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int tileX, int tileY, Ter
 	TextureRAM texDiffuse = PushTextureToRAM("../../../Content/diffuse.pak", Y, X, 3);
 
 	SDL_LockMutex(gMutex);
-	memLocation->TextureHeight = PushTextureToGL(texHeight.ColorSlots, texHeight.Data);
- 	memLocation->TextureNormal = PushTextureToGL(texNormal.ColorSlots, texNormal.Data);
- 	memLocation->TextureDiffuse = PushTextureToGL(texDiffuse.ColorSlots, texDiffuse.Data);
+	wglMakeCurrent(*_hdc, *_hglrc);
+	_memLocation->TextureHeight = PushTextureToGL(texHeight.ColorSlots, texHeight.Data);
+ 	_memLocation->TextureNormal = PushTextureToGL(texNormal.ColorSlots, texNormal.Data);
+ 	_memLocation->TextureDiffuse = PushTextureToGL(texDiffuse.ColorSlots, texDiffuse.Data);
 
-	memLocation->ModelMatrix = glm::translate(glm::vec3(tileX*m_level.PatchSize, 0, tileY*m_level.PatchSize));
-	memLocation->IsActive = true;
+	_memLocation->ModelMatrix = glm::translate(glm::vec3(_tileX*m_level.PatchSize, 0, _tileY*m_level.PatchSize));
+	_memLocation->IsActive = true;
 
 	glFlush();
+	wglMakeCurrent(NULL, NULL);
 	SDL_UnlockMutex(gMutex);
 
 	tempStack->FreeTo(memoryTop);

@@ -53,8 +53,8 @@ namespace Graphics
 
 		struct Level
 		{
-			int TileSize = 8;
-			int PatchSize = 32;
+			int TileSize = 32;
+			int PatchSize = 128;
 
 			unsigned int Width		= 10000;
 			unsigned int Height		= 5000;
@@ -73,11 +73,11 @@ namespace Graphics
 	public:
 		struct TerrainPatch
 		{
-			glm::mat4		ModelMatrix;
-			GLuint			TextureHeight;
-			GLuint			TextureNormal;
-			GLuint			TextureDiffuse;
-			bool			IsActive;
+			glm::mat4		ModelMatrix = glm::mat4(1.0f);
+			GLuint			TextureHeight = 0;
+			GLuint			TextureNormal = 0;
+			GLuint			TextureDiffuse = 0;
+			bool			IsActive = false;
 		};
 
 
@@ -106,7 +106,7 @@ namespace Graphics
 		void LookCameraY(float _val);
 
 		void ReloadTerrainPatches(std::vector<TerrainPatch*> newPatches);
-		void LoadSingleTexturePatch(int tileX, int tileY, TerrainPatch* memLocation);
+		void LoadSingleTexturePatch(int tileX, int tileY, TerrainPatch* memLocation, HDC* hdc, HGLRC* hglrc);
 		//void DeleteSingleTexturePatch(int tileX, int tileY);
 		void DeleteSingleTexturePatch(TerrainPatch* memLocation);
 		Level* GetLevel() { return &m_level; }
@@ -169,6 +169,8 @@ namespace Graphics
 		HDC m_hDC;
 
 		//SDL_mutex* m_mutex;
+
+		std::string debugString = "";
 	};
 }
 
