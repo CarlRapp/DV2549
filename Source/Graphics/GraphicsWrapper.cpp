@@ -173,7 +173,7 @@ void Graphics::GraphicsWrapper::InitializeSDL(unsigned int _width, unsigned int 
 
 	m_renderContext = wglGetCurrentContext();
 
-	SDL_GL_SetSwapInterval(0);
+	SDL_GL_SetSwapInterval(1);
 
 	m_SDLStarted = true;
 }
