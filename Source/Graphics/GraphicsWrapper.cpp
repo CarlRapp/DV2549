@@ -75,9 +75,9 @@ void GraphicsWrapper::RenderTerrain()
 
 	m_terrainShader->SetUniformV("gEyePos", m_camera->GetPosition());
 
-	//GLint availableMem;
+	GLint availableMem;
 
-	//glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &availableMem);
+	glGetIntegerv(GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &availableMem);
 
 	int active = 0;
 
@@ -134,6 +134,7 @@ void GraphicsWrapper::RenderTerrain()
 		for (int i = 0; i < faultySlots.size(); i++)
 			debugString += std::to_string(faultySlots[i]) + ",";
 	}
+	debugString += "\nVIDEO MEM AVAILABLE: " + std::to_string(availableMem/(1024)) + "MB";
 
 	
 	
