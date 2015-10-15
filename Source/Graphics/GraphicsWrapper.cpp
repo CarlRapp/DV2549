@@ -335,6 +335,7 @@ Graphics::TextureRAM Graphics::GraphicsWrapper::PushTextureToRAM(const char * _f
 		texRAM.Data = nullptr;
 		return texRAM;
 	}
+	fclose(file);
 
 	texRAM.Data = (GLubyte*)(Memory::StackAllocator_SingleBuffer*)Memory::MemoryWrapper::GetInstance()->GetGlobalStack()->Reserve(m_level.ChunkSize * m_level.ChunkSize * _colorSlots);
 
