@@ -88,7 +88,7 @@ void ResourceManager::CreateChunkPool(unsigned int _nChunks)
 			m_graphicsWrapper->DeleteSingleTexturePatch(&m_loadedChunks[n].GraphicsPatch);
 		glFlush();
 
-		delete m_loadedChunks;
+		free(m_loadedChunks);
 		m_loadedChunks = 0;
 	}
 		
@@ -145,28 +145,12 @@ void ResourceManager::CreateChunkPool(unsigned int _nChunks)
 
 void ResourceManager::Update(float _dt)
 {
-	SDL_LockMutex(m_mutex);
-	while (!m_preloadedChunks.empty())
-	{
-		LoadedChunk*	chunkToOverwrite = &m_loadedChunks[GetLeastPopularChunkIndex()];
-		if (chunkToOverwrite)
-		{
-			LoadedChunk* loadedChunk = &m_preloadedChunks.back();
-			m_graphicsWrapper->DeleteSingleTexturePatch(&chunkToOverwrite->GraphicsPatch);
-			memcpy(chunkToOverwrite, loadedChunk, sizeof(LoadedChunk));
-			m_preloadedChunks.pop_back();
-		}
-		else
-			break;
-	}
-	
-
 	for (int n = 0; n < m_loadedChunksN; ++n)
 		m_loadedChunks[n].Popularity += 1;
 		
 
 	m_ticks++;
-	SDL_UnlockMutex(m_mutex);
+	
 }
 
 int ResourceManager::GetLeastPopularChunkIndex()
@@ -274,10 +258,32 @@ void ResourceManager::LoadChunks_Thread()
 			delete chunk;
 			return;
 		}
-
 		SDL_UnlockMutex(m_mutex);
-		
+
+		SDL_LockMutex(m_mutex);
+		if (!m_preloadedChunks.empty())
+		{
+			wglMakeCurrent(m_hDC, m_resourceContext);
+			while (!m_preloadedChunks.empty())
+			{
+				LoadedChunk*	chunkToOverwrite = &m_loadedChunks[GetLeastPopularChunkIndex()];
+				if (chunkToOverwrite)
+				{
+					LoadedChunk* loadedChunk = &m_preloadedChunks.back();
+					m_graphicsWrapper->DeleteSingleTexturePatch(&chunkToOverwrite->GraphicsPatch);
+					memcpy(chunkToOverwrite, loadedChunk, sizeof(LoadedChunk));
+					m_preloadedChunks.pop_back();
+				}
+				else
+					break;
+			}
+			wglMakeCurrent(NULL, NULL);
+		}
+		SDL_UnlockMutex(m_mutex);
 	}
 	delete chunk;
+
+
+
 	return;
 }

@@ -134,7 +134,7 @@ int main(int argc, char** argv)
 
 		fpsString = "DTT: " + std::to_string(frameTime) + "MS";
 		fpsString += "\nFPS: " + std::to_string( int(1.0 / frameTime));
-		fpsString += "\nMEM: " + std::to_string(memCounter.PagefileUsage/1000000) + "MB";
+		fpsString += "\nMEM: " + std::to_string(memCounter.PagefileUsage/(1024*1024)) + "MB";
 
 		while (frameTime > 0.0)
 		{
