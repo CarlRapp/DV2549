@@ -17,7 +17,7 @@
 
 #include "ICompressionHandler.h"
 
-#define CHUNK 512000 //16384 //256000 //16384
+#define CHUNK 256000 //512000 //16384 //256000 //16384
 
 namespace Compression
 {
@@ -39,7 +39,7 @@ namespace Compression
 		virtual void* deCompress_memoryToMemory(void *source, void *dest, unsigned int nBytes = -1);
 		virtual FILE* deCompress_memoryToFile(void *source, FILE *dest, unsigned int nBytes = -1);
 		virtual FILE* deCompress_fileToFile(FILE *source, FILE *dest, unsigned int nBytes = -1);
-		virtual int deCompress_fileToMemory(FILE *source, unsigned int sourceOffset, void *dest, unsigned int nBytes = -1);
+		virtual int deCompress_fileToMemory(FILE *source, unsigned int sourceOffset, void *dest, int nBytes = -1, int compressedSize = -1);
 
 		// Misc. methods:
 

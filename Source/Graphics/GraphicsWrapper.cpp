@@ -33,6 +33,8 @@ GraphicsWrapper::GraphicsWrapper()
 	m_level.TerrainNormals = (float*)malloc(m_level.Normals*sizeof(float));
 	debugString = "DEBUG";
 	TextRenderer::GetInstance().AddString(&debugString, glm::vec3(1, 1, 1), 2, 0, -400);
+
+	m_pakRW = new PackageReaderWriter();
 }
 
 GraphicsWrapper::~GraphicsWrapper()
@@ -289,10 +291,10 @@ void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int _tileX, int _tileY, T
 	Memory::StackAllocator_SingleBuffer* tempStack = (Memory::StackAllocator_SingleBuffer*)Memory::MemoryWrapper::GetInstance()->GetGlobalStack();
 	size_t memoryTop = tempStack->GetTop();
 
+	TextureRAM texDiffuse = PushTextureToRAM("../../../Content/diffuse.pak", Y, X, 3);
 	TextureRAM texHeight = PushTextureToRAM("../../../Content/height.pak", Y, X, 1);
 	TextureRAM texNormal = PushTextureToRAM("../../../Content/norm.pak", Y, X, 3);
-	TextureRAM texDiffuse = PushTextureToRAM("../../../Content/diffuse.pak", Y, X, 3);
-
+	
 	SDL_LockMutex(gMutex);
 	wglMakeCurrent(*_hdc, *_hglrc);
 	_memLocation->TextureHeight = PushTextureToGL(texHeight.ColorSlots, texHeight.Data);
@@ -335,11 +337,22 @@ Graphics::TextureRAM Graphics::GraphicsWrapper::PushTextureToRAM(const char * _f
 
 	texRAM.Data = (GLubyte*)(Memory::StackAllocator_SingleBuffer*)Memory::MemoryWrapper::GetInstance()->GetGlobalStack()->Reserve(m_level.ChunkSize * m_level.ChunkSize * _colorSlots);
 
-	long location = (m_level.ChunkSize*m_level.ChunkSize)*(m_level.X*_x + _y) * _colorSlots;
+	//long location = (m_level.ChunkSize*m_level.ChunkSize)*(m_level.X*_x + _y) * _colorSlots;
 
-	fseek(file, location, SEEK_SET);
-	fread(texRAM.Data, m_level.ChunkSize * m_level.ChunkSize * _colorSlots, 1, file);
- 	fclose(file);
+	// Calculate the PAK index corresponding to the texture (x, y) coordinates.
+	long index = m_level.X * _x + _y;
+	
+	//long start = SDL_GetTicks();
+	m_pakRW->loadPackageData(_filename, texRAM.Data, index, index);
+	//long stop = SDL_GetTicks();
+	//long time = stop - start;
+
+	//long start2 = SDL_GetTicks();
+	//fseek(file, location, SEEK_SET);
+	//fread(texRAM.Data, m_level.ChunkSize * m_level.ChunkSize * _colorSlots, 1, file);
+	//fclose(file);
+	//long stop2 = SDL_GetTicks();
+	//long time2 = stop2 - start2;
 
 	return texRAM;
 }

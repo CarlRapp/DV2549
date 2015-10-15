@@ -299,8 +299,10 @@ FILE* Compression::CompressionHandler_zlib::deCompress_fileToFile(FILE *source, 
 	return dest;
 }
 
-int Compression::CompressionHandler_zlib::deCompress_fileToMemory(FILE *source, unsigned int sourceOffset, void *dest, unsigned int nBytes)
+int Compression::CompressionHandler_zlib::deCompress_fileToMemory(FILE *source, unsigned int sourceOffset, void *dest, int nBytes, int compressedSize)
 {
+	//long start = SDL_GetTicks();
+
 	unsigned int nBytesDecompressed = 0;
 
 	int zResult = Z_OK;
@@ -318,8 +320,14 @@ int Compression::CompressionHandler_zlib::deCompress_fileToMemory(FILE *source, 
 	strm.avail_in = 0;
 	strm.next_in = Z_NULL;
 	zResult = inflateInit(&strm);
+
+	//long stop = SDL_GetTicks();
+	//long time = stop - start;
+
 	if (zResult == Z_OK)
 	{
+		long start2 = SDL_GetTicks();
+
 		/* decompress until deflate stream ends or end of file */
 		do {
 			strm.avail_in = fread(in, 1, CHUNK, source);
@@ -378,6 +386,9 @@ int Compression::CompressionHandler_zlib::deCompress_fileToMemory(FILE *source, 
 
 			Compression::CompressionHandler_zlib::zerr(zResult);
 		}
+
+		long stop2 = SDL_GetTicks();
+		long time2 = stop2 - start2;
 
 		return nBytesDecompressed;
 	}

@@ -171,6 +171,8 @@ namespace Graphics
 		//SDL_mutex* m_mutex;
 
 		std::string debugString = "";
+
+		PackageReaderWriter *m_pakRW;
 	};
 }
 

@@ -3,6 +3,7 @@
 #include "FileDirectory.h"
 #include "PakLib/PackageReaderWriter.h"
 #include "PakLib/Compression/CompressionHandler_zlib.h"
+#include "PakLib/Compression/CompressionHandler_lz4.h"
 #include "PakLib/Hash/MD5.h"
 
 int main(int argc, char* argv[]) 
@@ -34,7 +35,7 @@ int main(int argc, char* argv[])
 
 	printf("PakTool: Packaging has begun. This can take a while...\n");
 
-	PackageReaderWriter packageReaderWriter = PackageReaderWriter(new Compression::CompressionHandler_zlib());
+	PackageReaderWriter packageReaderWriter = PackageReaderWriter(new Compression::CompressionHandler_lz4());
 	packageReaderWriter.createPackageFromFiles(outputFile, filePaths);
 
 	printf("PakTool: Work finished\n");

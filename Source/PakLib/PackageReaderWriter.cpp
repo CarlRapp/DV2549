@@ -7,7 +7,7 @@ PackageReaderWriter::PackageReaderWriter(Compression::ICompressionHandler *_comp
 
 PackageReaderWriter::PackageReaderWriter()
 {
-	compressionHandler = new Compression::CompressionHandler_zlib();
+	compressionHandler = new Compression::CompressionHandler_lz4(); //new Compression::CompressionHandler_zlib();
 }
 
 PackageReaderWriter::~PackageReaderWriter()
@@ -31,23 +31,24 @@ void PackageReaderWriter::createPackageFromFiles(std::string PAKFilePath, std::v
 
 	/* Destroy old file if it exists and create new */
 	fopen_s(&package.m_fileHandle, package.m_filePath.c_str(), "wb");
-	fclose(package.m_fileHandle);
+	//fclose(package.m_fileHandle);
 
 	if (package.m_header.numFileTableEntries == 0)
 	{
 		package.m_nextFileOffset = sizeOfHeaderAndFileTable;
 
 		// Write dummy data to move the file pointer.
-		fopen_s(&package.m_fileHandle, package.m_filePath.c_str(), "ab");
+		//fopen_s(&package.m_fileHandle, package.m_filePath.c_str(), "ab");
 		char *dummyData = new char[sizeOfHeaderAndFileTable] {0};
 		fwrite(dummyData, sizeOfHeaderAndFileTable, 1, package.m_fileHandle);
-		fclose(package.m_fileHandle);
+		//fclose(package.m_fileHandle);
 	}
 
 	// Append the file data to the end of the Package file.
+	//fopen_s(&package.m_fileHandle, package.m_filePath.c_str(), "wb"); // Open the Package file for writing at the end of it. NOTE: Opening with "a" keeps the last EOF marker, which should work well with repeated use of the current version of decompress_fileToMemory.
 	for (unsigned int i = 0; i < filePaths.size(); ++i)
 	{
-		fopen_s(&package.m_fileHandle, package.m_filePath.c_str(), "ab"); // Open the Package file for writing at the end of it. NOTE: Opening with "a" keeps the last EOF marker, which should work well with repeated use of the current version of decompress_fileToMemory.
+		
 		fopen_s(&fileToAdd, filePaths[i].c_str(), "rb");
 
 		fseek(fileToAdd, 0, SEEK_END);
@@ -63,7 +64,7 @@ void PackageReaderWriter::createPackageFromFiles(std::string PAKFilePath, std::v
 
 		PackageFileTableEntry fileTableEntry;
 		int startIndex = filePaths[i].find_last_of('/') + 1;
-		strncpy_s(fileTableEntry.fileName, filePaths[i].c_str() + startIndex, filePaths[i].size() - startIndex - 1);
+		strncpy_s(fileTableEntry.fileName, filePaths[i].c_str() + startIndex, filePaths[i].size() - startIndex);
 		fileTableEntry.fileName[sizeof(fileTableEntry.fileName) - 1] = 0;
 		fileTableEntry.fileOffset = package.m_nextFileOffset; // Add the offset to the start of the added file.
 		fileTableEntry.fileSize_compressed = nBytesAdded;
@@ -77,10 +78,10 @@ void PackageReaderWriter::createPackageFromFiles(std::string PAKFilePath, std::v
 		++package.m_header.numFileTableEntries;
 
 		fclose(fileToAdd); 
-		fclose(package.m_fileHandle); // NOTE: Adds EOF marker while closing.
+		//fclose(package.m_fileHandle); // NOTE: Adds EOF marker while closing.
 	}
 		
-	fopen_s(&package.m_fileHandle, package.m_filePath.c_str(), "r+"); // Opens for reading and writing without destroying the already existing file.
+	//fopen_s(&package.m_fileHandle, package.m_filePath.c_str(), "r+"); // Opens for reading and writing without destroying the already existing file.
 	fseek(package.m_fileHandle, 0, SEEK_SET); // Set the read/write marker to the start of the Package File.
 
 	// Write the header the start of the Package file.
@@ -155,14 +156,14 @@ void PackageReaderWriter::loadPackageData(std::string packageFileName, void *des
 	FILE *packageFileHandle;
 	fopen_s(&packageFileHandle, packageFileName.c_str(), "rb");
 
-	unsigned int nBytesLoaded = 0;
+	int nBytesLoaded = 0;
 	unsigned int currentIndex = loadStartIndex;
 	do 
 	{
 		unsigned int startOffset = fileTableEntries[currentIndex].fileOffset;
 		fseek(packageFileHandle, startOffset, SEEK_SET);
 		//unsigned int nFileSize = fileTableEntries[currentIndex + 1].fileOffset - startOffset;
-		nBytesLoaded += compressionHandler->deCompress_fileToMemory(packageFileHandle, startOffset, (char*)dest + nBytesLoaded, fileTableEntries[currentIndex].fileSize_uncompressed);  // NOTE: Continuously moves the file pointer and reads until various EOF markers in the Package, I think...
+		nBytesLoaded += compressionHandler->deCompress_fileToMemory(packageFileHandle, startOffset, (char*)dest + nBytesLoaded, fileTableEntries[currentIndex].fileSize_uncompressed, fileTableEntries[currentIndex].fileSize_compressed);  // NOTE: Continuously moves the file pointer and reads until various EOF markers in the Package, I think...
 		++currentIndex;
 	} while (currentIndex < loadEndIndex);
 

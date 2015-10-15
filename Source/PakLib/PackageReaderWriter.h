@@ -8,6 +8,7 @@
 #include <Windows.h>
 
 #include "Compression\CompressionHandler_zlib.h"
+#include "Compression\CompressionHandler_lz4.h"
 
 struct PackageHeader
 {
