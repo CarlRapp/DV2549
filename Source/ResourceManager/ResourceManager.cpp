@@ -11,7 +11,7 @@ int StaticThreadProc(void* pParam)
 
 
 ResourceManager::ResourceManager()
-	: m_totalMemorySize(0), m_currentAllocatedMemory(0), m_loadedChunks(0), m_ticks(0)
+	: m_totalMemorySize(0), m_currentAllocatedMemory(0), m_loadedChunks(0)
 {
 	stop = false;
 	m_mutex = SDL_CreateMutex();
@@ -33,7 +33,7 @@ ResourceManager& ResourceManager::GetInstance()
 
 bool ResourceManager::InitResourceManager(size_t _totalMemorySize)
 {
-	m_currentAllocatedMemory = _totalMemorySize;
+	m_totalMemorySize = _totalMemorySize;
 
 	//compressionHandler = new Compression::CompressionHandler_zlib();
 
@@ -45,41 +45,19 @@ void ResourceManager::SetGraphicsWrapper(Graphics::GraphicsWrapper* instance)
 	m_graphicsWrapper = instance; 
 }
 
-bool ResourceManager::LoadAsset()
-{
-	//	Check if the asset already exists?
-
-	//	Calculate size for wanted asset
-	size_t	assetSize = 0;
-
-	//	Check if the requested asset fits in our memory 
-	//	(not very accurate check if fragmentation exists)
-	if (m_currentAllocatedMemory + assetSize > m_totalMemorySize)
-	{
-		//	No more memory, either crash or check if
-		//	we can remove old assets
-
-		return false;
-	}
-
-	return true;
-}
-
-bool ResourceManager::UnloadAsset()
-{
-	//	Find the asset
-
-	//	Set that memory as "free" but let the data remain
-	//	or actually delete the data, dunno what we wanna do?
-
-
-	return true;
-}
-
 void ResourceManager::CreateChunkPool(unsigned int _nChunks)
 {
 	//SDL_LockMutex(m_graphicsWrapper->gMutex);
 	SDL_LockMutex(m_mutex);
+
+	//	No more memory...
+	if (m_currentAllocatedMemory - m_loadedChunksN*sizeof(LoadedChunk) + _nChunks*sizeof(LoadedChunk) > m_totalMemorySize)
+	{
+		DumpCurrentMemory();
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Out of memory", "ResourceManager is using all of its memory.", NULL);
+		exit(0);
+	}
+
 	//	If the current loaded chunks
 	if(m_loadedChunks)
 	{
@@ -112,49 +90,30 @@ void ResourceManager::CreateChunkPool(unsigned int _nChunks)
 		
 	m_loadedChunksN = _nChunks;
 	
-	//	No more memory...
-	if (m_currentAllocatedMemory > m_totalMemorySize)
-	{
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Out of memory", "ResourceManager is using all of its memory.", NULL);
-		exit(0);
-	}
+
 	
 	//SDL_UnlockMutex(m_graphicsWrapper->gMutex);
 	SDL_UnlockMutex(m_mutex);
 }
 
-// void ResourceManager::LoadChunk(int tileX, int tileZ)
-// {
-// 	//Graphics::GraphicsWrapper::TerrainPatch* tileMemLoc = 0;// (Graphics::GraphicsWrapper::TerrainPatch*)
-// 
-// 	for (int n = 0; n < m_loadedChunksN; ++n)
-// 		if (m_loadedChunks[n].X == tileX && m_loadedChunks[n].Z == tileZ)
-// 		{
-// 			m_loadedChunks[n].Popularity = SDL_GetTicks();
-// 			return;
-// 		}
-// 			
-// 
-// 	LoadedChunk*	chunkToOverwrite = &m_loadedChunks[GetLeastPopularChunkIndex()];
-// 	if (chunkToOverwrite)
-// 	{
-// 		m_graphicsWrapper->DeleteSingleTexturePatch(&chunkToOverwrite->GraphicsPatch);
-// 		m_graphicsWrapper->LoadSingleTexturePatch(tileX, tileZ, &chunkToOverwrite->GraphicsPatch);
-// 		chunkToOverwrite->X = tileX;
-// 		chunkToOverwrite->Z = tileZ;
-// 		chunkToOverwrite->Popularity = SDL_GetTicks();
-// 		
-// 	}
-// 
-// }
-
 void ResourceManager::Update(float _dt)
 {
 	for (int n = 0; n < m_loadedChunksN; ++n)
 		m_loadedChunks[n].Popularity += 1;
-		
+}
 
-	m_ticks++;
+void ResourceManager::DumpCurrentMemory()
+{
+	SDL_Log("###	Resource Manager	###\n");
+	//	Dump currently loaded chunks
+	SDL_Log("Chunks\n");
+	SDL_Log("Index - Position - Last Seen - IsRendered\n");
+	for (int n = 0; n < m_loadedChunksN; ++n)
+	{
+		LoadedChunk tChunk = m_loadedChunks[n];
+		SDL_Log("%i - [%i, %i] - %i - %s\n", n, tChunk.X, tChunk.Z, tChunk.Popularity, tChunk.GraphicsPatch.IsActive ? "Yes" : "No");
+
+	}
 	
 }
 

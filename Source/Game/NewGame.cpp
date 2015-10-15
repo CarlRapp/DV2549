@@ -71,6 +71,7 @@ int main(int argc, char** argv)
 
 	wglMakeCurrent(NULL, NULL);
 	resource = &ResourceManager::GetInstance();
+	resource->InitResourceManager(60*sizeof(ResourceManager::LoadedChunk));
 	//resource->SetGraphicsWrapper(graphics);
 
 
@@ -237,6 +238,9 @@ int main(int argc, char** argv)
 					renderDistance = "RENDER DISTANCE ";
 					renderDistance.append(std::to_string(gameManager->GetRenderDistance()));
 				}
+
+				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_P) == Input::PRESSED)
+					resource->DumpCurrentMemory();
 					
 					
 			}
