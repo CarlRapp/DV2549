@@ -33,9 +33,6 @@ public:
 	bool InitResourceManager(size_t _totalMemorySize);
 	void SetGraphicsWrapper(Graphics::GraphicsWrapper* instance);
 
-	bool LoadAsset();
-	bool UnloadAsset();
-
 	void CreateChunkPool(unsigned int _nChunks);
 	//void LoadChunk(int tileX, int tileY);
 
@@ -47,6 +44,7 @@ public:
 
 	void Update(float _dt);
 	
+	void DumpCurrentMemory();
 
 private:
 	ResourceManager();
@@ -73,8 +71,6 @@ private:
 	bool stop;
 	std::vector<LoadedChunk> m_preloadedChunks;
 	std::queue<SDL_Point> m_chunksToPreload;
-
-	size_t m_ticks;
 
 	HDC m_hDC;
 	HGLRC m_resourceContext;
