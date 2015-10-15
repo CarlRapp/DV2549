@@ -237,6 +237,9 @@ int main(int argc, char** argv)
 					renderDistance = "RENDER DISTANCE ";
 					renderDistance.append(std::to_string(gameManager->GetRenderDistance()));
 				}
+
+				if (input.GetKeyboard()->GetKeyState(SDL_SCANCODE_P) == Input::PRESSED)
+					resource->DumpCurrentMemory();
 					
 					
 			}
