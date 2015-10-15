@@ -33,7 +33,7 @@ ResourceManager& ResourceManager::GetInstance()
 
 bool ResourceManager::InitResourceManager(size_t _totalMemorySize)
 {
-	m_currentAllocatedMemory = _totalMemorySize;
+	m_totalMemorySize = _totalMemorySize;
 
 	//compressionHandler = new Compression::CompressionHandler_zlib();
 
@@ -49,6 +49,15 @@ void ResourceManager::CreateChunkPool(unsigned int _nChunks)
 {
 	//SDL_LockMutex(m_graphicsWrapper->gMutex);
 	SDL_LockMutex(m_mutex);
+
+	//	No more memory...
+	if (m_currentAllocatedMemory - m_loadedChunksN*sizeof(LoadedChunk) + _nChunks*sizeof(LoadedChunk) > m_totalMemorySize)
+	{
+		DumpCurrentMemory();
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Out of memory", "ResourceManager is using all of its memory.", NULL);
+		exit(0);
+	}
+
 	//	If the current loaded chunks
 	if(m_loadedChunks)
 	{
@@ -81,13 +90,7 @@ void ResourceManager::CreateChunkPool(unsigned int _nChunks)
 		
 	m_loadedChunksN = _nChunks;
 	
-	//	No more memory...
-	if (m_currentAllocatedMemory > m_totalMemorySize)
-	{
-		DumpCurrentMemory();
-		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Out of memory", "ResourceManager is using all of its memory.", NULL);
-		exit(0);
-	}
+
 	
 	//SDL_UnlockMutex(m_graphicsWrapper->gMutex);
 	SDL_UnlockMutex(m_mutex);
