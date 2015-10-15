@@ -113,7 +113,12 @@ void ResourceManager::CreateChunkPool(unsigned int _nChunks)
 	m_loadedChunksN = _nChunks;
 	
 	//	No more memory...
-	assert(m_currentAllocatedMemory > m_totalMemorySize);
+	if (m_currentAllocatedMemory > m_totalMemorySize)
+	{
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Out of memory", "ResourceManager is using all of its memory.", NULL);
+		exit(0);
+	}
+	
 	//SDL_UnlockMutex(m_graphicsWrapper->gMutex);
 	SDL_UnlockMutex(m_mutex);
 }
