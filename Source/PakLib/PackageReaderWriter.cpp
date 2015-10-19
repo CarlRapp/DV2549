@@ -1,5 +1,8 @@
 #include "PackageReaderWriter.h"
 
+#include <unordered_map>
+#include "Hash/MD5.h"
+
 PackageReaderWriter::PackageReaderWriter(Compression::ICompressionHandler *_compressionHandler)
 {
 	compressionHandler = _compressionHandler;
@@ -85,6 +88,114 @@ void PackageReaderWriter::createPackageFromFiles(std::string PAKFilePath, std::v
 	fseek(package.m_fileHandle, 0, SEEK_SET); // Set the read/write marker to the start of the Package File.
 
 	// Write the header the start of the Package file.
+	fwrite(&package.m_header, sizeof(PackageHeader), 1, package.m_fileHandle);
+
+	// Write the file table to the Package file, after the header.
+	for (unsigned int i = 0; i < filePaths.size(); ++i)
+	{
+		fwrite(&fileTableEntries[i], sizeof(PackageFileTableEntry), 1, package.m_fileHandle);
+	}
+
+	fclose(package.m_fileHandle);
+
+	// NOTE: In-game, first read sizeof(header) to see how many sizeof(PackageFileTableEntry) to read in to get all resource names and offsets.
+}
+
+void PackageReaderWriter::createPackageFromUniqueFiles(std::string PAKFilePath, std::vector<std::string> filePaths, bool compressFiles)
+{
+	Package package;
+	package.m_header.numFileTableEntries = 0;
+	package.m_filePath = PAKFilePath;
+
+	FILE *fileToAdd;
+
+	int nBytesAdded = 0;
+
+	std::vector<PackageFileTableEntry> fileTableEntries;
+
+	unsigned int sizeOfHeaderAndFileTable = sizeof(PackageHeader) + filePaths.size() * sizeof(PackageFileTableEntry);
+
+	/* Destroy old file if it exists and create new */
+	fopen_s(&package.m_fileHandle, package.m_filePath.c_str(), "wb");
+	//fclose(package.m_fileHandle);
+
+	if (package.m_header.numFileTableEntries == 0)
+	{
+		package.m_nextFileOffset = sizeOfHeaderAndFileTable;
+
+		// Write dummy data to move the file pointer.
+		//fopen_s(&package.m_fileHandle, package.m_filePath.c_str(), "ab");
+		char *dummyData = new char[sizeOfHeaderAndFileTable] {0};
+		fwrite(dummyData, sizeOfHeaderAndFileTable, 1, package.m_fileHandle);
+		//fclose(package.m_fileHandle);
+	}
+
+	/* unordered_map used for GUID checks */
+	std::unordered_map<std::string, std::string>* hashedFiles = new std::unordered_map<std::string, std::string>();
+
+	// Append the file data to the end of the Package file.
+	//fopen_s(&package.m_fileHandle, package.m_filePath.c_str(), "wb"); // Open the Package file for writing at the end of it. NOTE: Opening with "a" keeps the last EOF marker, which should work well with repeated use of the current version of decompress_fileToMemory.
+	for (unsigned int i = 0; i < filePaths.size(); ++i)
+	{
+
+		fopen_s(&fileToAdd, filePaths[i].c_str(), "rb");
+
+		fseek(fileToAdd, 0, SEEK_END);
+		int fileSize_unCompressed = ftell(fileToAdd);
+		rewind(fileToAdd);
+
+		char* buffer = (char*)malloc(fileSize_unCompressed);
+		fread(buffer, sizeof(char), fileSize_unCompressed, fileToAdd);
+
+		MD5 hash;
+		hash.update(buffer, fileSize_unCompressed);
+		hash.finalize();
+		std::string hashedFile = hash.hexdigest();
+
+		auto it = hashedFiles->find(hashedFile);
+		if (it != hashedFiles->end())
+		{
+			printf("The content of a unique file was found twice in %s and %s\n", filePaths[i].c_str(), it->second.c_str());
+		}
+		else
+		{
+			hashedFiles->insert(std::pair<std::string, std::string>(hashedFile, filePaths[i].c_str()));
+		}
+
+		delete[] buffer;
+
+		// Append the file contents to the contents of the Package.
+		if (compressFiles == true)
+		{
+			// Compress and append the file contents.
+			nBytesAdded = compressionHandler->compress_fileToFile(fileToAdd, package.m_fileHandle);
+		}
+
+		PackageFileTableEntry fileTableEntry;
+		int startIndex = filePaths[i].find_last_of('/') + 1;
+		strncpy_s(fileTableEntry.fileName, filePaths[i].c_str() + startIndex, filePaths[i].size() - startIndex);
+		fileTableEntry.fileName[sizeof(fileTableEntry.fileName) - 1] = 0;
+		fileTableEntry.fileOffset = package.m_nextFileOffset; // Add the offset to the start of the added file.
+		fileTableEntry.fileSize_compressed = nBytesAdded;
+		fileTableEntry.fileSize_uncompressed = fileSize_unCompressed;
+		fileTableEntries.push_back(fileTableEntry);
+
+		// Increment the file offset so the next eventual file to be added is added after the current one.
+		package.m_nextFileOffset = fileTableEntry.fileOffset + nBytesAdded;
+
+		// Do I have to add the size of EOF to the offset or is it only relevant to the OS / FILE class handling?
+		++package.m_header.numFileTableEntries;
+
+		fclose(fileToAdd);
+		//fclose(package.m_fileHandle); // NOTE: Adds EOF marker while closing.
+	}
+
+	delete hashedFiles;
+
+	//fopen_s(&package.m_fileHandle, package.m_filePath.c_str(), "r+"); // Opens for reading and writing without destroying the already existing file.
+	fseek(package.m_fileHandle, 0, SEEK_SET); // Set the read/write marker to the start of the Package File.
+
+											  // Write the header the start of the Package file.
 	fwrite(&package.m_header, sizeof(PackageHeader), 1, package.m_fileHandle);
 
 	// Write the file table to the Package file, after the header.

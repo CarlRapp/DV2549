@@ -8,16 +8,15 @@
 
 int main(int argc, char* argv[]) 
 {
-	/* Do nothing if there aren't input/output arguments specified */
-	if (argc != 3)
-	{
-		printf("PakTool: Input Directory and Output File not specified\n");
-		printf("PakTool: Shutting down\n");
-		return 0;
-	}
+	/* Fetch input directory from user */
+	std::string inputDir;
+	std::cout << "PakTool: Input Directory: ";
+	getline(std::cin, inputDir);
 
-	std::string inputDir = argv[1];
-	std::string outputFile = argv[2];
+	/* Fetch output file from user */
+	std::string outputFile;
+	std::cout << "PakTool: Output File: ";
+	getline(std::cin, outputFile);
 
 	printf("PakTool: Input Directory: %s\n", inputDir.c_str());
 	printf("PakTool: Output File: %s\n", outputFile.c_str());
@@ -36,10 +35,11 @@ int main(int argc, char* argv[])
 	printf("PakTool: Packaging has begun. This can take a while...\n");
 
 	PackageReaderWriter packageReaderWriter = PackageReaderWriter(new Compression::CompressionHandler_lz4());
-	packageReaderWriter.createPackageFromFiles(outputFile, filePaths);
+	packageReaderWriter.createPackageFromUniqueFiles(outputFile, filePaths);
 
 	printf("PakTool: Work finished\n");
 	printf("PakTool: Shutting down\n");
+	system("pause");
 
 	return 0;
 }
