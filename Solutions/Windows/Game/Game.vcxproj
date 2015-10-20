@@ -115,8 +115,7 @@
     <PostBuildEvent>
       <Command>xcopy /d /y "$(SolutionDir)..\..\Externals\binaries\Windows\$(PlatformTarget)\*.dll" "$(OutDir)"
 if not exist "$(OutDir)content" mkdir "$(OutDir)content"
-xcopy "$(SolutionDir)..\..\Externals\Content" "$(OutDir)content" /d /y /s /e
-call "$(OutDir)PakTool.exe" "$(SolutionDir)..\..\Content" "$(OutDir)content\Data.PAK"</Command>
+xcopy "$(SolutionDir)..\..\Externals\Content" "$(OutDir)content" /d /y /s /e</Command>
       <Message>
       </Message>
     </PostBuildEvent>
@@ -141,8 +140,7 @@ call "$(OutDir)PakTool.exe" "$(SolutionDir)..\..\Content" "$(OutDir)content\Data
     <PostBuildEvent>
       <Command>xcopy /d /y "$(SolutionDir)..\..\Externals\binaries\Windows\$(PlatformTarget)\*.dll" "$(OutDir)"
 if not exist "$(OutDir)content" mkdir "$(OutDir)content"
-xcopy "$(SolutionDir)..\..\Externals\Content" "$(OutDir)content" /d /y /s /e
-call "$(OutDir)PakTool.exe" "$(SolutionDir)..\..\Content" "$(OutDir)content\Data.PAK"</Command>
+xcopy "$(SolutionDir)..\..\Externals\Content" "$(OutDir)content" /d /y /s /e</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -169,8 +167,7 @@ call "$(OutDir)PakTool.exe" "$(SolutionDir)..\..\Content" "$(OutDir)content\Data
     <PostBuildEvent>
       <Command>xcopy /d /y "$(SolutionDir)..\..\Externals\binaries\Windows\$(PlatformTarget)\*.dll" "$(OutDir)"
 if not exist "$(OutDir)content" mkdir "$(OutDir)content"
-xcopy "$(SolutionDir)..\..\Externals\Content" "$(OutDir)content" /d /y /s /e
-call "$(OutDir)PakTool.exe" "$(SolutionDir)..\..\Content" "$(OutDir)content\Data.PAK"</Command>
+xcopy "$(SolutionDir)..\..\Externals\Content" "$(OutDir)content" /d /y /s /e</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -197,8 +194,7 @@ call "$(OutDir)PakTool.exe" "$(SolutionDir)..\..\Content" "$(OutDir)content\Data
     <PostBuildEvent>
       <Command>xcopy /d /y "$(SolutionDir)..\..\Externals\binaries\Windows\$(PlatformTarget)\*.dll" "$(OutDir)"
 if not exist "$(OutDir)content" mkdir "$(OutDir)content"
-xcopy "$(SolutionDir)..\..\Externals\Content" "$(OutDir)content" /d /y /s /e
-call "$(OutDir)PakTool.exe" "$(SolutionDir)..\..\Content" "$(OutDir)content\Data.PAK"</Command>
+xcopy "$(SolutionDir)..\..\Externals\Content" "$(OutDir)content" /d /y /s /e</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
