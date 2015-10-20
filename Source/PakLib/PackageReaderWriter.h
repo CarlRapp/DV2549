@@ -61,6 +61,7 @@ public:
 
 	/* Adds one or more file to the PAK, compressing them if so desired. */
 	void createPackageFromFiles(std::string PAKFilePath, std::vector<std::string> filePaths, bool compressFiles = true);
+	void createPackageFromUniqueFiles(std::string PAKFilePath, std::vector<std::string> filePaths, bool compressFiles = true);
 
 	//PackageHeader loadPackageHeader(std::string packageFileName);
 	std::vector<PackageFileTableEntry> loadPackageFileTable(std::string packageFileName);
