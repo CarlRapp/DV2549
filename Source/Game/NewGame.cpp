@@ -87,7 +87,7 @@ int main(int argc, char** argv)
 	graphics->LoadTerrainPatch();
 	
 
-	graphics->GetCamera()->SetPosition(glm::vec3(0, cameraMaxY, 0));
+	graphics->GetCamera()->SetPosition(glm::vec3(graphics->GetLevel()->PatchSize*0.5f, cameraMaxY, graphics->GetLevel()->PatchSize*0.5f));
 	graphics->GetCamera()->SetForward(glm::vec3(0, -1, 0));
 	
 
@@ -101,7 +101,7 @@ int main(int argc, char** argv)
 	graphics->AddString(&infoString, glm::vec3(1, 1, 0), 2, 0, -150);
 	
 	resource->SetGraphicsWrapper(graphics);
-	gameManager->RequestRenderDistance(3);
+	gameManager->RequestRenderDistance(2);
 	//INIT INPUT
 	Input::InputWrapper input = Input::InputWrapper::GetInstance();
 	input.GetMouse()->SetCenter(centerX, centerY);

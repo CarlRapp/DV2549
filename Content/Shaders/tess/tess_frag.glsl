@@ -44,7 +44,7 @@ void main()
 
 	if(gFog)
 	{
-		int fogStart = 80;
+		int fogStart = 360;
 
 		if(d > fogStart)
 			outColor.w = max(1-(d-fogStart)*0.01,0);

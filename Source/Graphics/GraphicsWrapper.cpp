@@ -175,7 +175,7 @@ void Graphics::GraphicsWrapper::InitializeSDL(unsigned int _width, unsigned int 
 
 	m_renderContext = wglGetCurrentContext();
 
-	SDL_GL_SetSwapInterval(1);
+	SDL_GL_SetSwapInterval(0);
 
 	m_SDLStarted = true;
 }
@@ -320,6 +320,7 @@ void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(TerrainPatch* memLocati
 	glDeleteTextures(1, &memLocation->TextureNormal);
 	glDeleteTextures(1, &memLocation->TextureHeight);
 	memLocation->IsActive = false;
+	glFlush();
 	wglMakeCurrent(NULL, NULL);
 	SDL_UnlockMutex(gMutex);
 }
@@ -332,6 +333,7 @@ void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(TerrainPatch* memLocati
 	glDeleteTextures(1, &memLocation->TextureNormal);
 	glDeleteTextures(1, &memLocation->TextureHeight);
 	memLocation->IsActive = false;
+	glFlush();
 	wglMakeCurrent(NULL, NULL);
 	SDL_UnlockMutex(gMutex);
 }

@@ -237,6 +237,7 @@ void ResourceManager::LoadChunks_Thread()
 			}
 		}
 		SDL_UnlockMutex(m_mutex);
+
 	}
 	delete chunk;
 
