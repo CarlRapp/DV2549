@@ -127,6 +127,8 @@ int Compression::CompressionHandler_lz4::deCompress_fileToMemory(FILE * source, 
 
 	int nBytes_compressedData = LZ4_decompress_fast(sourceData, (char*)dest, originalByteSize);
 
+	delete sourceData;
+
 	return nBytes_compressedData;
 
 	//// Read the file table.

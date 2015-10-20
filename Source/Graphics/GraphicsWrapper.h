@@ -108,6 +108,7 @@ namespace Graphics
 		void ReloadTerrainPatches(std::vector<TerrainPatch*> newPatches);
 		void LoadSingleTexturePatch(int tileX, int tileY, TerrainPatch* memLocation, HDC* hdc, HGLRC* hglrc);
 		//void DeleteSingleTexturePatch(int tileX, int tileY);
+		void DeleteSingleTexturePatch(TerrainPatch* memLocation, HDC* _hdc, HGLRC* _hglrc);
 		void DeleteSingleTexturePatch(TerrainPatch* memLocation);
 		Level* GetLevel() { return &m_level; }
 

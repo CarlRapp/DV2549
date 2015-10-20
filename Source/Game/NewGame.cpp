@@ -87,7 +87,7 @@ int main(int argc, char** argv)
 	graphics->LoadTerrainPatch();
 	
 
-	graphics->GetCamera()->SetPosition(glm::vec3(graphics->GetLevel()->PatchSize*0.5f, cameraMaxY, graphics->GetLevel()->PatchSize*0.5f));
+	graphics->GetCamera()->SetPosition(glm::vec3(0, cameraMaxY, 0));
 	graphics->GetCamera()->SetForward(glm::vec3(0, -1, 0));
 	
 

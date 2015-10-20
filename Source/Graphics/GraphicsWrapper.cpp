@@ -295,12 +295,12 @@ void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int _tileX, int _tileY, T
 	TextureRAM texDiffuse = PushTextureToRAM("../../../Content/diffuse.pak", Y, X, 3);
 	TextureRAM texHeight = PushTextureToRAM("../../../Content/height.pak", Y, X, 1);
 	TextureRAM texNormal = PushTextureToRAM("../../../Content/norm.pak", Y, X, 3);
-	
+
 	SDL_LockMutex(gMutex);
 	wglMakeCurrent(*_hdc, *_hglrc);
 	_memLocation->TextureHeight = PushTextureToGL(texHeight.ColorSlots, texHeight.Data);
- 	_memLocation->TextureNormal = PushTextureToGL(texNormal.ColorSlots, texNormal.Data);
- 	_memLocation->TextureDiffuse = PushTextureToGL(texDiffuse.ColorSlots, texDiffuse.Data);
+	_memLocation->TextureNormal = PushTextureToGL(texNormal.ColorSlots, texNormal.Data);
+	_memLocation->TextureDiffuse = PushTextureToGL(texDiffuse.ColorSlots, texDiffuse.Data);
 
 	_memLocation->ModelMatrix = glm::translate(glm::vec3(_tileX*m_level.PatchSize, 0, _tileY*m_level.PatchSize));
 	_memLocation->IsActive = true;
@@ -312,13 +312,27 @@ void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int _tileX, int _tileY, T
 	tempStack->FreeTo(memoryTop);
 }
 
-void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(TerrainPatch* memLocation)
+void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(TerrainPatch* memLocation, HDC* _hdc, HGLRC* _hglrc)
 {
 	SDL_LockMutex(gMutex);
+	wglMakeCurrent(*_hdc, *_hglrc);
 	glDeleteTextures(1, &memLocation->TextureDiffuse);
 	glDeleteTextures(1, &memLocation->TextureNormal);
 	glDeleteTextures(1, &memLocation->TextureHeight);
 	memLocation->IsActive = false;
+	wglMakeCurrent(NULL, NULL);
+	SDL_UnlockMutex(gMutex);
+}
+
+void Graphics::GraphicsWrapper::DeleteSingleTexturePatch(TerrainPatch* memLocation)
+{
+	SDL_LockMutex(gMutex);
+	wglMakeCurrent(m_hDC, m_renderContext);
+	glDeleteTextures(1, &memLocation->TextureDiffuse);
+	glDeleteTextures(1, &memLocation->TextureNormal);
+	glDeleteTextures(1, &memLocation->TextureHeight);
+	memLocation->IsActive = false;
+	wglMakeCurrent(NULL, NULL);
 	SDL_UnlockMutex(gMutex);
 }
 
