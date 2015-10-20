@@ -25,19 +25,23 @@ StackAllocator_DoubleEnded::StackAllocator_DoubleEnded(size_t _stackSizeBytes, s
 	size_t bytesToAlign = ((size_t)m_stackPtrOffset) % m_dataAlignment;
 	m_stackPtrOffset = bytesToAlign;
 
-	m_currentLeftIndex.store(0);
-	m_currentRightIndex.store(m_stackByteSize);
+	FreeTo(0);
 
 	m_currentSide.store(0);
 }
 
 StackAllocator_DoubleEnded::~StackAllocator_DoubleEnded()
 {
-
+	free(m_stackPtr);
 }
 
 bool Memory::StackAllocator_DoubleEnded::HasPointer(void * _inPtr)
 {
+	size_t ptrValue = (size_t)_inPtr;
+	size_t stackBlockPtr = (size_t)m_stackPtr + m_stackPtrOffset;
+
+	if (stackBlockPtr <= ptrValue && ptrValue < stackBlockPtr + m_stackByteSize)
+		return true;
 
 	return false;
 }
