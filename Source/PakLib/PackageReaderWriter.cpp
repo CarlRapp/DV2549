@@ -109,6 +109,41 @@ void PackageReaderWriter::createPackageFromUniqueFiles(std::string PAKFilePath, 
 
 	FILE *fileToAdd;
 
+	// Remove copies of the same file
+	std::unordered_map<std::string, std::string>* hashedFiles = new std::unordered_map<std::string, std::string>();
+	std::vector<std::string> filteredFiles;
+	for (unsigned int i = 0; i < filePaths.size(); ++i)
+	{
+
+		fopen_s(&fileToAdd, filePaths[i].c_str(), "rb");
+		fseek(fileToAdd, 0, SEEK_END);
+		int fileSize_unCompressed = ftell(fileToAdd);
+		rewind(fileToAdd);
+
+		char* buffer = (char*)malloc(fileSize_unCompressed);
+		fread(buffer, sizeof(char), fileSize_unCompressed, fileToAdd);
+		rewind(fileToAdd);
+
+		MD5 hash;
+		hash.update(buffer, fileSize_unCompressed);
+		hash.finalize();
+		std::string hashedFile = hash.hexdigest();
+
+		auto it = hashedFiles->find(hashedFile);
+		if (it != hashedFiles->end())
+		{
+			printf("The content of a unique file was found twice in %s and %s. The file will not be added to the PAK file.\n", filePaths[i].c_str(), it->second.c_str());
+		}
+		else
+		{
+			hashedFiles->insert(std::pair<std::string, std::string>(hashedFile, filePaths[i].c_str()));
+			filteredFiles.push_back(filePaths[i]);
+		}
+
+		delete[] buffer;
+	}
+	filePaths = filteredFiles;
+
 	int nBytesAdded = 0;
 
 	std::vector<PackageFileTableEntry> fileTableEntries;
@@ -130,9 +165,6 @@ void PackageReaderWriter::createPackageFromUniqueFiles(std::string PAKFilePath, 
 		//fclose(package.m_fileHandle);
 	}
 
-	/* unordered_map used for GUID checks */
-	std::unordered_map<std::string, std::string>* hashedFiles = new std::unordered_map<std::string, std::string>();
-
 	// Append the file data to the end of the Package file.
 	//fopen_s(&package.m_fileHandle, package.m_filePath.c_str(), "wb"); // Open the Package file for writing at the end of it. NOTE: Opening with "a" keeps the last EOF marker, which should work well with repeated use of the current version of decompress_fileToMemory.
 	for (unsigned int i = 0; i < filePaths.size(); ++i)
@@ -143,26 +175,6 @@ void PackageReaderWriter::createPackageFromUniqueFiles(std::string PAKFilePath, 
 		fseek(fileToAdd, 0, SEEK_END);
 		int fileSize_unCompressed = ftell(fileToAdd);
 		rewind(fileToAdd);
-
-		char* buffer = (char*)malloc(fileSize_unCompressed);
-		fread(buffer, sizeof(char), fileSize_unCompressed, fileToAdd);
-
-		MD5 hash;
-		hash.update(buffer, fileSize_unCompressed);
-		hash.finalize();
-		std::string hashedFile = hash.hexdigest();
-
-		auto it = hashedFiles->find(hashedFile);
-		if (it != hashedFiles->end())
-		{
-			printf("The content of a unique file was found twice in %s and %s\n", filePaths[i].c_str(), it->second.c_str());
-		}
-		else
-		{
-			hashedFiles->insert(std::pair<std::string, std::string>(hashedFile, filePaths[i].c_str()));
-		}
-
-		delete[] buffer;
 
 		// Append the file contents to the contents of the Package.
 		if (compressFiles == true)
