@@ -215,35 +215,29 @@ void ResourceManager::LoadChunks_Thread()
 			
 			//SDL_UnlockMutex(m_graphicsWrapper->gMutex);
 		}
-
+		SDL_UnlockMutex(m_mutex);
 		if (stop)
 		{
 			SDL_UnlockMutex(m_mutex);
 			delete chunk;
 			return;
 		}
-		SDL_UnlockMutex(m_mutex);
+		
 
 		SDL_LockMutex(m_mutex);
 		if (!m_preloadedChunks.empty())
 		{
-			wglMakeCurrent(m_hDC, m_resourceContext);
-			while (!m_preloadedChunks.empty())
+			LoadedChunk*	chunkToOverwrite = &m_loadedChunks[GetLeastPopularChunkIndex()];
+			if (chunkToOverwrite)
 			{
-				LoadedChunk*	chunkToOverwrite = &m_loadedChunks[GetLeastPopularChunkIndex()];
-				if (chunkToOverwrite)
-				{
-					LoadedChunk* loadedChunk = &m_preloadedChunks.back();
-					m_graphicsWrapper->DeleteSingleTexturePatch(&chunkToOverwrite->GraphicsPatch);
-					memcpy(chunkToOverwrite, loadedChunk, sizeof(LoadedChunk));
-					m_preloadedChunks.pop_back();
-				}
-				else
-					break;
+				LoadedChunk* loadedChunk = &m_preloadedChunks.back();
+				m_graphicsWrapper->DeleteSingleTexturePatch(&chunkToOverwrite->GraphicsPatch, &m_hDC, &m_resourceContext);
+				memcpy(chunkToOverwrite, loadedChunk, sizeof(LoadedChunk));
+				m_preloadedChunks.pop_back();
 			}
-			wglMakeCurrent(NULL, NULL);
 		}
 		SDL_UnlockMutex(m_mutex);
+
 	}
 	delete chunk;
 

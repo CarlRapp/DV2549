@@ -5,7 +5,7 @@
 static GameManager* m_instance = nullptr;
 
 GameManager::GameManager() :
-	m_oldPosX(0), m_oldPosY(0), m_oldPosZ(0), m_tileRenderDistance(2), m_oldTileRenderDistance(2)
+	m_oldPosX(0), m_oldPosY(0), m_oldPosZ(0), m_tileRenderDistance(1), m_oldTileRenderDistance(1)
 {
 	
 }
@@ -25,11 +25,17 @@ void GameManager::Update(float dt)
 	//	Check if the camera is in another 
 	//	tile position than last frame
 	glm::vec3	currentPos	= m_graphicsWrapper->GetCamera()->GetPosition();
-	int currentX = (int)(currentPos.x / m_graphicsWrapper->GetLevel()->PatchSize);
-	int currentZ = (int)(currentPos.z / m_graphicsWrapper->GetLevel()->PatchSize);
+
+	float offset = m_graphicsWrapper->GetLevel()->PatchSize/2.0f;
+
+	int currentX = (int)std::roundf((currentPos.x - offset) / m_graphicsWrapper->GetLevel()->PatchSize);
+	int currentZ = (int)std::roundf((currentPos.z - offset) / m_graphicsWrapper->GetLevel()->PatchSize);
 
 	if(currentX != m_oldPosX || currentZ != m_oldPosZ)
 	{
+		printf("%d,%d\n", currentX, currentZ);
+		printf("%.0f,%.0f\n", currentPos.x, currentPos.z);
+
 		m_oldPosX	=	currentX;
 		m_oldPosZ	=	currentZ;
 
@@ -61,8 +67,11 @@ void GameManager::ChangeRenderDistance()
 
 	ResourceManager::GetInstance().CreateChunkPool(numberOfChunks);
 	glm::vec3	currentPos = m_graphicsWrapper->GetCamera()->GetPosition();
-	int currentX = (int)(currentPos.x / m_graphicsWrapper->GetLevel()->PatchSize);
-	int currentZ = (int)(currentPos.z / m_graphicsWrapper->GetLevel()->PatchSize);
+
+	float offset = m_graphicsWrapper->GetLevel()->PatchSize / 2.0f;
+
+	int currentX = (int)std::roundf((currentPos.x - offset) / m_graphicsWrapper->GetLevel()->PatchSize);
+	int currentZ = (int)std::roundf((currentPos.z - offset) / m_graphicsWrapper->GetLevel()->PatchSize);
 
 	if (currentX != m_oldPosX || currentZ != m_oldPosZ)
 	{

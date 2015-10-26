@@ -26,6 +26,7 @@ namespace Graphics
 	{
 		short ColorSlots;
 		GLubyte* Data;
+		int Width, Height;
 	};
 
 	class DECLSPEC GraphicsWrapper
@@ -53,8 +54,8 @@ namespace Graphics
 
 		struct Level
 		{
-			int TileSize = 32;
-			int PatchSize = 128;
+			int TileSize = 64;
+			int PatchSize = 256;
 
 			unsigned int Width		= 10000;
 			unsigned int Height		= 5000;
@@ -108,6 +109,7 @@ namespace Graphics
 		void ReloadTerrainPatches(std::vector<TerrainPatch*> newPatches);
 		void LoadSingleTexturePatch(int tileX, int tileY, TerrainPatch* memLocation, HDC* hdc, HGLRC* hglrc);
 		//void DeleteSingleTexturePatch(int tileX, int tileY);
+		void DeleteSingleTexturePatch(TerrainPatch* memLocation, HDC* _hdc, HGLRC* _hglrc);
 		void DeleteSingleTexturePatch(TerrainPatch* memLocation);
 		Level* GetLevel() { return &m_level; }
 
@@ -115,7 +117,7 @@ namespace Graphics
 		Graphics::TextureRAM PushTextureToRAM(const char * _filename, unsigned int _x, unsigned int _y, short _colorSlots);
 
 
-		GLuint PushTextureToGL(short _colorSlots, GLubyte * data);
+		GLuint PushTextureToGL(TextureRAM tex);
 
 		void ConvertToPAK(const char * _filename, GLint _width, GLint _height, short colorSlots);
 		SDL_Window* GetWindow() { return m_window; };

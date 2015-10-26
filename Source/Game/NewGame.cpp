@@ -101,7 +101,7 @@ int main(int argc, char** argv)
 	graphics->AddString(&infoString, glm::vec3(1, 1, 0), 2, 0, -150);
 	
 	resource->SetGraphicsWrapper(graphics);
-	gameManager->RequestRenderDistance(3);
+	gameManager->RequestRenderDistance(2);
 	//INIT INPUT
 	Input::InputWrapper input = Input::InputWrapper::GetInstance();
 	input.GetMouse()->SetCenter(centerX, centerY);
