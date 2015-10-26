@@ -141,6 +141,7 @@ void PackageReaderWriter::createPackageFromUniqueFiles(std::string PAKFilePath, 
 		}
 
 		delete[] buffer;
+		fclose(fileToAdd);
 	}
 	filePaths = filteredFiles;
 
