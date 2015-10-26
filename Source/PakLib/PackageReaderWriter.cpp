@@ -146,7 +146,7 @@ void PackageReaderWriter::createPackageFromUniqueFiles(std::string PAKFilePath, 
 
 		char* buffer = (char*)malloc(fileSize_unCompressed);
 		fread(buffer, sizeof(char), fileSize_unCompressed, fileToAdd);
-
+		rewind(fileToAdd);
 		MD5 hash;
 		hash.update(buffer, fileSize_unCompressed);
 		hash.finalize();
