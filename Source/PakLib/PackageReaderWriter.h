@@ -10,6 +10,14 @@
 #include "Compression\CompressionHandler_zlib.h"
 #include "Compression\CompressionHandler_lz4.h"
 
+
+struct LoadedFileInfo
+{
+	std::string fileExtension;
+	long offset_bytes;
+	long size_bytes;
+};
+
 struct PackageHeader
 {
 	unsigned int numFileTableEntries;
@@ -18,6 +26,7 @@ struct PackageHeader
 struct PackageFileTableEntry
 {
 	char fileName[30];
+	BYTE compressionSetting;
 	unsigned int fileSize_uncompressed;
 	unsigned int fileSize_compressed;
 	unsigned int fileOffset; // The offset, in bytes, to the first byte of the file, in its PAK file.
@@ -52,7 +61,8 @@ struct Package
 class DECLSPEC PackageReaderWriter
 {
 private:
-	Compression::ICompressionHandler *compressionHandler;
+	Compression::ICompressionHandler *compressionHandler_zlib;
+	Compression::ICompressionHandler *compressionHandler_lz4;
 
 public:
 	PackageReaderWriter(Compression::ICompressionHandler *compressionHandler);
@@ -65,7 +75,9 @@ public:
 
 	//PackageHeader loadPackageHeader(std::string packageFileName);
 	std::vector<PackageFileTableEntry> loadPackageFileTable(std::string packageFileName);
-	void loadPackageData(std::string packageFileName, void *dest, int _loadStartIndex = -1, int _loadEndIndex = -1);
+
+	// Load data from package within a given range set by _loadStartIndex and _loadEndIndex, or load the entire package by setting _loadEntirePackage to true.
+	std::vector<LoadedFileInfo> loadPackageData(std::string packageFileName, void *dest, int _loadStartIndex, int _loadEndIndex, bool _loadEntirePackage = false);
 	int getIndexOfResourceByName(std::string packageFileName, std::string resourceName);
 };
 #endif

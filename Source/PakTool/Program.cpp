@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
 
 	printf("PakTool: Packaging has begun. This can take a while...\n");
 
-	PackageReaderWriter packageReaderWriter = PackageReaderWriter(new Compression::CompressionHandler_lz4());
+	PackageReaderWriter packageReaderWriter = PackageReaderWriter();
 	packageReaderWriter.createPackageFromUniqueFiles(outputFile, filePaths);
 
 	printf("PakTool: Work finished\n");

@@ -361,7 +361,15 @@ Graphics::TextureRAM Graphics::GraphicsWrapper::PushTextureToRAM(const char * _f
 	long index = m_level.X * _x + _y;
 	
 	//long start = SDL_GetTicks();
-	m_pakRW->loadPackageData(_filename, texRAM.Data, index, index);
+	std::vector<LoadedFileInfo> loadedFileInfos;
+	loadedFileInfos = m_pakRW->loadPackageData(_filename, texRAM.Data, index, index); // TODO Could read several patches at the same time, assuming they the ones to be read in are in a row.
+	
+	// Handle the loaded files going by the info for each file loaded.
+	//for (unsigned int i = 0; i < loadedFileInfos.size(); ++i)
+	//{
+	//	if (loadedFileInfos.)
+	//}
+
 	//long stop = SDL_GetTicks();
 	//long time = stop - start;
 

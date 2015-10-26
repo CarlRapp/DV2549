@@ -3,19 +3,17 @@
 #include <unordered_map>
 #include "Hash/MD5.h"
 
-PackageReaderWriter::PackageReaderWriter(Compression::ICompressionHandler *_compressionHandler)
-{
-	compressionHandler = _compressionHandler;
-}
 
 PackageReaderWriter::PackageReaderWriter()
 {
-	compressionHandler = new Compression::CompressionHandler_lz4(); //new Compression::CompressionHandler_zlib();
+	compressionHandler_lz4 = new Compression::CompressionHandler_lz4(); //new Compression::CompressionHandler_zlib();
+	compressionHandler_zlib = new Compression::CompressionHandler_zlib();
 }
 
 PackageReaderWriter::~PackageReaderWriter()
 {
-	delete compressionHandler;
+	delete compressionHandler_lz4;
+	delete compressionHandler_zlib;
 }
 
 void PackageReaderWriter::createPackageFromFiles(std::string PAKFilePath, std::vector<std::string> filePaths, bool compressFiles)
@@ -51,7 +49,8 @@ void PackageReaderWriter::createPackageFromFiles(std::string PAKFilePath, std::v
 	//fopen_s(&package.m_fileHandle, package.m_filePath.c_str(), "wb"); // Open the Package file for writing at the end of it. NOTE: Opening with "a" keeps the last EOF marker, which should work well with repeated use of the current version of decompress_fileToMemory.
 	for (unsigned int i = 0; i < filePaths.size(); ++i)
 	{
-		
+		PackageFileTableEntry fileTableEntry;
+
 		fopen_s(&fileToAdd, filePaths[i].c_str(), "rb");
 
 		fseek(fileToAdd, 0, SEEK_END);
@@ -62,10 +61,9 @@ void PackageReaderWriter::createPackageFromFiles(std::string PAKFilePath, std::v
 		if (compressFiles == true)
 		{
 			// Compress and append the file contents.
-			nBytesAdded = compressionHandler->compress_fileToFile(fileToAdd, package.m_fileHandle);
+			nBytesAdded = compressionHandler_lz4->compress_fileToFile(fileToAdd, package.m_fileHandle);
 		}
 
-		PackageFileTableEntry fileTableEntry;
 		int startIndex = filePaths[i].find_last_of('/') + 1;
 		strncpy_s(fileTableEntry.fileName, filePaths[i].c_str() + startIndex, filePaths[i].size() - startIndex);
 		fileTableEntry.fileName[sizeof(fileTableEntry.fileName) - 1] = 0;
@@ -117,36 +115,31 @@ void PackageReaderWriter::createPackageFromUniqueFiles(std::string PAKFilePath, 
 
 	/* Destroy old file if it exists and create new */
 	fopen_s(&package.m_fileHandle, package.m_filePath.c_str(), "wb");
-	//fclose(package.m_fileHandle);
 
 	if (package.m_header.numFileTableEntries == 0)
 	{
 		package.m_nextFileOffset = sizeOfHeaderAndFileTable;
-
-		// Write dummy data to move the file pointer.
-		//fopen_s(&package.m_fileHandle, package.m_filePath.c_str(), "ab");
 		char *dummyData = new char[sizeOfHeaderAndFileTable] {0};
 		fwrite(dummyData, sizeOfHeaderAndFileTable, 1, package.m_fileHandle);
-		//fclose(package.m_fileHandle);
 	}
 
 	/* unordered_map used for GUID checks */
 	std::unordered_map<std::string, std::string>* hashedFiles = new std::unordered_map<std::string, std::string>();
 
 	// Append the file data to the end of the Package file.
-	//fopen_s(&package.m_fileHandle, package.m_filePath.c_str(), "wb"); // Open the Package file for writing at the end of it. NOTE: Opening with "a" keeps the last EOF marker, which should work well with repeated use of the current version of decompress_fileToMemory.
 	for (unsigned int i = 0; i < filePaths.size(); ++i)
 	{
+		PackageFileTableEntry fileTableEntry;
 
 		fopen_s(&fileToAdd, filePaths[i].c_str(), "rb");
 
 		fseek(fileToAdd, 0, SEEK_END);
 		int fileSize_unCompressed = ftell(fileToAdd);
-		rewind(fileToAdd);
-
+		
 		char* buffer = (char*)malloc(fileSize_unCompressed);
+		rewind(fileToAdd);
 		fread(buffer, sizeof(char), fileSize_unCompressed, fileToAdd);
-
+		
 		MD5 hash;
 		hash.update(buffer, fileSize_unCompressed);
 		hash.finalize();
@@ -161,17 +154,43 @@ void PackageReaderWriter::createPackageFromUniqueFiles(std::string PAKFilePath, 
 		{
 			hashedFiles->insert(std::pair<std::string, std::string>(hashedFile, filePaths[i].c_str()));
 		}
+		
+		// Get the file extension of the file to add.
+		size_t indexOfLastPeriod = filePaths[i].find_last_of('.');
+		std::string fileExtension = filePaths[i].substr(indexOfLastPeriod, 258); // Not that important, but: Windows 7's character limit for filepaths is supposedly 260, so a file extension for a file with a name that's 1 char long can be at most 255, given the usage of 2 characters for the name and the period before the extension, and 3 for the drive letter, colon, and the initial slash.
 
-		delete[] buffer;
+		// Check if the file format (extension) is one that is already compressed/should not be compressed.
+		fileTableEntry.compressionSetting = 1;
+		if (fileExtension.compare("jpg") == 0)
+			fileTableEntry.compressionSetting = 0;
+		else if (fileExtension.compare("png") == 0)
+			fileTableEntry.compressionSetting = 0;
+		else if (fileExtension.compare("flac") == 0)
+			fileTableEntry.compressionSetting = 0;
+		else if (fileExtension.compare("ogg") == 0)
+			fileTableEntry.compressionSetting = 0;
+		else if (fileExtension.compare("mp3") == 0)
+			fileTableEntry.compressionSetting = 0;
 
 		// Append the file contents to the contents of the Package.
-		if (compressFiles == true)
+		if (fileTableEntry.compressionSetting != 0)
 		{
-			// Compress and append the file contents.
-			nBytesAdded = compressionHandler->compress_fileToFile(fileToAdd, package.m_fileHandle);
+			// Compress the file content with the chosen/appropriate compressor, and append them to the PAK file.
+			rewind(fileToAdd);
+			if(fileTableEntry.compressionSetting == 1)
+				nBytesAdded = compressionHandler_lz4->compress_fileToFile(fileToAdd, package.m_fileHandle);
+			if(fileTableEntry.compressionSetting == 2)
+				nBytesAdded = compressionHandler_zlib->compress_fileToFile(fileToAdd, package.m_fileHandle);
+		}
+		else
+		{
+			// Without compressing the file content, append them to the PAK file.
+			fwrite(buffer, 1, fileSize_unCompressed, package.m_fileHandle);
 		}
 
-		PackageFileTableEntry fileTableEntry;
+		// Delete the buffer after the hash function is done with it and after, possibly, its contents have been written to the PAK (in the case of the contents not being compressed).
+		delete[] buffer;
+
 		int startIndex = filePaths[i].find_last_of('/') + 1;
 		strncpy_s(fileTableEntry.fileName, filePaths[i].c_str() + startIndex, filePaths[i].size() - startIndex);
 		fileTableEntry.fileName[sizeof(fileTableEntry.fileName) - 1] = 0;
@@ -218,6 +237,8 @@ void PackageReaderWriter::createPackageFromUniqueFiles(std::string PAKFilePath, 
 
 std::vector<PackageFileTableEntry> PackageReaderWriter::loadPackageFileTable(std::string packageFileName)
 {
+	// TODO Optimize this so it's only read once per frame, at the most. PRW could store "current package file header" or something.
+
 	PackageHeader header;
 	//ZeroMemory(&header, sizeof(PackageHeader));
 
@@ -242,8 +263,11 @@ std::vector<PackageFileTableEntry> PackageReaderWriter::loadPackageFileTable(std
 	return fileTableEntries;
 }
 
-void PackageReaderWriter::loadPackageData(std::string packageFileName, void *dest, int _loadStartIndex, int _loadEndIndex)
+// Set _loadStartIndex and _loadEndIndex
+std::vector<LoadedFileInfo> PackageReaderWriter::loadPackageData(std::string packageFileName, void *dest, int _loadStartIndex, int _loadEndIndex, bool _loadEntirePackage)
 {
+	std::vector<LoadedFileInfo> loadedFileInfos;
+
 	void *loadedData = NULL;
 	unsigned int loadStartIndex, loadEndIndex;
 	
@@ -252,15 +276,27 @@ void PackageReaderWriter::loadPackageData(std::string packageFileName, void *des
 		
 	unsigned int startOffset;
 	unsigned int endOffset;
-	if (_loadStartIndex == -1)
-		loadStartIndex = 0;
-	else
-		loadStartIndex = _loadStartIndex;
 
-	if (_loadEndIndex == -1)
-		loadEndIndex = 0;
+	if (_loadEntirePackage == true)
+	{
+		loadStartIndex = 0;
+		loadEndIndex = fileTableEntries.size() - 1;
+	}
 	else
-		loadEndIndex = _loadStartIndex;
+	{
+		loadStartIndex = _loadStartIndex;
+		loadEndIndex = _loadEndIndex;
+	}
+
+	//if (_loadStartIndex == -1)
+	//	loadStartIndex = 0;
+	//else
+	//	loadStartIndex = _loadStartIndex;
+
+	//if (_loadEndIndex == -1)
+	//	loadEndIndex = fileTableEntries.size() - 1;
+	//else
+	//	loadEndIndex = _loadStartIndex;
 
 	//loadedData = new char[endOffset - startOffset];
 
@@ -271,14 +307,43 @@ void PackageReaderWriter::loadPackageData(std::string packageFileName, void *des
 	unsigned int currentIndex = loadStartIndex;
 	do 
 	{
+		LoadedFileInfo loadedFileInfo;
+
+		// Get the file extension of the file to load.
+		std::string fileName = std::string(fileTableEntries[currentIndex].fileName);
+		size_t indexOfLastPeriod = fileName.find_last_of('.');
+		loadedFileInfo.fileExtension = fileName.substr(indexOfLastPeriod, 258); // Not that important, but: Windows 7's character limit for filepaths is supposedly 260, so a file extension for a file with a name that's 1 char long can be at most 255, given the usage of 2 characters for the name and the period before the extension, and 3 for the drive letter, colon, and the initial slash.
+
 		unsigned int startOffset = fileTableEntries[currentIndex].fileOffset;
+
 		fseek(packageFileHandle, startOffset, SEEK_SET);
 		//unsigned int nFileSize = fileTableEntries[currentIndex + 1].fileOffset - startOffset;
-		nBytesLoaded += compressionHandler->deCompress_fileToMemory(packageFileHandle, startOffset, (char*)dest + nBytesLoaded, fileTableEntries[currentIndex].fileSize_uncompressed, fileTableEntries[currentIndex].fileSize_compressed);  // NOTE: Continuously moves the file pointer and reads until various EOF markers in the Package, I think...
+		
+		if (fileTableEntries[currentIndex].compressionSetting != 0)
+		{
+			if (fileTableEntries[currentIndex].compressionSetting == 1)
+				nBytesLoaded += compressionHandler_lz4->deCompress_fileToMemory(packageFileHandle, startOffset, (char*)dest + nBytesLoaded, fileTableEntries[currentIndex].fileSize_uncompressed, fileTableEntries[currentIndex].fileSize_compressed);
+			else if (fileTableEntries[currentIndex].compressionSetting == 2)
+				nBytesLoaded += compressionHandler_zlib->deCompress_fileToMemory(packageFileHandle, startOffset, (char*)dest + nBytesLoaded, fileTableEntries[currentIndex].fileSize_uncompressed, fileTableEntries[currentIndex].fileSize_compressed);
+		
+			loadedFileInfo.size_bytes = fileTableEntries[currentIndex].fileSize_uncompressed;
+			loadedFileInfo.offset_bytes = nBytesLoaded;
+		}
+		else
+		{
+			nBytesLoaded += fread((char*)dest + nBytesLoaded, 1, fileTableEntries[currentIndex].fileSize_uncompressed, packageFileHandle);
+			loadedFileInfo.size_bytes = fileTableEntries[currentIndex].fileSize_uncompressed;
+			loadedFileInfo.offset_bytes = nBytesLoaded;
+		}
+				
+		loadedFileInfos.push_back(loadedFileInfo);
+
 		++currentIndex;
 	} while (currentIndex < loadEndIndex);
 
 	fclose(packageFileHandle);
+
+	return loadedFileInfos;
 }
 
 int PackageReaderWriter::getIndexOfResourceByName(std::string packageFileName, std::string resourceName)
