@@ -26,6 +26,7 @@ namespace Graphics
 	{
 		short ColorSlots;
 		GLubyte* Data;
+		int Width, Height;
 	};
 
 	class DECLSPEC GraphicsWrapper
@@ -116,7 +117,7 @@ namespace Graphics
 		Graphics::TextureRAM PushTextureToRAM(const char * _filename, unsigned int _x, unsigned int _y, short _colorSlots);
 
 
-		GLuint PushTextureToGL(short _colorSlots, GLubyte * data);
+		GLuint PushTextureToGL(TextureRAM tex);
 
 		void ConvertToPAK(const char * _filename, GLint _width, GLint _height, short colorSlots);
 		SDL_Window* GetWindow() { return m_window; };
