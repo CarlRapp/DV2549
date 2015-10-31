@@ -33,6 +33,7 @@ void GameManager::Update(float dt)
 
 	if(currentX != m_oldPosX || currentZ != m_oldPosZ)
 	{
+		printf("New position: \n");
 		printf("%d,%d\n", currentX, currentZ);
 		printf("%.0f,%.0f\n", currentPos.x, currentPos.z);
 
