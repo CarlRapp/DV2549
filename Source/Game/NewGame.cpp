@@ -72,7 +72,7 @@ int main(int argc, char** argv)
 
 	wglMakeCurrent(NULL, NULL);
 	resource = &ResourceManager::GetInstance();
-	resource->InitResourceManager(60*sizeof(ResourceManager::LoadedChunk));
+	resource->InitResourceManager(64*1024*1024);
 	//resource->SetGraphicsWrapper(graphics);
 
 
@@ -88,8 +88,8 @@ int main(int argc, char** argv)
 	graphics->LoadTerrainPatch();
 	
 
-	graphics->GetCamera()->SetPosition(glm::vec3(graphics->GetLevel()->PatchSize*0.5f, cameraMaxY, graphics->GetLevel()->PatchSize*0.5f));
-	graphics->GetCamera()->SetForward(glm::vec3(0, -1, 0));
+	graphics->GetCamera()->SetPosition(glm::vec3(-391, 80, -255));
+	graphics->GetCamera()->SetForward(glm::vec3(0, -0.5f, -1));
 	
 
 	//std::string FPS;

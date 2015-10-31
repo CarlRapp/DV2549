@@ -17,10 +17,11 @@ namespace Memory
 		bool HasPointer(void* _inPtr);
 		void* Reserve(size_t _nBytes);
 		void FreeTo(size_t _index);
-
-	private:
 		void* ReserveLeft(size_t _nBytes, size_t _currentRight);
 		void* ReserveRight(size_t _nBytes, size_t _currentLeft);
+
+	private:
+
 
 	private:
 
