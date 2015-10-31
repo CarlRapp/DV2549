@@ -39,7 +39,7 @@ namespace Compression
 		/*	Decompresses in-memory data and stores the decompressed data in-memory.
 		Returns a pointer to the compressed data if the compression of it succeeded.
 		Returns a NULL pointer if the compression of the data failed. */
-		virtual void* deCompress_memoryToMemory(void *source, void *dest, unsigned int nBytes = -1) = 0;
+		virtual int deCompress_memoryToMemory(void *source, unsigned int sourceOffset, void *dest, unsigned int destOffset, int originalByteSize, int compressedSize, int nBytes) = 0;
 
 		/*	Decompresses in-memory data and stores the decompressed data in a file.
 		Returns a pointer to the compressed data if the compression of it succeeded.

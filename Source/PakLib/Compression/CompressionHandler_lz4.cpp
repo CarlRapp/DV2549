@@ -100,10 +100,10 @@ void * Compression::CompressionHandler_lz4::compress_fileToMemory(FILE * source,
 	return nullptr;
 }
 
-void * Compression::CompressionHandler_lz4::deCompress_memoryToMemory(void * source, void * dest, unsigned int nBytes)
-{
-	return nullptr;
-}
+//int Compression::CompressionHandler_lz4::deCompress_memoryToMemory(void *source, unsigned int sourceOffset, void *dest, unsigned int destOffset, int nBytes = -1, int compressedSize = -1)
+//{
+//	return 1;
+//}
 
 FILE * Compression::CompressionHandler_lz4::deCompress_memoryToFile(void * source, FILE * dest, unsigned int nBytes)
 {
@@ -125,11 +125,11 @@ int Compression::CompressionHandler_lz4::deCompress_fileToMemory(FILE * source, 
 	fread((void*)sourceData, 1, compressedSize, source);
 	fclose(source);
 
-	int nBytes_compressedData = LZ4_decompress_fast(sourceData, (char*)dest, originalByteSize);
+	int nBytes_deCompressedData = LZ4_decompress_fast(sourceData, (char*)dest, originalByteSize);
 
-	delete sourceData;
+	delete[] sourceData;
 
-	return nBytes_compressedData;
+	return nBytes_deCompressedData;
 
 	//// Read the file table.
 	//const char *sourceData = NULL;
@@ -153,4 +153,21 @@ int Compression::CompressionHandler_lz4::deCompress_fileToMemory(FILE * source, 
 	//int nBytes_compressedData = LZ4_decompress_fast(sourceData, (char*)dest, originalByteSize);
 
 	//return nBytes_compressedData;
+}
+
+int Compression::CompressionHandler_lz4::deCompress_memoryToMemory(void *source, unsigned int sourceOffset, void *dest, unsigned int destOffset, int nBytes, int originalByteSize, int compressedSize)
+{
+	// Create an array big enough to hold the file.
+	const char *sourceData = NULL;
+	sourceData = new char[compressedSize];
+
+	//// Read the compressed file data.
+	//fread((void*)sourceData, 1, compressedSize, source);
+	//fclose(source);
+
+	int nBytes_deCompressedData = LZ4_decompress_fast((char*)source + sourceOffset, (char*)dest, originalByteSize);
+
+	delete[] sourceData;
+
+	return nBytes_deCompressedData;
 }

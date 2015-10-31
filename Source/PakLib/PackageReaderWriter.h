@@ -6,16 +6,30 @@
 
 //#define NOMINMAX
 #include <Windows.h>
+#include <unordered_map>
 
 #include "Compression\CompressionHandler_zlib.h"
 #include "Compression\CompressionHandler_lz4.h"
 
+enum FileFormat {RAW = 0, PNG, JPG, FLAC, OGG, MP3};
 
 struct LoadedFileInfo
 {
-	std::string fileExtension;
+	FileFormat fileFormat;
 	long offset_bytes;
 	long size_bytes;
+};
+
+struct HashFileInfo
+{
+	std::string fileName;
+	int index;
+};
+
+struct DuplicateDataInfo
+{
+	bool duplicateData;
+	unsigned int redirectIndex;
 };
 
 struct PackageHeader
@@ -26,27 +40,12 @@ struct PackageHeader
 struct PackageFileTableEntry
 {
 	char fileName[30];
-	BYTE compressionSetting;
+	int compressionSetting;
 	unsigned int fileSize_uncompressed;
 	unsigned int fileSize_compressed;
 	unsigned int fileOffset; // The offset, in bytes, to the first byte of the file, in its PAK file.
-	//PAKFileTableEntry *nextEntry;
-
-	//PAKFileTableEntry()
-	//{
-	//	ZeroMemory(&fileName, sizeof(fileName));
-	//	fileSize = 0;
-	//	fileOffset = 0;
-	//	nextEntry = NULL;
-	//}
-
-	//~PAKFileTableEntry()
-	//{
-	//	ZeroMemory(&fileName, sizeof(fileName));
-	//	fileSize = 0;
-	//	fileOffset = 0;
-	//	delete nextEntry;
-	//}
+	int redirectIndex;
+	FileFormat fileFormat;
 };
 
 struct Package
@@ -61,6 +60,8 @@ struct Package
 class DECLSPEC PackageReaderWriter
 {
 private:
+	std::unordered_map<std::string, std::vector<PackageFileTableEntry>> map_PAKnameToFileTable;
+
 	Compression::ICompressionHandler *compressionHandler_zlib;
 	Compression::ICompressionHandler *compressionHandler_lz4;
 
@@ -69,15 +70,23 @@ public:
 	PackageReaderWriter();
 	~PackageReaderWriter();
 
+	std::vector<std::string> interleaveInputFolderFilePaths(std::vector<std::vector<std::string>> filePathLists);
+	void createPackageByInterleavingInputFolderFiles(std::string PAKFilePath, std::vector<std::vector<std::string>> filePathLists);
+
+	void storeFileTableForPackage(std::string PAKname);
+	bool getFileTableOfPackage(std::string PAKname, std::vector<PackageFileTableEntry> &out_fileTableEntries);
+
 	/* Adds one or more file to the PAK, compressing them if so desired. */
 	void createPackageFromFiles(std::string PAKFilePath, std::vector<std::string> filePaths, bool compressFiles = true);
 	void createPackageFromUniqueFiles(std::string PAKFilePath, std::vector<std::string> filePaths, bool compressFiles = true);
+	void createPackageFromUniqueFiles2(std::string PAKFilePath, std::vector<std::string> filePaths, bool compressFiles = true);
 
 	//PackageHeader loadPackageHeader(std::string packageFileName);
 	std::vector<PackageFileTableEntry> loadPackageFileTable(std::string packageFileName);
 
 	// Load data from package within a given range set by _loadStartIndex and _loadEndIndex, or load the entire package by setting _loadEntirePackage to true.
 	std::vector<LoadedFileInfo> loadPackageData(std::string packageFileName, void *dest, int _loadStartIndex, int _loadEndIndex, bool _loadEntirePackage = false);
+	std::vector<LoadedFileInfo> loadPackageData2(std::string packageFileName, void *dest, int _loadStartIndex, int _loadEndIndex, bool _loadEntirePackage);
 	int getIndexOfResourceByName(std::string packageFileName, std::string resourceName);
 };
 #endif
