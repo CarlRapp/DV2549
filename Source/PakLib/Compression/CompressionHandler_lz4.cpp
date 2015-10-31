@@ -100,10 +100,10 @@ void * Compression::CompressionHandler_lz4::compress_fileToMemory(FILE * source,
 	return nullptr;
 }
 
-void * Compression::CompressionHandler_lz4::deCompress_memoryToMemory(void * source, void * dest, unsigned int nBytes)
-{
-	return nullptr;
-}
+//int Compression::CompressionHandler_lz4::deCompress_memoryToMemory(void *source, unsigned int sourceOffset, void *dest, unsigned int destOffset, int nBytes = -1, int compressedSize = -1)
+//{
+//	return 1;
+//}
 
 FILE * Compression::CompressionHandler_lz4::deCompress_memoryToFile(void * source, FILE * dest, unsigned int nBytes)
 {
@@ -119,38 +119,31 @@ int Compression::CompressionHandler_lz4::deCompress_fileToMemory(FILE * source, 
 {
 	// Create an array big enough to hold the file.
 	const char *sourceData = NULL;
-	sourceData = new char[compressedSize];
+
+	Memory::StackAllocator_SingleBuffer* tempStack = (Memory::StackAllocator_SingleBuffer*)Memory::MemoryWrapper::GetInstance()->GetGlobalStack();
+	size_t memoryTop = tempStack->GetTop();
+	sourceData = (char*)(Memory::StackAllocator_SingleBuffer*)Memory::MemoryWrapper::GetInstance()->GetGlobalStack()->Reserve(compressedSize);  //new byte[bytesPerRow]; new char[compressedSize];
 	
 	// Read the compressed file data.
 	fread((void*)sourceData, 1, compressedSize, source);
 	fclose(source);
 
-	int nBytes_compressedData = LZ4_decompress_fast(sourceData, (char*)dest, originalByteSize);
+	int nBytes_deCompressedData = LZ4_decompress_fast(sourceData, (char*)dest, originalByteSize);
 
-	delete sourceData;
+	tempStack->FreeTo(memoryTop); //delete[] sourceData;
 
-	return nBytes_compressedData;
+	return nBytes_deCompressedData;
+}
 
-	//// Read the file table.
-	//const char *sourceData = NULL;
+int Compression::CompressionHandler_lz4::deCompress_memoryToMemory(void *source, unsigned int sourceOffset, void *dest, unsigned int destOffset, int nBytes, int originalByteSize, int compressedSize)
+{
+	// Create an array big enough to hold the file.
+	const char *sourceData = NULL;
+	sourceData = new char[compressedSize];
 
-	//// Get the offset of the file pointer.
-	//int byteOffsetToStartOfCurFile = ftell(source);
+	int nBytes_deCompressedData = LZ4_decompress_fast((char*)source + sourceOffset, (char*)dest, originalByteSize);
 
-	//// Get the size of the file using the file pointer. // This should fail if the EOF doesn't work the way I thought it might.
-	//fseek(source, 0, SEEK_END);
-	//int bytesBetweenStartAndEndOfFile = ftell(source) - byteOffsetToStartOfCurFile;
+	delete[] sourceData;
 
-	//// Create an array big enough to hold the file.
-	//sourceData = new char[bytesBetweenStartAndEndOfFile];
-
-
-	//fseek(source, byteOffsetToStartOfCurFile, SEEK_SET);
-	//byteOffsetToStartOfCurFile = ftell(source);
-	//fread((void*)sourceData, 1, bytesBetweenStartAndEndOfFile, source);
-	//fclose(source);
-
-	//int nBytes_compressedData = LZ4_decompress_fast(sourceData, (char*)dest, originalByteSize);
-
-	//return nBytes_compressedData;
+	return nBytes_deCompressedData;
 }

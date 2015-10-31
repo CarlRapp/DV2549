@@ -48,6 +48,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ResourceManager", "Resource
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PakLib", "PakLib\PakLib.vcxproj", "{F02B5BC9-1333-4E4A-84AE-162009D9DA9F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{65AC8BCF-B67B-43E5-B01D-A1D462E629CA} = {65AC8BCF-B67B-43E5-B01D-A1D462E629CA}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PakTool", "PakTool\PakTool.vcxproj", "{985878E7-F0B1-40C2-BF6D-FC5A08CA64A5}"
 	ProjectSection(ProjectDependencies) = postProject

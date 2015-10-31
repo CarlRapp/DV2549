@@ -6,6 +6,7 @@
 #include "PakLib/Compression/CompressionHandler_lz4.h"
 #include "PakLib/Hash/MD5.h"
 
+
 int main(int argc, char* argv[]) 
 {
 	/* Fetch input directory from user */
@@ -31,11 +32,33 @@ int main(int argc, char* argv[])
 	{
 		printf("PakTool: About to package %s\n", filePath.c_str());
 	}
+	
+	PackageReaderWriter packageReaderWriter = PackageReaderWriter();
 
-	printf("PakTool: Packaging has begun. This can take a while...\n");
+	/* Fetch output file from user */
+	char choice;
+	std::cout << "PakTool: Remove duplicate files? (y/n): ";
+	std::cin >> choice;
+	std::cin.ignore();
 
-	PackageReaderWriter packageReaderWriter = PackageReaderWriter(new Compression::CompressionHandler_lz4());
-	packageReaderWriter.createPackageFromUniqueFiles(outputFile, filePaths);
+	while (choice != 'y' && choice != 'n' && choice != 'Y' && choice != 'N')
+	{
+		std::cout << "PakTool: Invalid choice - must input y/Y (yes) or n/N (no). " << std::endl;
+		std::cout << "PakTool: Remove duplicate files? (y/n): ";
+		std::cin >> choice;
+		std::cin.ignore();
+	}
+	
+	if (choice == 'y' || choice == 'Y')
+	{
+		printf("PakTool: Packaging has begun. This can take a while...\n");
+		packageReaderWriter.createPackageFromUniqueFiles(outputFile, filePaths);
+	}
+	else
+	{
+		printf("PakTool: Packaging has begun. This can take a while...\n");
+		packageReaderWriter.createPackageFromFiles(outputFile, filePaths);
+	}
 
 	printf("PakTool: Work finished\n");
 	printf("PakTool: Shutting down\n");

@@ -116,7 +116,6 @@ namespace Graphics
 		//GLuint LoadTextureRAW(const char * _filename, unsigned int _width, unsigned int _height, short _colorSlots);
 		Graphics::TextureRAM PushTextureToRAM(const char * _filename, unsigned int _x, unsigned int _y, short _colorSlots);
 
-
 		GLuint PushTextureToGL(TextureRAM tex);
 
 		void ConvertToPAK(const char * _filename, GLint _width, GLint _height, short colorSlots);

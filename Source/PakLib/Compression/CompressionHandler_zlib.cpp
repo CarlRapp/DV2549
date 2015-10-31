@@ -200,13 +200,13 @@ void* Compression::CompressionHandler_zlib::compress_fileToMemory(FILE *source, 
 	return compressedData;
 }
 
-void* Compression::CompressionHandler_zlib::deCompress_memoryToMemory(void *source, void *dest, unsigned int nBytes)
+int Compression::CompressionHandler_zlib::deCompress_memoryToMemory(void *source, unsigned int sourceOffset, void *dest, unsigned int destOffset, int originalByteSize, int compressedSize, int nBytes)
 {
 	// TODO Write the deCompress_memoryToMemory function.
 
 	void *compressedData = NULL;
 
-	return compressedData;
+	return 1;
 }
 
 FILE* Compression::CompressionHandler_zlib::deCompress_memoryToFile(void *source, FILE *dest, unsigned int nBytes)

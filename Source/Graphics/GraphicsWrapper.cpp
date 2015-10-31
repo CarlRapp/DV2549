@@ -36,6 +36,9 @@ GraphicsWrapper::GraphicsWrapper()
 	TextRenderer::GetInstance().AddString(&debugString, glm::vec3(1, 1, 1), 2, 0, -400);
 
 	m_pakRW = new PackageReaderWriter();
+	m_pakRW->storeFileTableForPackage("../../../Content/diffuse.pak");
+	m_pakRW->storeFileTableForPackage("../../../Content/norm.pak");
+	m_pakRW->storeFileTableForPackage("../../../Content/height.pak");
 }
 
 GraphicsWrapper::~GraphicsWrapper()
@@ -176,7 +179,7 @@ void Graphics::GraphicsWrapper::InitializeSDL(unsigned int _width, unsigned int 
 
 	m_renderContext = wglGetCurrentContext();
 
-	SDL_GL_SetSwapInterval(0);
+	SDL_GL_SetSwapInterval(1);
 
 	m_SDLStarted = true;
 }
@@ -296,7 +299,7 @@ void Graphics::GraphicsWrapper::LoadSingleTexturePatch(int _tileX, int _tileY, T
 	TextureRAM texDiffuse = PushTextureToRAM("../../../Content/diffuse.pak", Y, X, 3);
 	TextureRAM texHeight = PushTextureToRAM("../../../Content/height.pak", Y, X, 1);
 	TextureRAM texNormal = PushTextureToRAM("../../../Content/norm.pak", Y, X, 3);
-
+	
 	SDL_LockMutex(gMutex);
 	wglMakeCurrent(*_hdc, *_hglrc);
 	_memLocation->TextureHeight = PushTextureToGL(texHeight);
@@ -363,173 +366,143 @@ void ReadPNGData(png_structp png_ptr, png_bytep outBytes, png_size_t byteCountTo
 
 Graphics::TextureRAM Graphics::GraphicsWrapper::PushTextureToRAM(const char * _filename, unsigned int _x, unsigned int _y, short _colorSlots)
 {
-	bool png = 0;
-	//if (_colorSlots > 1)
-	//	png = 1;
+	//bool png = 0;
+	////if (_colorSlots > 1)
+	////	png = 1;
 
-	if (_x == 9 && _y == 19 && _colorSlots > 1)
-			png = 1;
+	//if (_x == 9 && _y == 19 && _colorSlots > 1)
+	//		png = 1;
 
 	TextureRAM texRAM;
-	
 
-
-	if (png)
+	FILE * file;
+	fopen_s(&file, _filename, "rb");
+	if (file == NULL)
 	{
-
-		pngstruct data;
-		data.offset = 0;
-
-		//Load png to "data"
-		FILE * file;
-		fopen_s(&file, "../../../Content/alfons.png", "rb");
-		if (file == NULL)
-		{
-			printf("missing file %s\n", "../../../Content/alfons.png");
-			texRAM.Data = nullptr;
-			return texRAM;
-		}
-
-		// obtain file size:
-		long lSize;
-		fseek(file, 0, SEEK_END);
-		lSize = ftell(file);
-		rewind(file);
-
-		// allocate memory to contain the whole file:
-		data.data = (char*)malloc(sizeof(char)*lSize);
-		if (data.data == NULL) { fputs("Memory error", stderr); exit(2); }
-
-		// copy the file into the buffer:
-		size_t result = fread(data.data, 1, lSize, file);
-		if (result != lSize) { fputs("Reading error", stderr); exit(3); }
-
-		fclose(file);
-
-		
-		enum { kPngSignatureLength = 8 };
-		byte pngSignature[kPngSignatureLength];
-
-
-		if (!png_check_sig((png_const_bytep)data.data, kPngSignatureLength))
-			printf("Error PNG!");
-
-		data.offset += kPngSignatureLength;
-
-		// get PNG file info struct (memory is allocated by libpng)
-		png_structp png_ptr = NULL;
-		png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-
-		if (png_ptr == NULL)
-			printf("Error PNG!");
-
-		// get PNG image data info struct (memory is allocated by libpng)
-		png_infop info_ptr = NULL;
-		info_ptr = png_create_info_struct(png_ptr);
-
-		if (info_ptr == NULL)
-		{
-			// libpng must free file info struct memory before we bail
-			png_destroy_read_struct(&png_ptr, NULL, NULL);
-			printf("Error PNG!");
-		}
-
-		png_set_read_fn(png_ptr, &data, ReadPNGData);
-
-
-		png_set_sig_bytes(png_ptr, kPngSignatureLength);
-
-		png_read_info(png_ptr, info_ptr);
-
-		png_uint_32 width = 0;
-		png_uint_32 height = 0;
-		int bitDepth = 0;
-		int colorType = -1;
-		png_uint_32 retval = png_get_IHDR(png_ptr, info_ptr,
-			&width,
-			&height,
-			&bitDepth,
-			&colorType,
-			NULL, NULL, NULL);
-
-		texRAM.Width = width;
-		texRAM.Height = height;
-
-		const png_uint_32 bytesPerRow = png_get_rowbytes(png_ptr, info_ptr);
-		byte* rowData = new byte[bytesPerRow];
-
-		switch (colorType)
-		{
-		case PNG_COLOR_TYPE_GRAY:
-			texRAM.ColorSlots = 1;
-			break;
-		case PNG_COLOR_TYPE_GRAY_ALPHA:
-			texRAM.ColorSlots = 2;
-			break;
-		case PNG_COLOR_TYPE_RGB:
-			texRAM.ColorSlots = 3;
-			break;
-		case PNG_COLOR_TYPE_RGB_ALPHA:
-			texRAM.ColorSlots = 4;
-			break;
-		case PNG_COLOR_TYPE_PALETTE:
-			//FUNKAR INTE
-			texRAM.ColorSlots = 4;
-			break;
-		default:
-			texRAM.ColorSlots = 0;
-		}
-
-		texRAM.Data = (GLubyte*)(Memory::StackAllocator_SingleBuffer*)Memory::MemoryWrapper::GetInstance()->GetGlobalStack()->Reserve(texRAM.Width * texRAM.Height * texRAM.ColorSlots);
-		
-		// read single row at a time
-		char* ptr = (char*)texRAM.Data;
-		for (int rowIdx = 0; rowIdx < height; ++rowIdx)
-		{
-			const int rowOffset = rowIdx * width * texRAM.ColorSlots;
-			png_read_row(png_ptr, (png_bytep)(&texRAM.Data[rowOffset]), NULL);
-		}
-
-		free(data.data);
+		printf("missing file %s\n", _filename);
+		texRAM.Data = nullptr;
+		return texRAM;
 	}
+	fclose(file);
 
-	else
+	texRAM.Data; // = (GLubyte*)(Memory::StackAllocator_SingleBuffer*)Memory::MemoryWrapper::GetInstance()->GetGlobalStack()->Reserve(m_level.ChunkSize * m_level.ChunkSize * _colorSlots);
+	//texRAM.Data = NULL;
+
+	// Calculate the PAK index corresponding to the texture (x, y) coordinates.
+	long index = m_level.X * _x + _y;
+
+	//long start = SDL_GetTicks();
+	void *mem;
+	std::vector<LoadedFileInfo> loadedFileInfos = m_pakRW->loadPackageData(_filename, mem, index, index);
+	texRAM.Data = (GLubyte*)mem;
+
+	for (unsigned int i = 0; i < 1 /*loadedFileInfos.size()*/; ++i)
 	{
-		FILE * file;
-		fopen_s(&file, _filename, "rb");
-		if (file == NULL)
+		if (loadedFileInfos[i].fileFormat == PNG)
 		{
-			printf("missing file %s\n", _filename);
-			texRAM.Data = nullptr;
-			return texRAM;
+			pngstruct data;
+			data.data = (char*)texRAM.Data;
+			data.offset = 0;
+
+			enum { kPngSignatureLength = 8 };
+			byte pngSignature[kPngSignatureLength];
+
+
+			if (!png_check_sig((png_const_bytep)data.data, kPngSignatureLength))
+				printf("Error PNG!");
+
+			data.offset += kPngSignatureLength;
+
+			// get PNG file info struct (memory is allocated by libpng)
+			png_structp png_ptr = NULL;
+			png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+
+			if (png_ptr == NULL)
+				printf("Error PNG!");
+
+			// get PNG image data info struct (memory is allocated by libpng)
+			png_infop info_ptr = NULL;
+			info_ptr = png_create_info_struct(png_ptr);
+
+			if (info_ptr == NULL)
+			{
+				// libpng must free file info struct memory before we bail
+				png_destroy_read_struct(&png_ptr, NULL, NULL);
+				printf("Error PNG!");
+			}
+
+			png_set_read_fn(png_ptr, &data, ReadPNGData);
+
+
+			png_set_sig_bytes(png_ptr, kPngSignatureLength);
+
+			png_read_info(png_ptr, info_ptr);
+
+			png_uint_32 width = 0;
+			png_uint_32 height = 0;
+			int bitDepth = 0;
+			int colorType = -1;
+			png_uint_32 retval = png_get_IHDR(png_ptr, info_ptr,
+				&width,
+				&height,
+				&bitDepth,
+				&colorType,
+				NULL, NULL, NULL);
+
+			TextureRAM texRAM_png;
+			texRAM_png.Data = NULL;
+
+			texRAM_png.Width = width;
+			texRAM_png.Height = height;
+
+			const png_uint_32 bytesPerRow = png_get_rowbytes(png_ptr, info_ptr);
+			byte* rowData = (byte*)(Memory::StackAllocator_SingleBuffer*)Memory::MemoryWrapper::GetInstance()->GetGlobalStack()->Reserve(bytesPerRow);  //new byte[bytesPerRow];
+
+			switch (colorType)
+			{
+			case PNG_COLOR_TYPE_GRAY:
+				texRAM_png.ColorSlots = 1;
+				break;
+			case PNG_COLOR_TYPE_GRAY_ALPHA:
+				texRAM_png.ColorSlots = 2;
+				break;
+			case PNG_COLOR_TYPE_RGB:
+				texRAM_png.ColorSlots = 3;
+				break;
+			case PNG_COLOR_TYPE_RGB_ALPHA:
+				texRAM_png.ColorSlots = 4;
+				break;
+			case PNG_COLOR_TYPE_PALETTE:
+				//FUNKAR INTE
+				texRAM_png.ColorSlots = 4;
+				break;
+			default:
+				texRAM_png.ColorSlots = 0;
+			}
+
+			texRAM_png.Data = (GLubyte*)(Memory::StackAllocator_SingleBuffer*)Memory::MemoryWrapper::GetInstance()->GetGlobalStack()->Reserve(texRAM_png.Width * texRAM_png.Height * texRAM_png.ColorSlots);
+
+			// read single row at a time
+			char* ptr = (char*)texRAM_png.Data;
+			for (int rowIdx = 0; rowIdx < height; ++rowIdx)
+			{
+				const int rowOffset = rowIdx * width * texRAM_png.ColorSlots;
+				png_read_row(png_ptr, (png_bytep)(&texRAM_png.Data[rowOffset]), NULL);
+			}
+
+			//free(data.data); // Using stack memory instead, so freeing the memory is already handled by resetting the stack.
+			texRAM = texRAM_png;
+
+			// Free memory allocated by libpng.
+			png_destroy_read_struct(&png_ptr, &info_ptr, &info_ptr);
 		}
-		fclose(file);
-
-		texRAM.Data = (GLubyte*)(Memory::StackAllocator_SingleBuffer*)Memory::MemoryWrapper::GetInstance()->GetGlobalStack()->Reserve(m_level.ChunkSize * m_level.ChunkSize * _colorSlots);
-
-		//long location = (m_level.ChunkSize*m_level.ChunkSize)*(m_level.X*_x + _y) * _colorSlots;
-
-		// Calculate the PAK index corresponding to the texture (x, y) coordinates.
-		long index = m_level.X * _x + _y;
-
-		//long start = SDL_GetTicks();
-		m_pakRW->loadPackageData(_filename, texRAM.Data, index, index);
-
-		texRAM.Width = m_level.ChunkSize;
-		texRAM.Height = m_level.ChunkSize;
-		texRAM.ColorSlots = _colorSlots;
-
-		//long stop = SDL_GetTicks();
-		//long time = stop - start;
-
-		//long start2 = SDL_GetTicks();
-		//fseek(file, location, SEEK_SET);
-		//fread(texRAM.Data, m_level.ChunkSize * m_level.ChunkSize * _colorSlots, 1, file);
-		//fclose(file);
-		//long stop2 = SDL_GetTicks();
-		//long time2 = stop2 - start2;
+		else
+		{
+			texRAM.Width = m_level.ChunkSize;
+			texRAM.Height = m_level.ChunkSize;
+			texRAM.ColorSlots = _colorSlots;
+		}
 	}
-
 
 	return texRAM;
 }

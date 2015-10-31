@@ -47,7 +47,8 @@ int main(int argc, char** argv)
 	Memory::MemoryWrapper::GetInstance()->CreateGlobalStack(
 		chunkSize*chunkSize * 3 +	//normalmap
 		chunkSize*chunkSize * 3 +	//diffusemap
-		chunkSize*chunkSize * 1,	//heightmap
+		chunkSize*chunkSize * 1 +	//heightmap
+		10000000, // TODO Remove this extra memory and work in PNG into memory in a better way.
 		8);
 
 	graphics->gMutex = SDL_CreateMutex();
