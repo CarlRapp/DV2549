@@ -62,6 +62,7 @@ class DECLSPEC PackageReaderWriter
 private:
 	std::unordered_map<std::string, std::vector<PackageFileTableEntry>> map_PAKnameToFileTable;
 
+	// Compression/decompression handlers:
 	Compression::ICompressionHandler *compressionHandler_zlib;
 	Compression::ICompressionHandler *compressionHandler_lz4;
 
@@ -71,7 +72,7 @@ public:
 	~PackageReaderWriter();
 
 	std::vector<std::string> interleaveInputFolderFilePaths(std::vector<std::vector<std::string>> filePathLists);
-	void createPackageByInterleavingInputFolderFiles(std::string PAKFilePath, std::vector<std::vector<std::string>> filePathLists);
+	void createPackageByInterleavingInputFolderFiles(std::string PAKFilePath, std::vector<std::vector<std::string>> filePathLists); // Not quite finished.
 
 	void storeFileTableForPackage(std::string PAKname);
 	bool getFileTableOfPackage(std::string PAKname, std::vector<PackageFileTableEntry> &out_fileTableEntries);
@@ -79,14 +80,14 @@ public:
 	/* Adds one or more file to the PAK, compressing them if so desired. */
 	void createPackageFromFiles(std::string PAKFilePath, std::vector<std::string> filePaths, bool compressFiles = true);
 	void createPackageFromUniqueFiles(std::string PAKFilePath, std::vector<std::string> filePaths, bool compressFiles = true);
-	void createPackageFromUniqueFiles2(std::string PAKFilePath, std::vector<std::string> filePaths, bool compressFiles = true);
+	void createPackageFromUniqueFiles2(std::string PAKFilePath, std::vector<std::string> filePaths, bool compressFiles = true); // Unfinished.
 
 	//PackageHeader loadPackageHeader(std::string packageFileName);
 	std::vector<PackageFileTableEntry> loadPackageFileTable(std::string packageFileName);
 
-	// Load data from package within a given range set by _loadStartIndex and _loadEndIndex, or load the entire package by setting _loadEntirePackage to true.
-	std::vector<LoadedFileInfo> loadPackageData(std::string packageFileName, void *dest, int _loadStartIndex, int _loadEndIndex, bool _loadEntirePackage = false);
-	std::vector<LoadedFileInfo> loadPackageData2(std::string packageFileName, void *dest, int _loadStartIndex, int _loadEndIndex, bool _loadEntirePackage);
+	// Load data from package within a given a specific index in the PAK file to load data from.
+	std::vector<LoadedFileInfo> loadPackageData(std::string packageFileName, void *&dest, int _loadStartIndex, int _loadEndIndex, bool _loadEntirePackage = false);
+	std::vector<LoadedFileInfo> loadPackageData2(std::string packageFileName, void *dest, int _loadStartIndex, int _loadEndIndex, bool _loadEntirePackage = false); // Unfinished.
 	int getIndexOfResourceByName(std::string packageFileName, std::string resourceName);
 };
 #endif

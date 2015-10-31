@@ -18,6 +18,9 @@
 #  define SET_BINARY_MODE(file)
 #endif
 
+
+#include <Memory/StackAllocator/StackAllocator_SingleBuffer.h>
+#include <Memory/MemoryWrapper.h>
 #include "ICompressionHandler.h"
 
 #define CHUNK 512000 //16384 //256000 //16384
@@ -43,11 +46,6 @@ namespace Compression
 		virtual FILE* deCompress_memoryToFile(void *source, FILE *dest, unsigned int nBytes = -1);
 		virtual FILE* deCompress_fileToFile(FILE *source, FILE *dest, unsigned int nBytes = -1);
 		virtual int deCompress_fileToMemory(FILE *source, unsigned int sourceOffset, void *dest, int nBytes = -1, int compressedSize = -1);
-
-		// Misc. methods:
-
-		/* Reports a zlib or i/o error. */
-		void zerr(int ret);
 	};
 }
 #endif

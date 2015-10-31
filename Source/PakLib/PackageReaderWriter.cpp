@@ -365,7 +365,7 @@ void PackageReaderWriter::createPackageFromUniqueFiles2(std::string PAKFilePath,
 	// Remove copies of the same file
 	std::unordered_map<std::string, HashFileInfo>* hashedFiles = new std::unordered_map<std::string, HashFileInfo>();
 	std::vector<DuplicateDataInfo> duplicateDataInfos; //std::vector<std::string> filteredFiles;
-	
+
 	int counter = 0;
 	for (unsigned int i = 0; i < filePaths.size(); ++i)
 	{
@@ -383,15 +383,33 @@ void PackageReaderWriter::createPackageFromUniqueFiles2(std::string PAKFilePath,
 		int fileSize_unCompressed = ftell(fileToAdd);
 		rewind(fileToAdd);
 
+		char* buffer = (char*)malloc(fileSize_unCompressed);
+		fread(buffer, sizeof(char), fileSize_unCompressed, fileToAdd);
 		rewind(fileToAdd);
+
+		MD5 hash;
+		hash.update(buffer, fileSize_unCompressed);
+		hash.finalize();
+		std::string hashedFile = hash.hexdigest();
+
+		auto it = hashedFiles->find(hashedFile);
+		if (it != hashedFiles->end())
+		{
 			//printf("The content of a unique file was found twice in %s and %s. The file will not be added to the PAK file.\n", filePaths[i].c_str(), it->second.fileName);
-		
+
 			duplicateDataInfo.duplicateData = true;
 			duplicateDataInfo.redirectIndex = it->second.index;
+		}
+		else
+		{
 			HashFileInfo hashFileInfo;
 			hashFileInfo.fileName = std::string(filePaths[i]);
 			hashFileInfo.index = i;
 			hashedFiles->insert(std::pair<std::string, HashFileInfo>(hashedFile, hashFileInfo));
+		}
+
+		delete[] buffer;
+
 		fclose(fileToAdd);
 
 		duplicateDataInfos.push_back(duplicateDataInfo);
@@ -401,7 +419,7 @@ void PackageReaderWriter::createPackageFromUniqueFiles2(std::string PAKFilePath,
 	int t = duplicateDataInfos.size();
 
 	int nBytesAdded = 0;
-	
+
 	unsigned int sizeOfHeaderAndFileTable = sizeof(PackageHeader) + filePaths.size() * sizeof(PackageFileTableEntry);
 
 	/* Destroy old file if it exists and create new */
@@ -425,9 +443,9 @@ void PackageReaderWriter::createPackageFromUniqueFiles2(std::string PAKFilePath,
 
 		fseek(fileToAdd, 0, SEEK_END);
 		int fileSize_unCompressed = ftell(fileToAdd);
-		
+
 		rewind(fileToAdd);
-		
+
 		//duplicateDataInfos[i].duplicateData = false;
 		if (duplicateDataInfos[i].duplicateData != true)
 		{
@@ -435,7 +453,7 @@ void PackageReaderWriter::createPackageFromUniqueFiles2(std::string PAKFilePath,
 			size_t indexOfLastPeriod = filePaths[i].find_last_of('.');
 			std::string fileExtension = filePaths[i].substr(indexOfLastPeriod, 258); // Not that important, but: Windows 7's character limit for filepaths is supposedly 260, so a file extension for a file with a name that's 1 char long can be at most 255, given the usage of 2 characters for the name and the period before the extension, and 3 for the drive letter, colon, and the initial slash.
 
-			// Check if the file format (extension) is one that is already compressed/should not be compressed.
+																					 // Check if the file format (extension) is one that is already compressed/should not be compressed.
 			fileTableEntry.compressionSetting = 1;
 			if (fileExtension.compare("png") == 0)
 			{
@@ -502,10 +520,10 @@ void PackageReaderWriter::createPackageFromUniqueFiles2(std::string PAKFilePath,
 			// The data is a duplicate of already packed data, so store the index of the original occurrence of the data.
 			ZeroMemory(&fileTableEntry, sizeof(PackageFileTableEntry));
 			fileTableEntry.redirectIndex = duplicateDataInfos[i].redirectIndex;
-			
+
 			package.m_nextFileOffset = fileTableEntry.fileOffset; // No bytes were added since the data is to be unique in the PAK file, so keep the current offset.
 
-			// The rest of the fileTableEntry doesn't need to be set, since the redirectIndex redirects to a fully set entry.
+																  // The rest of the fileTableEntry doesn't need to be set, since the redirectIndex redirects to a fully set entry.
 		}
 
 		fileTableEntries.push_back(fileTableEntry);
@@ -571,11 +589,10 @@ std::vector<PackageFileTableEntry> PackageReaderWriter::loadPackageFileTable(std
 }
 
 // Set _loadStartIndex and _loadEndIndex.
-std::vector<LoadedFileInfo> PackageReaderWriter::loadPackageData(std::string packageFileName, void *dest, int _loadStartIndex, int _loadEndIndex, bool _loadEntirePackage)
+std::vector<LoadedFileInfo> PackageReaderWriter::loadPackageData(std::string packageFileName, void *&dest, int _loadStartIndex, int _loadEndIndex, bool _loadEntirePackage)
 {
 	std::vector<LoadedFileInfo> loadedFileInfos;
 
-	void *loadedData = NULL;
 	unsigned int loadStartIndex, loadEndIndex;
 	
 	// Get the package file table entries.
@@ -601,14 +618,14 @@ std::vector<LoadedFileInfo> PackageReaderWriter::loadPackageData(std::string pac
 	unsigned int backupOfCurrentIndex;
 	do 
 	{
-		backupOfCurrentIndex = currentIndex;
+		//backupOfCurrentIndex = currentIndex;
 
-		// If the redirectIndex isn't zero then data for this entry occurs only once in the package, at another index.
-		if (fileTableEntries[currentIndex].redirectIndex != -1)
-		{
-			// Change the currentIndex to the index that contains the unique data.
-			currentIndex = fileTableEntries[currentIndex].redirectIndex;
-		}
+		//// If the redirectIndex isn't zero then data for this entry occurs only once in the package, at another index.
+		//if (fileTableEntries[currentIndex].redirectIndex != -1)
+		//{
+		//	// Change the currentIndex to the index that contains the unique data.
+		//	currentIndex = fileTableEntries[currentIndex].redirectIndex;
+		//}
 
 		LoadedFileInfo loadedFileInfo;
 
@@ -620,6 +637,10 @@ std::vector<LoadedFileInfo> PackageReaderWriter::loadPackageData(std::string pac
 		fseek(packageFileHandle, startOffset, SEEK_SET);
 		
 		int compressionSetting = fileTableEntries[currentIndex].compressionSetting;
+		
+		void* pointer = (Memory::StackAllocator_SingleBuffer*)Memory::MemoryWrapper::GetInstance()->GetGlobalStack()->Reserve(fileTableEntries[currentIndex].fileSize_uncompressed);
+		dest = pointer;
+
 		if (compressionSetting != 0)
 		{
 			if (compressionSetting == 1)
@@ -640,7 +661,7 @@ std::vector<LoadedFileInfo> PackageReaderWriter::loadPackageData(std::string pac
 		loadedFileInfos.push_back(loadedFileInfo);
 
 		// Just in case a re-direct index was used, restore currentIndex with the backup of it, before it was set to the redirectIndex.
-		currentIndex = backupOfCurrentIndex;
+		//currentIndex = backupOfCurrentIndex;
 
 		++currentIndex;
 	} while (currentIndex < loadEndIndex);
