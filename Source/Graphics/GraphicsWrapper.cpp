@@ -492,12 +492,130 @@ Graphics::TextureRAM Graphics::GraphicsWrapper::PushTextureToRAM(const char * _f
 	//		const int rowOffset = rowIdx * width * texRAM.ColorSlots;
 	//		png_read_row(png_ptr, (png_bytep)(&texRAM.Data[rowOffset]), NULL);
 	//	}
-
+	
 	//	free(data.data);
 	//}
 
 	//else
 	//{
+		pngstruct data;
+		data.offset = 0;
+
+		//Load png to "data"
+		FILE * file;
+		fopen_s(&file, "../../../Content/alfons.png", "rb");
+		if (file == NULL)
+		{
+			printf("missing file %s\n", "../../../Content/alfons.png");
+			texRAM.Data = nullptr;
+			return texRAM;
+		}
+
+		// obtain file size:
+		long lSize;
+		fseek(file, 0, SEEK_END);
+		lSize = ftell(file);
+		rewind(file);
+
+		// allocate memory to contain the whole file:
+		data.data = (char*)malloc(sizeof(char)*lSize);
+		if (data.data == NULL) { fputs("Memory error", stderr); exit(2); }
+
+		// copy the file into the buffer:
+		size_t result = fread(data.data, 1, lSize, file);
+		if (result != lSize) { fputs("Reading error", stderr); exit(3); }
+
+		fclose(file);
+
+		
+		enum { kPngSignatureLength = 8 };
+		byte pngSignature[kPngSignatureLength];
+
+
+		if (!png_check_sig((png_const_bytep)data.data, kPngSignatureLength))
+			printf("Error PNG!");
+
+		data.offset += kPngSignatureLength;
+
+		// get PNG file info struct (memory is allocated by libpng)
+		png_structp png_ptr = NULL;
+		png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+
+		if (png_ptr == NULL)
+			printf("Error PNG!");
+
+		// get PNG image data info struct (memory is allocated by libpng)
+		png_infop info_ptr = NULL;
+		info_ptr = png_create_info_struct(png_ptr);
+
+		if (info_ptr == NULL)
+		{
+			// libpng must free file info struct memory before we bail
+			png_destroy_read_struct(&png_ptr, NULL, NULL);
+			printf("Error PNG!");
+		}
+
+		png_set_read_fn(png_ptr, &data, ReadPNGData);
+
+
+		png_set_sig_bytes(png_ptr, kPngSignatureLength);
+
+		png_read_info(png_ptr, info_ptr);
+
+		png_uint_32 width = 0;
+		png_uint_32 height = 0;
+		int bitDepth = 0;
+		int colorType = -1;
+		png_uint_32 retval = png_get_IHDR(png_ptr, info_ptr,
+			&width,
+			&height,
+			&bitDepth,
+			&colorType,
+			NULL, NULL, NULL);
+
+		texRAM.Width = width;
+		texRAM.Height = height;
+
+		const png_uint_32 bytesPerRow = png_get_rowbytes(png_ptr, info_ptr);
+		byte* rowData = new byte[bytesPerRow];
+
+		switch (colorType)
+		{
+		case PNG_COLOR_TYPE_GRAY:
+			texRAM.ColorSlots = 1;
+			break;
+		case PNG_COLOR_TYPE_GRAY_ALPHA:
+			texRAM.ColorSlots = 2;
+			break;
+		case PNG_COLOR_TYPE_RGB:
+			texRAM.ColorSlots = 3;
+			break;
+		case PNG_COLOR_TYPE_RGB_ALPHA:
+			texRAM.ColorSlots = 4;
+			break;
+		case PNG_COLOR_TYPE_PALETTE:
+			//FUNKAR INTE
+			texRAM.ColorSlots = 4;
+			break;
+		default:
+			texRAM.ColorSlots = 0;
+		}
+
+		texRAM.Data = (GLubyte*)(Memory::StackAllocator_SingleBuffer*)Memory::MemoryWrapper::GetInstance()->GetGlobalStack()->Reserve(texRAM.Width * texRAM.Height * texRAM.ColorSlots);
+		
+		// read single row at a time
+		char* ptr = (char*)texRAM.Data;
+		for (int rowIdx = 0; rowIdx < height; ++rowIdx)
+		{
+			const int rowOffset = rowIdx * width * texRAM.ColorSlots;
+			png_read_row(png_ptr, (png_bytep)(&texRAM.Data[rowOffset]), NULL);
+		}
+
+		free(data.data);
+	}
+
+	else
+	{
 		FILE * file;
 		fopen_s(&file, _filename, "rb");
 		if (file == NULL)

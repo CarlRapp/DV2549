@@ -230,6 +230,7 @@ void PackageReaderWriter::createPackageFromUniqueFiles(std::string PAKFilePath, 
 	}
 	filePaths = filteredFiles;
 
+
 	int nBytesAdded = 0;
 
 	std::vector<PackageFileTableEntry> fileTableEntries;
@@ -382,33 +383,15 @@ void PackageReaderWriter::createPackageFromUniqueFiles2(std::string PAKFilePath,
 		int fileSize_unCompressed = ftell(fileToAdd);
 		rewind(fileToAdd);
 
-		char* buffer = (char*)malloc(fileSize_unCompressed);
-		fread(buffer, sizeof(char), fileSize_unCompressed, fileToAdd);
 		rewind(fileToAdd);
-
-		MD5 hash;
-		hash.update(buffer, fileSize_unCompressed);
-		hash.finalize();
-		std::string hashedFile = hash.hexdigest();
-
-		auto it = hashedFiles->find(hashedFile);
-		if (it != hashedFiles->end())
-		{
 			//printf("The content of a unique file was found twice in %s and %s. The file will not be added to the PAK file.\n", filePaths[i].c_str(), it->second.fileName);
 		
 			duplicateDataInfo.duplicateData = true;
 			duplicateDataInfo.redirectIndex = it->second.index;
-		}
-		else
-		{
 			HashFileInfo hashFileInfo;
 			hashFileInfo.fileName = std::string(filePaths[i]);
 			hashFileInfo.index = i;
 			hashedFiles->insert(std::pair<std::string, HashFileInfo>(hashedFile, hashFileInfo));
-		}
-
-		delete[] buffer;
-
 		fclose(fileToAdd);
 
 		duplicateDataInfos.push_back(duplicateDataInfo);
