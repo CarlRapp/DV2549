@@ -203,9 +203,3 @@ UpgradeLog*.htm
 
 # Microsoft Fakes
 FakesAssemblies/
-Content/diffuse.pak
-Content/diffuse.raw
-Content/height.pak
-Content/height.raw
-Content/norm.pak
-Content/norm.raw
