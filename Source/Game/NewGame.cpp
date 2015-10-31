@@ -72,7 +72,7 @@ int main(int argc, char** argv)
 
 	wglMakeCurrent(NULL, NULL);
 	resource = &ResourceManager::GetInstance();
-	resource->InitResourceManager(60*sizeof(ResourceManager::LoadedChunk));
+	resource->InitResourceManager(64*1024*1024);
 	//resource->SetGraphicsWrapper(graphics);
 
 
